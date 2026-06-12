@@ -74,6 +74,10 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
 .article-body ul{padding-left:22px;margin-bottom:18px;color:var(--t2)}
 .article-body li{margin-bottom:6px}
 .article-body strong{color:var(--t1);font-weight:600}
+.article-body a{color:var(--a2);text-decoration:underline;text-underline-offset:3px}
+.article-body img,.article-body video,.article-body iframe{display:block;width:100%;max-width:100%;border-radius:var(--r);border:1px solid var(--b2);margin:22px 0;background:var(--card)}
+.article-body video{height:auto}
+.article-body iframe{aspect-ratio:16/9;min-height:320px}
 
 /* ARTICLE TAGS */
 .article-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px}
@@ -300,6 +304,7 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
   </div>
 </div>
 
+<script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── THEME ────────────────────────────────────────────────────────────
@@ -400,8 +405,8 @@ function escapeHtml(value){
   });
 }
 function supabaseClient(){
-  const url=localStorage.getItem('pf-supabase-url')||'';
-  const key=localStorage.getItem('pf-supabase-anon-key')||'';
+  const url=localStorage.getItem('pf-supabase-url')||window.PORTFOLIO_SUPABASE_URL||'';
+  const key=localStorage.getItem('pf-supabase-anon-key')||window.PORTFOLIO_SUPABASE_KEY||'';
   if(!url||!key||!window.supabase) return null;
   return window.supabase.createClient(url,key);
 }
@@ -452,6 +457,34 @@ function mapSupabasePublication(row){
   };
 }
 
+function renderMarkdownContent(content){
+  var raw=String(content||'');
+  if(/<\/?(p|h2|h3|ul|ol|pre|blockquote|video|iframe|img|a)\b/i.test(raw))return raw;
+  var html=escapeHtml(raw);
+  var codeBlocks=[];
+  html=html.replace(/```([\s\S]*?)```/g,function(_,code){
+    var token='@@CODEBLOCK'+codeBlocks.length+'@@';
+    codeBlocks.push('<pre><code>'+code.trim()+'</code></pre>');
+    return token;
+  });
+  html=html
+    .replace(/^### (.*)$/gm,'<h3>$1</h3>')
+    .replace(/^## (.*)$/gm,'<h2>$1</h2>')
+    .replace(/^# (.*)$/gm,'<h2>$1</h2>')
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" loading="lazy">')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>');
+  html=html.split(/\n{2,}/).map(function(block){
+    var trimmed=block.trim();
+    if(!trimmed)return '';
+    if(/^<h[23]|^<pre|^<img|^<video|^<iframe|^<ul|^<ol|^<blockquote/.test(trimmed))return trimmed;
+    return '<p>'+trimmed.replace(/\n/g,'<br>')+'</p>';
+  }).join('');
+  codeBlocks.forEach(function(block,index){html=html.replace('@@CODEBLOCK'+index+'@@',block);});
+  return html;
+}
+
 function render(item){
   curItem=item;
   document.title=item.title+' — Steven Daniel';
@@ -489,7 +522,7 @@ function render(item){
 
   document.getElementById('article-title').textContent=item.title;
   document.getElementById('article-tags').innerHTML=(item.tags||[]).map(t=>`<span class="article-tag">${escapeHtml(t)}</span>`).join('');
-  document.getElementById('article-body').innerHTML=item.content;
+  document.getElementById('article-body').innerHTML=renderMarkdownContent(item.content);
 
   // Nav
   const list=item.type==='pub'?PUBS:BLOGS;

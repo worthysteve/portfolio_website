@@ -50,9 +50,9 @@
 
   function getConfig() {
     return {
-      url: localStorage.getItem(CONFIG_KEYS.url) || '',
-      anonKey: localStorage.getItem(CONFIG_KEYS.anonKey) || '',
-      bucket: localStorage.getItem(CONFIG_KEYS.bucket) || 'portfolio-media'
+      url: localStorage.getItem(CONFIG_KEYS.url) || window.PORTFOLIO_SUPABASE_URL || '',
+      anonKey: localStorage.getItem(CONFIG_KEYS.anonKey) || window.PORTFOLIO_SUPABASE_KEY || '',
+      bucket: localStorage.getItem(CONFIG_KEYS.bucket) || window.PORTFOLIO_SUPABASE_BUCKET || 'portfolio-media'
     };
   }
 
@@ -303,8 +303,13 @@
     if (vals[0]) vals[0].textContent = projects.length;
     if (vals[1]) vals[1].textContent = posts.length;
     if (vals[2]) vals[2].textContent = messages.filter(function(m){ return (m.status || 'unread') === 'unread'; }).length;
-    const certLegend = document.querySelector('.donut-legend .dl-item:nth-child(3) span');
-    if (certLegend) certLegend.textContent = certs.length || '40';
+    const legend = document.querySelectorAll('.donut-legend .dl-item span');
+    if (legend[0]) legend[0].textContent = projects.length;
+    if (legend[1]) legend[1].textContent = posts.length;
+    if (legend[2]) legend[2].textContent = certs.length;
+    const total = projects.length + posts.length + certs.length;
+    const donutVal = document.querySelector('.donut-val');
+    if (donutVal) donutVal.textContent = total;
   }
 
   function renderDashboardInbox(messages) {
@@ -324,6 +329,36 @@
     }).join('');
   }
 
+  function renderNotifications(messages) {
+    const unread = (messages || []).filter(function(message){ return (message.status || 'unread') === 'unread'; });
+    const badge = document.getElementById('notif-badge');
+    const label = document.getElementById('notif-count-label');
+    const list = document.getElementById('notif-list');
+    if (badge) {
+      badge.textContent = unread.length > 99 ? '99+' : String(unread.length);
+      badge.style.display = unread.length ? 'flex' : 'none';
+    }
+    const sidebarBadge = document.getElementById('messages-sidebar-badge');
+    if (sidebarBadge) {
+      sidebarBadge.textContent = unread.length > 99 ? '99+' : String(unread.length);
+      sidebarBadge.style.display = unread.length ? 'inline-flex' : 'none';
+    }
+    if (label) label.textContent = unread.length + ' unread';
+    if (!list) return;
+    if (!unread.length) {
+      list.innerHTML = '<div class="notif-empty">No unread notifications.</div>';
+      return;
+    }
+    list.innerHTML = unread.slice(0, 5).map(function(message){
+      return '<div class="notif-item" onclick="switchView(\'messages\',document.querySelector(\'[onclick*=messages]\'));closeNotifications()">'
+        + '<div class="notif-dot"></div>'
+        + '<div><p class="notif-title">' + escapeHtml(message.name || 'Visitor') + '</p>'
+        + '<p class="notif-text">' + escapeHtml(message.subject || message.message || 'New message') + '</p>'
+        + '<p class="notif-time">' + escapeHtml(relativeTime(message.created_at)) + '</p></div>'
+        + '</div>';
+    }).join('');
+  }
+
   async function loadDashboard() {
     if (!init()) {
       const localProjects = fallbackProjects.concat(readLocalCustomProjects());
@@ -337,6 +372,7 @@
       renderAchievements(fallbackAchievements.concat(readLocalRecords('pf_achievements_custom')));
       renderStats(localProjects, fallbackPosts, fallbackMessages, fallbackCerts);
       renderDashboardInbox(fallbackMessages);
+      renderNotifications(fallbackMessages);
       return { connected: false };
     }
     const results = await Promise.all([
@@ -372,6 +408,7 @@
     renderBlogComments(byName.blog_comments.data || []);
     renderStats(projects, posts, messages, certs);
     renderDashboardInbox(messages);
+    renderNotifications(messages);
     return { connected: failed.length === 0, failures: failed };
   }
 
@@ -616,7 +653,10 @@
     if (!init()) return { connected: false };
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.href }
+      options: {
+        redirectTo: window.location.href,
+        queryParams: { prompt: 'select_account' }
+      }
     });
     if (error) throw error;
     return { connected: true };

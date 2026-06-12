@@ -45,6 +45,10 @@ button{cursor:pointer;font-family:var(--fb)}
 .lfield label{font-size:12px;color:var(--t2);font-weight:500}
 .lfield input{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:10px 13px;color:var(--t1);font-size:14px;font-family:var(--fb);outline:none;transition:border-color .2s;width:100%}
 .lfield input:focus{border-color:var(--a)}
+.password-wrap{position:relative}
+.password-wrap input{padding-right:42px}
+.password-toggle{position:absolute;right:9px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:0;background:none;color:var(--t3);display:flex;align-items:center;justify-content:center;border-radius:7px;cursor:pointer}
+.password-toggle:hover{background:var(--s1);color:var(--t1)}
 .btn-login{width:100%;padding:12px;border-radius:var(--r);background:var(--a);color:#fff;font-size:14px;font-weight:600;border:none;transition:filter .2s;margin-top:8px}
 .btn-login:hover{filter:brightness(1.1)}
 .login-hint{font-size:12px;color:var(--t3);text-align:center;margin-top:16px;font-family:var(--fm)}
@@ -87,7 +91,22 @@ button{cursor:pointer;font-family:var(--fb)}
 .profile-menu-btn:hover{background:var(--s2);color:var(--t1)}
 .profile-menu-btn.danger{color:var(--red)}
 .tb-notif{position:relative}
-.notif-badge{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--s1)}
+.notif-badge{position:absolute;top:-8px;right:-8px;min-width:17px;height:17px;padding:0 5px;border-radius:999px;background:var(--red);border:2px solid var(--s1);color:#fff;font-size:10px;font-family:var(--fm);font-weight:700;display:none;align-items:center;justify-content:center;line-height:1}
+.notif-menu{position:absolute;right:0;top:42px;width:320px;max-width:calc(100vw - 32px);background:var(--s1);border:1px solid var(--b);border-radius:var(--r);box-shadow:0 18px 40px rgba(0,0,0,.28);display:none;z-index:210;overflow:hidden}
+.notif-menu.open{display:block}
+.notif-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--b)}
+.notif-head strong{font-size:13px;color:var(--t1)}
+.notif-list{max-height:300px;overflow:auto}
+.notif-empty{padding:22px 14px;text-align:center;color:var(--t3);font-size:12px;font-family:var(--fm)}
+.notif-item{display:flex;gap:10px;padding:12px 14px;border-bottom:1px solid var(--b);cursor:pointer}
+.notif-item:hover{background:var(--s2)}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--a);margin-top:6px;flex-shrink:0}
+.notif-title{font-size:13px;font-weight:600;color:var(--t1);line-height:1.3}
+.notif-text{font-size:12px;color:var(--t2);line-height:1.45;margin-top:2px}
+.notif-time{font-size:10px;color:var(--t3);font-family:var(--fm);margin-top:5px}
+.notif-foot{padding:10px 14px;border-top:1px solid var(--b)}
+.notif-foot button{width:100%;border:1px solid var(--b2);background:none;color:var(--t1);border-radius:8px;padding:9px;font-size:12px;cursor:pointer}
+.notif-foot button:hover{border-color:var(--a);background:rgba(37,99,235,.08)}
 
 /* MAIN LAYOUT */
 .main-layout{display:flex;flex:1;overflow:hidden}
@@ -353,7 +372,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </button>
     <div class="login-divider"><span>or sign in with email</span></div>
     <div class="lfield"><label>Email address</label><input type="email" id="login-email" placeholder="admin@example.com" autocomplete="username"></div>
-    <div class="lfield"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="lfield"><label>Password</label><div class="password-wrap"><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"><button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Show password" id="password-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <div class="login-row">
       <label class="remember-label"><input type="checkbox" id="remember-me"> Remember me</label>
       <button type="button" class="forgot-btn" onclick="doForgotPassword()">Forgot password?</button>
@@ -379,10 +398,17 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="tb-acts">
       <button class="tb-btn" id="admin-theme-btn" title="Toggle theme"></button>
-      <button class="tb-btn tb-notif" title="Notifications" onclick="switchView('messages',document.querySelector('[onclick*=messages]'))">
+      <div class="profile-menu-wrap">
+      <button class="tb-btn tb-notif" title="Notifications" onclick="toggleNotifications(event)">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <div class="notif-badge"></div>
+        <div class="notif-badge" id="notif-badge"></div>
       </button>
+      <div class="notif-menu" id="notif-menu">
+        <div class="notif-head"><strong>Notifications</strong><span id="notif-count-label">0 unread</span></div>
+        <div class="notif-list" id="notif-list"><div class="notif-empty">No unread notifications.</div></div>
+        <div class="notif-foot"><button onclick="switchView('messages',document.querySelector('[onclick*=messages]'));closeNotifications()">See all messages</button></div>
+      </div>
+      </div>
       <a href="index.html" class="tb-btn" title="View Portfolio" target="_blank">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       </a>
@@ -440,7 +466,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="sb-item" onclick="switchView('messages',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Messages
-          <span class="sb-badge new">4</span>
+          <span class="sb-badge new" id="messages-sidebar-badge" style="display:none"></span>
         </div>
         <div class="sb-item" onclick="switchView('comments',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -478,23 +504,23 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </button>
         </div>
         <div class="stat-row">
-          <div class="sc"><p class="sc-label">Total Projects <span>⚡</span></p><p class="sc-val">20</p><p class="sc-delta up">↑ 2 this month</p></div>
-          <div class="sc"><p class="sc-label">Blog Posts <span>✍️</span></p><p class="sc-val">12</p><p class="sc-delta up">↑ 1 this week</p></div>
-          <div class="sc"><p class="sc-label">New Messages <span>💬</span></p><p class="sc-val">4</p><p class="sc-delta neutral">unread</p></div>
-          <div class="sc"><p class="sc-label">Portfolio Views <span>👁</span></p><p class="sc-val">1.2K</p><p class="sc-delta up">↑ 18% this week</p></div>
+          <div class="sc"><p class="sc-label">Total Projects <span>⚡</span></p><p class="sc-val">0</p><p class="sc-delta neutral">from Supabase</p></div>
+          <div class="sc"><p class="sc-label">Blog Posts <span>✍️</span></p><p class="sc-val">0</p><p class="sc-delta neutral">from Supabase</p></div>
+          <div class="sc"><p class="sc-label">New Messages <span>💬</span></p><p class="sc-val">0</p><p class="sc-delta neutral">unread</p></div>
+          <div class="sc"><p class="sc-label">Portfolio Views <span>👁</span></p><p class="sc-val">0</p><p class="sc-delta neutral">analytics not connected</p></div>
         </div>
         <div class="chart-row">
           <div class="chart-card">
             <p class="chart-title">Portfolio Views — Last 7 Days</p>
             <p class="chart-sub">Unique visitors from analytics</p>
             <div class="bar-chart">
-              <div class="bar-row"><span class="bar-label">Mon</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="bar-val">142</span></div>
-              <div class="bar-row"><span class="bar-label">Tue</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="bar-val">192</span></div>
-              <div class="bar-row"><span class="bar-label">Wed</span><div class="bar-track"><div class="bar-fill" style="width:45%"></div></div><span class="bar-val">108</span></div>
-              <div class="bar-row"><span class="bar-label">Thu</span><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div><span class="bar-val">228</span></div>
-              <div class="bar-row"><span class="bar-label">Fri</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><span class="bar-val">168</span></div>
-              <div class="bar-row"><span class="bar-label">Sat</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-val">132</span></div>
-              <div class="bar-row"><span class="bar-label">Sun</span><div class="bar-track"><div class="bar-fill" style="width:48%"></div></div><span class="bar-val">115</span></div>
+              <div class="bar-row"><span class="bar-label">Mon</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
+              <div class="bar-row"><span class="bar-label">Tue</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
+              <div class="bar-row"><span class="bar-label">Wed</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
+              <div class="bar-row"><span class="bar-label">Thu</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
+              <div class="bar-row"><span class="bar-label">Fri</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
+              <div class="bar-row"><span class="bar-label">Sat</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
+              <div class="bar-row"><span class="bar-label">Sun</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
             </div>
           </div>
           <div class="chart-card">
@@ -509,13 +535,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
                   <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#8B5CF6" stroke-width="4" stroke-dasharray="20 80" stroke-dashoffset="-65"/>
                   <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#10B981" stroke-width="4" stroke-dasharray="15 85" stroke-dashoffset="-85"/>
                 </svg>
-                <div class="donut-center"><span class="donut-val">72</span><span class="donut-lbl">total</span></div>
+                <div class="donut-center"><span class="donut-val">0</span><span class="donut-lbl">total</span></div>
               </div>
               <div class="donut-legend">
-                <div class="dl-item"><div class="dl-dot" style="background:#2563EB"></div>Projects <span>20</span></div>
-                <div class="dl-item"><div class="dl-dot" style="background:#06B6D4"></div>Blog Posts <span>12</span></div>
-                <div class="dl-item"><div class="dl-dot" style="background:#8B5CF6"></div>Certifications <span>40</span></div>
-                <div class="dl-item"><div class="dl-dot" style="background:#10B981"></div>Publications <span>4</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#2563EB"></div>Projects <span>0</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#06B6D4"></div>Blog Posts <span>0</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#8B5CF6"></div>Certifications <span>0</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#10B981"></div>Publications <span>0</span></div>
               </div>
             </div>
           </div>
@@ -530,11 +556,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="activity-row">
           <div class="activity-card">
             <p class="ac-head">Recent Activity</p>
-            <div class="ac-item"><div class="ac-dot green"></div><div class="ac-text"><strong>Flood Prediction</strong> <span>project updated with new metrics</span></div><span class="ac-time">2h ago</span></div>
-            <div class="ac-item"><div class="ac-dot"></div><div class="ac-text"><strong>New message</strong> <span>from Sarah Chen about collaboration</span></div><span class="ac-time">5h ago</span></div>
-            <div class="ac-item"><div class="ac-dot yellow"></div><div class="ac-text"><strong>Blog post</strong> <span>"RAG Systems" published</span></div><span class="ac-time">1d ago</span></div>
-            <div class="ac-item"><div class="ac-dot purple"></div><div class="ac-text"><strong>Certificate</strong> <span>TensorFlow Developer added</span></div><span class="ac-time">2d ago</span></div>
-            <div class="ac-item"><div class="ac-dot green"></div><div class="ac-text"><strong>Publication</strong> <span>ICML paper accepted</span></div><span class="ac-time">3d ago</span></div>
+            <div class="empty-state">No recent activity yet.</div>
           </div>
           <div class="activity-card">
             <p class="ac-head">Inbox Preview</p>
@@ -804,6 +826,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <!-- TOAST -->
 <div id="toast"><div class="toast-dot"></div><span id="toast-msg">Saved successfully</span></div>
 
+<script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="admin-supabase.js"></script>
 <script>
@@ -822,6 +845,17 @@ function persistRememberedLogin(email){
   const remember = document.getElementById('remember-me')?.checked;
   if(remember) localStorage.setItem(LOGIN_MEMORY_KEY, email);
   else localStorage.removeItem(LOGIN_MEMORY_KEY);
+}
+function togglePasswordVisibility(){
+  const input=document.getElementById('login-pass');
+  const button=document.getElementById('password-toggle');
+  if(!input||!button)return;
+  const showing=input.type==='text';
+  input.type=showing?'password':'text';
+  button.setAttribute('aria-label',showing?'Show password':'Hide password');
+  button.innerHTML=showing
+    ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-10-7-10-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>';
 }
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -864,10 +898,19 @@ function confirmLogout(){
 }
 function toggleProfileMenu(event){
   if(event)event.stopPropagation();
+  closeNotifications();
   document.getElementById('profile-menu')?.classList.toggle('open');
 }
 function closeProfileMenu(){
   document.getElementById('profile-menu')?.classList.remove('open');
+}
+function toggleNotifications(event){
+  if(event)event.stopPropagation();
+  closeProfileMenu();
+  document.getElementById('notif-menu')?.classList.toggle('open');
+}
+function closeNotifications(){
+  document.getElementById('notif-menu')?.classList.remove('open');
 }
 function goProfileSettings(){
   closeProfileMenu();
@@ -875,6 +918,7 @@ function goProfileSettings(){
 }
 document.addEventListener('click',function(event){
   if(!event.target.closest('.profile-menu-wrap'))closeProfileMenu();
+  if(!event.target.closest('.tb-notif')&&!event.target.closest('.notif-menu'))closeNotifications();
 });
 function userInitials(nameOrEmail){
   var source=String(nameOrEmail||'Admin').trim();
@@ -953,7 +997,7 @@ const MODALS = {
   },
   blog: {
     title: 'New Blog Post',
-    body: `<div class="mfield"><label>Cover Image <small style="color:var(--t3);font-weight:400">(featured image at top of blog post)</small></label><div class="mfield" style="margin-bottom:0"><label style="font-size:11px">Which blog card slot does this update?</label><select id="admin-blog-slot"><option value="">-- Select slot to update --</option><option value="1">Slot 1 — RAG Systems Guide</option><option value="2">Slot 2 — Time Series &amp; LSTMs</option><option value="3">Slot 3 — CV for Social Good</option><option value="new">New post (won't update existing card)</option></select></div><div class="admin-img-drop" id="admin-blog-img" onclick="adminImgClick('admin-blog-img')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-blog-img')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Click or drag &amp; drop to upload cover image</p><small>PNG, JPG, WebP &middot; Appears at top of the blog detail page</small></div></div><div class="mfield"><label>Title</label><input type="text" id="blog-title" placeholder="Post title..."></div><div class="mrow"><div class="mfield"><label>Category</label><select id="blog-category"><option>AI</option><option>Data Science</option><option>Financial Engineering</option><option>Machine Learning</option><option>Computer Vision</option><option>Research</option></select></div><div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="blog-tags" placeholder="RAG, LLMs, Python"></div></div><div class="mfield"><label>Excerpt <small style="color:var(--t3);font-weight:400">(card preview — 1-2 sentences)</small></label><textarea id="blog-excerpt" placeholder="Brief description shown on blog card..." style="min-height:60px"></textarea></div><div class="mfield"><label>Full Content <small style="color:var(--t3);font-weight:400">(Markdown — use ## headings, **bold**, \`code\`)</small></label><textarea id="blog-content" style="min-height:200px;font-family:var(--fm);font-size:12px;line-height:1.6" placeholder="## Introduction&#10;&#10;Write your post here in Markdown...&#10;&#10;## Section 2&#10;&#10;More content..."></textarea></div><div class="mrow"><div class="mfield"><label>Status</label><select id="blog-status"><option>Draft</option><option>Published</option></select></div><div class="mfield"><label>Read Time</label><input type="text" id="blog-read-time" placeholder="8 min read"></div></div>`
+    body: `<div class="mfield"><label>Cover Image <small style="color:var(--t3);font-weight:400">(featured image at top of blog post)</small></label><div class="mfield" style="margin-bottom:0"><label style="font-size:11px">Which blog card slot does this update?</label><select id="admin-blog-slot"><option value="">-- Select slot to update --</option><option value="1">Slot 1 — RAG Systems Guide</option><option value="2">Slot 2 — Time Series &amp; LSTMs</option><option value="3">Slot 3 — CV for Social Good</option><option value="new">New post (won't update existing card)</option></select></div><div class="admin-img-drop" id="admin-blog-img" onclick="adminImgClick('admin-blog-img')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-blog-img')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Click or drag &amp; drop to upload cover image</p><small>PNG, JPG, WebP &middot; Appears at top of the blog detail page</small></div></div><div class="mfield"><label>Title</label><input type="text" id="blog-title" placeholder="Post title..."></div><div class="mrow"><div class="mfield"><label>Category</label><select id="blog-category"><option>AI</option><option>Data Science</option><option>Financial Engineering</option><option>Machine Learning</option><option>Computer Vision</option><option>Research</option></select></div><div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="blog-tags" placeholder="RAG, LLMs, Python"></div></div><div class="mfield"><label>Excerpt <small style="color:var(--t3);font-weight:400">(card preview — 1-2 sentences)</small></label><textarea id="blog-excerpt" placeholder="Brief description shown on blog card..." style="min-height:60px"></textarea></div><div class="mfield"><label>Blog Media <small style="color:var(--t3);font-weight:400">upload image, video, PDF, or file and insert into Markdown</small></label><div class="admin-file-drop" id="blog-media-file" onclick="adminFileClick('blog-media-file','image/*,video/*,application/pdf')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminFileDrop(event,'blog-media-file','image/*,video/*,application/pdf')"><p>Click or drop media for this post</p><small>Images, videos, PDFs &middot; Inserted into content</small></div><button type="button" class="btn-sm" style="margin-top:10px" onclick="uploadBlogMediaAndInsert()">Upload &amp; Insert in Content</button></div><div class="mfield"><label>Full Content <small style="color:var(--t3);font-weight:400">(Markdown — use ## headings, **bold**, \`code\`)</small></label><textarea id="blog-content" style="min-height:200px;font-family:var(--fm);font-size:12px;line-height:1.6" placeholder="## Introduction&#10;&#10;Write your post here in Markdown...&#10;&#10;## Section 2&#10;&#10;More content..."></textarea></div><div class="mrow"><div class="mfield"><label>Status</label><select id="blog-status"><option>Draft</option><option>Published</option></select></div><div class="mfield"><label>Read Time</label><input type="text" id="blog-read-time" placeholder="8 min read"></div></div>`
   },
   cert: {
     title: 'Add Certificate',
@@ -1383,7 +1427,12 @@ function adminApplyFile(id, file, accept) {
   var el = document.getElementById(id);
   if (!el) return;
   var wantsPdf = String(accept || '').indexOf('pdf') > -1;
-  if (wantsPdf && file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+  var mixedMedia = String(accept || '').indexOf('image/*') > -1 || String(accept || '').indexOf('video/*') > -1;
+  if (mixedMedia && !(file.type.startsWith('image/') || file.type.startsWith('video/') || file.type === 'application/pdf')) {
+    showToast('Please choose an image, video, or PDF file');
+    return;
+  }
+  if (!mixedMedia && wantsPdf && file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
     showToast('Please choose a PDF file');
     return;
   }
@@ -1393,6 +1442,45 @@ function adminApplyFile(id, file, accept) {
   if (p) p.textContent = '\u2713 ' + file.name + ' ready';
   var sm = el.querySelector('small');
   if (sm) sm.textContent = 'Uploads when you save';
+}
+function insertIntoTextarea(textarea, text) {
+  if (!textarea) return;
+  var start = textarea.selectionStart || textarea.value.length;
+  var end = textarea.selectionEnd || textarea.value.length;
+  var before = textarea.value.slice(0, start);
+  var after = textarea.value.slice(end);
+  var prefix = before && !before.endsWith('\n') ? '\n\n' : '';
+  var suffix = after && !after.startsWith('\n') ? '\n\n' : '';
+  textarea.value = before + prefix + text + suffix + after;
+  var next = (before + prefix + text).length;
+  textarea.focus();
+  textarea.setSelectionRange(next, next);
+}
+async function uploadBlogMediaAndInsert() {
+  var drop = document.getElementById('blog-media-file');
+  var content = document.getElementById('blog-content');
+  if (!drop || !drop._adminFile) { showToast('Choose a blog media file first'); return; }
+  if (!window.PortfolioAdminDB?.isConfigured()) { showToast('Connect Supabase before uploading media'); return; }
+  try {
+    var file = drop._adminFile;
+    var result = await PortfolioAdminDB.uploadFile(file, 'blog-media');
+    var safeName = (file.name || 'media').replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').trim() || 'Media';
+    var embed = '';
+    if (file.type.startsWith('image/')) {
+      embed = '![' + safeName + '](' + result.url + ')';
+    } else if (file.type.startsWith('video/')) {
+      embed = '<video controls width="100%">' + '\n  <source src="' + result.url + '" type="' + file.type + '">' + '\n  Your browser does not support the video tag.' + '\n</video>';
+    } else {
+      embed = '[' + safeName + '](' + result.url + ')';
+    }
+    insertIntoTextarea(content, embed);
+    drop.dataset.fileUrl = result.url;
+    var sm = drop.querySelector('small');
+    if (sm) sm.textContent = 'Uploaded and inserted into content';
+    showToast('Blog media inserted');
+  } catch (error) {
+    showToast(error.message || 'Blog media upload failed');
+  }
 }
 </script>
 </body>

@@ -106,7 +106,7 @@ initManagedImageSlot('slot-portrait', 'pf-portrait');
 initManagedImageSlot('slot-about', 'pf-about-photo');
 
 function getResumeUrl() {
-  return localStorage.getItem('pf-resume-url') || 'resume.pdf';
+  return localStorage.getItem('pf-resume-url') || '';
 }
 function applyResumeUrl(url) {
   if (!url) return;
@@ -120,6 +120,16 @@ function applyResumeUrl(url) {
   });
 }
 applyResumeUrl(getResumeUrl());
+document.querySelectorAll('a[data-resume-link]').forEach(function(link){
+  if(!link.href || /resume\.pdf$/.test(link.getAttribute('href')||'')){
+    link.addEventListener('click', function(event){
+      if(!getResumeUrl()){
+        event.preventDefault();
+        alert('Resume is not available yet.');
+      }
+    });
+  }
+});
 
 // SCROLL REVEAL
 (function(){
@@ -314,8 +324,8 @@ function escapeHtml(value) {
 }
 function hasUrl(url) { return Boolean(url && String(url).trim() && String(url).trim() !== '#'); }
 function supabaseClient() {
-  var url = localStorage.getItem('pf-supabase-url') || '';
-  var key = localStorage.getItem('pf-supabase-anon-key') || '';
+  var url = localStorage.getItem('pf-supabase-url') || window.PORTFOLIO_SUPABASE_URL || '';
+  var key = localStorage.getItem('pf-supabase-anon-key') || window.PORTFOLIO_SUPABASE_KEY || '';
   if (!url || !key || !window.supabase) return null;
   return window.supabase.createClient(url, key);
 }

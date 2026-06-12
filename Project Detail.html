@@ -185,6 +185,7 @@ h1,h2,h3{font-family:var(--fh);font-weight:600;line-height:1.15;color:var(--t1)}
   <div class="pnav" id="pnav"></div>
 </div>
 
+<script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── THEME ──────────────────────────────────────────────
@@ -317,8 +318,8 @@ function mapSupabaseProject(row){
 }
 
 function getSupabaseClient(){
-  var url=localStorage.getItem(SUPABASE_CONFIG_KEYS.url)||'';
-  var key=localStorage.getItem(SUPABASE_CONFIG_KEYS.anonKey)||'';
+  var url=localStorage.getItem(SUPABASE_CONFIG_KEYS.url)||window.PORTFOLIO_SUPABASE_URL||'';
+  var key=localStorage.getItem(SUPABASE_CONFIG_KEYS.anonKey)||window.PORTFOLIO_SUPABASE_KEY||'';
   if(!url||!key||!window.supabase)return null;
   return window.supabase.createClient(url,key);
 }
