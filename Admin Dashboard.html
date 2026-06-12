@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Admin — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B1017;--s1:#111827;--s2:#1F2937;--card:#1F2937;
+  --b:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);
+  --a:#2563EB;--a2:#06B6D4;
+  --t1:#F9FAFB;--t2:#9CA3AF;--t3:#6B7280;
+  --green:#10B981;--yellow:#F59E0B;--red:#EF4444;--purple:#8B5CF6;
+  --fh:'IBM Plex Sans',sans-serif;--fb:'Inter',sans-serif;--fm:'IBM Plex Mono',monospace;
+  --r:8px;--rl:12px;
+}
+html,body{height:100%;overflow:hidden}
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:14px;line-height:1.5}
+a{text-decoration:none;color:inherit}
+button{cursor:pointer;font-family:var(--fb)}
+
+/* LOGIN OVERLAY */
+#login-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);
+  backdrop-filter:blur(20px);z-index:999;
+  display:flex;align-items:center;justify-content:center;
+}
+.login-box{
+  background:var(--s1);border:1px solid var(--b2);border-radius:20px;
+  padding:48px;width:100%;max-width:420px;
+  box-shadow:0 40px 80px rgba(0,0,0,.5);
+}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
+.login-logo-mark{min-width:104px;height:36px;padding:0 12px;border-radius:9px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center}
+.login-logo-mark span{font-family:var(--fm);font-size:12px;font-weight:700;color:#fff}
+.login-logo h2{font-family:var(--fh);font-size:16px;font-weight:600}
+.login-logo p{font-size:12px;color:var(--t3);font-family:var(--fm)}
+.login-title{font-family:var(--fh);font-size:24px;font-weight:600;margin-bottom:8px}
+.login-sub{font-size:14px;color:var(--t2);margin-bottom:32px;line-height:1.5}
+.lfield{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.lfield label{font-size:12px;color:var(--t2);font-weight:500}
+.lfield input{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:10px 13px;color:var(--t1);font-size:14px;font-family:var(--fb);outline:none;transition:border-color .2s;width:100%}
+.lfield input:focus{border-color:var(--a)}
+.btn-login{width:100%;padding:12px;border-radius:var(--r);background:var(--a);color:#fff;font-size:14px;font-weight:600;border:none;transition:filter .2s;margin-top:8px}
+.btn-login:hover{filter:brightness(1.1)}
+.login-hint{font-size:12px;color:var(--t3);text-align:center;margin-top:16px;font-family:var(--fm)}
+.login-hint span{color:var(--a2)}
+
+/* SHELL */
+#app{display:none;height:100%;flex-direction:column}
+#app.visible{display:flex}
+
+/* TOPBAR */
+.topbar{
+  display:flex;align-items:center;gap:16px;
+  padding:0 20px;height:56px;
+  background:var(--s1);border-bottom:1px solid var(--b);
+  flex-shrink:0;
+}
+.tb-logo{display:flex;align-items:center;gap:10px;margin-right:auto}
+.tb-logo-mark{min-width:94px;height:28px;padding:0 10px;border-radius:7px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center}
+.tb-logo-mark span{font-family:var(--fm);font-size:10px;font-weight:700;color:#fff}
+.tb-logo-name{font-family:var(--fh);font-size:14px;font-weight:600}
+.tb-search{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:7px 12px;width:240px;color:var(--t3)}
+.tb-search input{background:none;border:none;outline:none;font-size:13px;color:var(--t1);width:100%;font-family:var(--fb)}
+.tb-search input::placeholder{color:var(--t3)}
+.tb-acts{display:flex;align-items:center;gap:8px}
+.tb-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--b);background:none;color:var(--t2);display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s,background .2s;font-size:13px}
+.tb-btn:hover{border-color:var(--b2);color:var(--t1);background:var(--s2)}
+.tb-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;cursor:pointer;flex-shrink:0}
+.profile-menu-wrap{position:relative}
+.profile-menu{position:absolute;right:0;top:42px;width:190px;background:var(--s1);border:1px solid var(--b);border-radius:var(--r);box-shadow:0 18px 40px rgba(0,0,0,.28);padding:8px;display:none;z-index:200}
+.profile-menu.open{display:block}
+.profile-menu-user{padding:10px 10px 8px;border-bottom:1px solid var(--b);margin-bottom:6px}
+.profile-menu-name{font-size:13px;font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-menu-email{font-size:11px;color:var(--t3);font-family:var(--fm);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-menu-btn{width:100%;display:flex;align-items:center;gap:8px;padding:9px 10px;border-radius:8px;background:none;border:none;color:var(--t2);font-size:13px;text-align:left;cursor:pointer;transition:background .15s,color .15s}
+.profile-menu-btn:hover{background:var(--s2);color:var(--t1)}
+.profile-menu-btn.danger{color:var(--red)}
+.tb-notif{position:relative}
+.notif-badge{position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;background:var(--red);border:2px solid var(--s1)}
+
+/* MAIN LAYOUT */
+.main-layout{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{
+  width:220px;background:var(--s1);border-right:1px solid var(--b);
+  display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;
+}
+.sb-section{padding:16px 12px 4px;font-size:10px;color:var(--t3);font-family:var(--fm);letter-spacing:.08em;text-transform:uppercase}
+.sb-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-radius:var(--r);margin:1px 8px;cursor:pointer;
+  color:var(--t2);font-size:13px;transition:background .15s,color .15s;
+  border:1px solid transparent;
+}
+.sb-item:hover{background:var(--s2);color:var(--t1)}
+.sb-item.active{background:rgba(37,99,235,.12);color:var(--a);border-color:rgba(37,99,235,.2)}
+.sb-item svg{flex-shrink:0;opacity:.7}
+.sb-item.active svg{opacity:1}
+.sb-badge{margin-left:auto;padding:1px 6px;border-radius:4px;font-size:10px;font-family:var(--fm);font-weight:600}
+.sb-badge.new{background:rgba(239,68,68,.15);color:var(--red)}
+.sb-spacer{flex:1}
+.sb-footer{padding:12px;border-top:1px solid var(--b)}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:var(--r);cursor:pointer;transition:background .15s}
+.sb-user:hover{background:var(--s2)}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.sb-user-name{font-size:13px;font-weight:500}
+.sb-user-role{font-size:11px;color:var(--t3);font-family:var(--fm)}
+
+/* CONTENT AREA */
+.content{flex:1;overflow-y:auto;background:var(--bg);padding:28px 32px}
+.view{display:none}
+.view.active{display:block}
+
+/* PAGE HEADER */
+.page-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px}
+.page-hdr h1{font-family:var(--fh);font-size:22px;font-weight:600}
+.page-hdr p{font-size:13px;color:var(--t2);margin-top:2px}
+.btn-new{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--r);background:var(--a);color:#fff;font-size:13px;font-weight:500;border:none;transition:filter .2s}
+.btn-new:hover{filter:brightness(1.1)}
+
+/* STATS CARDS */
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.sc{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);padding:20px;transition:border-color .2s}
+.sc:hover{border-color:var(--b2)}
+.sc-label{font-size:12px;color:var(--t2);margin-bottom:10px;font-weight:500;display:flex;align-items:center;justify-content:space-between}
+.sc-label span{font-size:18px}
+.sc-val{font-family:var(--fh);font-size:28px;font-weight:600;line-height:1;margin-bottom:6px}
+.sc-delta{font-size:12px;font-family:var(--fm);display:flex;align-items:center;gap:4px}
+.sc-delta.up{color:var(--green)}
+.sc-delta.down{color:var(--red)}
+.sc-delta.neutral{color:var(--t3)}
+
+/* TABLE */
+.table-wrap{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);overflow:hidden;margin-bottom:24px}
+.table-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--b)}
+.table-head h3{font-size:14px;font-weight:600}
+.table-acts{display:flex;gap:8px;align-items:center}
+.tbl-search{display:flex;align-items:center;gap:6px;background:var(--s2);border:1px solid var(--b);border-radius:6px;padding:5px 10px}
+.tbl-search input{background:none;border:none;outline:none;font-size:12px;color:var(--t1);width:140px;font-family:var(--fb)}
+.tbl-search input::placeholder{color:var(--t3)}
+.btn-sm{padding:5px 12px;border-radius:6px;border:1px solid var(--b2);color:var(--t1);background:none;font-size:12px;transition:border-color .2s,background .2s}
+.btn-sm:hover{border-color:var(--a);background:rgba(37,99,235,.08)}
+table{width:100%;border-collapse:collapse}
+thead tr{border-bottom:1px solid var(--b)}
+th{padding:10px 20px;text-align:left;font-size:11px;color:var(--t3);font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-family:var(--fm);white-space:nowrap}
+td{padding:12px 20px;font-size:13px;border-bottom:1px solid var(--b);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.td-title{font-weight:500;color:var(--t1);max-width:220px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.td-mono{font-family:var(--fm);font-size:11px;color:var(--t2)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:5px;font-size:11px;font-family:var(--fm);font-weight:500}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.badge.published{background:rgba(16,185,129,.1);color:var(--green);border:1px solid rgba(16,185,129,.2)}
+.badge.draft{background:rgba(245,158,11,.1);color:var(--yellow);border:1px solid rgba(245,158,11,.2)}
+.badge.archived{background:rgba(107,114,128,.1);color:var(--t3);border:1px solid rgba(107,114,128,.2)}
+.badge.review{background:rgba(139,92,246,.1);color:var(--purple);border:1px solid rgba(139,92,246,.2)}
+.badge.unread{background:rgba(37,99,235,.1);color:var(--a);border:1px solid rgba(37,99,235,.2)}
+.badge.read{background:rgba(107,114,128,.08);color:var(--t3);border:1px solid rgba(107,114,128,.15)}
+.td-actions{display:flex;gap:6px}
+.ia{width:28px;height:28px;border-radius:6px;border:1px solid var(--b);background:none;color:var(--t2);display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s,background .2s}
+.ia:hover{border-color:var(--b2);color:var(--t1);background:var(--s2)}
+.ia.del:hover{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08)}
+
+/* ACTIVITY FEED */
+.activity-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+.activity-card{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);overflow:hidden}
+.ac-head{padding:16px 20px;border-bottom:1px solid var(--b);font-size:14px;font-weight:600}
+.ac-item{display:flex;align-items:flex-start;gap:12px;padding:12px 20px;border-bottom:1px solid var(--b);transition:background .15s}
+.ac-item:last-child{border-bottom:none}
+.ac-item:hover{background:rgba(255,255,255,.02)}
+.ac-dot{width:8px;height:8px;border-radius:50%;background:var(--a);flex-shrink:0;margin-top:4px}
+.ac-dot.green{background:var(--green)}
+.ac-dot.yellow{background:var(--yellow)}
+.ac-dot.purple{background:var(--purple)}
+.ac-text{font-size:13px;line-height:1.4}
+.ac-text strong{color:var(--t1);font-weight:500}
+.ac-text span{color:var(--t2)}
+.ac-time{font-size:11px;color:var(--t3);font-family:var(--fm);margin-left:auto;white-space:nowrap;margin-top:1px}
+
+/* QUICK ACTIONS */
+.qa-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.qa{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);padding:16px;cursor:pointer;transition:border-color .25s,transform .2s;text-align:center}
+.qa:hover{border-color:rgba(37,99,235,.3);transform:translateY(-2px)}
+.qa-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(6,182,212,.08));border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
+.qa-label{font-size:13px;font-weight:500}
+
+/* FORM MODAL */
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+#modal-overlay.open{display:flex}
+.modal{background:var(--s1);border:1px solid var(--b2);border-radius:16px;width:100%;max-width:560px;max-height:85vh;overflow-y:auto;box-shadow:0 25px 50px rgba(0,0,0,.5)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--b);position:sticky;top:0;background:var(--s1);z-index:1}
+.modal-head h3{font-size:16px;font-weight:600}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--b);background:none;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s}
+.modal-close:hover{color:var(--t1);border-color:var(--b2)}
+.modal-body{padding:24px;display:flex;flex-direction:column;gap:14px}
+.mfield{display:flex;flex-direction:column;gap:6px}
+.mfield label{font-size:12px;color:var(--t2);font-weight:500}
+.mfield input,.mfield textarea,.mfield select{background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:10px 12px;color:var(--t1);font-size:14px;font-family:var(--fb);outline:none;transition:border-color .2s;width:100%}
+.mfield input:focus,.mfield textarea:focus,.mfield select:focus{border-color:var(--a)}
+.mfield textarea{resize:vertical;min-height:80px}
+.mfield select option{background:var(--s2)}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--b);display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel{padding:8px 18px;border-radius:var(--r);border:1px solid var(--b2);color:var(--t1);background:none;font-size:13px}
+.btn-cancel:hover{background:var(--s2)}
+.btn-save{padding:8px 18px;border-radius:var(--r);background:var(--a);color:#fff;font-size:13px;font-weight:500;border:none;transition:filter .2s}
+.btn-save:hover{filter:brightness(1.1)}
+
+/* TOAST */
+#toast{position:fixed;bottom:28px;right:28px;padding:12px 18px;border-radius:var(--rl);background:#1F2937;border:1px solid var(--b2);font-size:13px;font-weight:500;box-shadow:0 8px 30px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:transform .3s,opacity .3s;z-index:999;display:flex;align-items:center;gap:8px}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{border-color:rgba(16,185,129,.3)}
+#toast .toast-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--b)}
+.pg-info{font-size:12px;color:var(--t3);font-family:var(--fm)}
+.pg-btns{display:flex;gap:4px}
+.pg-btn{padding:4px 10px;border-radius:5px;font-size:12px;border:1px solid var(--b);color:var(--t2);background:none;transition:border-color .2s,color .2s}
+.pg-btn:hover,.pg-btn.active{border-color:var(--a);color:var(--a)}
+
+/* CHARTS */
+.chart-row{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:24px}
+.chart-card{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);padding:20px}
+.chart-title{font-size:14px;font-weight:600;margin-bottom:4px}
+.chart-sub{font-size:12px;color:var(--t3);margin-bottom:20px;font-family:var(--fm)}
+.bar-chart{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:12px}
+.bar-label{font-size:12px;color:var(--t2);width:90px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;height:6px;background:var(--s2);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--a),var(--a2));transition:width .6s ease}
+.bar-val{font-size:12px;font-family:var(--fm);color:var(--t3);width:32px;text-align:right}
+.donut-wrap{display:flex;flex-direction:column;align-items:center;gap:16px}
+.donut{position:relative;width:120px;height:120px}
+.donut svg{transform:rotate(-90deg)}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-val{font-family:var(--fh);font-size:22px;font-weight:600}
+.donut-lbl{font-size:10px;color:var(--t3);font-family:var(--fm)}
+.donut-legend{display:flex;flex-direction:column;gap:7px;width:100%}
+.dl-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2)}
+.dl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dl-item span{margin-left:auto;font-family:var(--fm);color:var(--t3)}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:48px 20px;color:var(--t3)}
+.empty svg{margin:0 auto 12px;opacity:.4}
+.empty p{font-size:14px}
+
+/* MESSAGES */
+.msg-list{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--b);border-radius:var(--rl);overflow:hidden}
+.msg-item{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .15s;position:relative}
+.msg-item:last-child{border-bottom:none}
+.msg-item:hover{background:rgba(255,255,255,.025)}
+.msg-item.unread::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--a)}
+.msg-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--s2),var(--s1));border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0}
+.msg-content{flex:1;min-width:0}
+.msg-from{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.msg-subject{font-size:13px;color:var(--t2);margin-bottom:4px}
+.msg-preview{font-size:12px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.msg-meta{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.msg-time{font-size:11px;color:var(--t3);font-family:var(--fm)}
+
+/* SETTINGS */
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.settings-card{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);padding:24px}
+.settings-card h3{font-size:14px;font-weight:600;margin-bottom:4px}
+.settings-card p{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.5}
+.settings-card .mfield{margin-bottom:12px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--b)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-row label{font-size:13px;font-weight:500}
+.toggle-row p{font-size:12px;color:var(--t3);margin-top:2px}
+.toggle{width:36px;height:20px;border-radius:10px;background:var(--s2);border:1px solid var(--b2);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle.on{background:var(--a);border-color:var(--a)}
+.toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s}
+.toggle.on::after{left:18px}
+
+/* ===== LIGHT THEME ===== */
+[data-theme="light"]{--bg:#F3F4F6;--s1:#FFFFFF;--s2:#F9FAFB;--card:#FFFFFF;--b:rgba(15,23,42,.06);--b2:rgba(15,23,42,.12);--t1:#111827;--t2:#6B7280;--t3:#9CA3AF}
+[data-theme="light"] .topbar,[data-theme="light"] .sidebar{background:#FFFFFF;border-color:rgba(15,23,42,.08)}
+[data-theme="light"] .modal,[data-theme="light"] .modal-head{background:#FFFFFF}
+[data-theme="light"] .login-box{background:#FFFFFF}
+[data-theme="light"] .mfield input,[data-theme="light"] .mfield textarea,[data-theme="light"] .mfield select{background:#F9FAFB}
+[data-theme="light"] tr:hover td{background:rgba(0,0,0,.02)}
+
+/* ===== ADMIN HAMBURGER ===== */
+.tb-ham{width:32px;height:32px;border-radius:7px;border:1px solid var(--b);background:none;color:var(--t2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:border-color .2s,color .2s;flex-shrink:0}
+.tb-ham span{display:block;width:14px;height:1.5px;background:currentColor;border-radius:1px;transition:transform .22s,opacity .22s}
+.tb-ham.open span:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+.tb-ham.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.tb-ham.open span:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+.tb-ham:hover{border-color:var(--a);color:var(--t1)}
+
+/* ===== MOBILE SIDEBAR ===== */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49;backdrop-filter:blur(2px);cursor:pointer}
+.sb-overlay.open{display:block}
+@media(max-width:768px){
+  .sidebar{position:fixed;left:-220px;top:0;bottom:0;z-index:50;transition:left .25s ease}
+  .sidebar.open{left:0}
+  .tb-search{display:none}
+}
+
+/* ===== GOOGLE SIGN IN ===== */
+.btn-google{width:100%;padding:11px;border-radius:var(--r);background:none;border:1px solid var(--b2);color:var(--t1);font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:16px;transition:border-color .2s,background .2s;cursor:pointer;font-family:var(--fb)}
+.btn-google:hover{border-color:#4285F4;background:rgba(66,133,244,.06)}
+.login-divider{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--b2)}
+.login-divider span{font-size:12px;color:var(--t3);font-family:var(--fm);white-space:nowrap}
+
+/* ===== REPLY MODAL ===== */
+#reply-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:600;align-items:center;justify-content:center;backdrop-filter:blur(5px)}
+#reply-overlay.open{display:flex}
+.reply-quote{background:var(--s2);border-left:3px solid var(--a);border-radius:0 var(--r) var(--r) 0;padding:12px 16px;font-size:13px;color:var(--t2);line-height:1.5;margin-bottom:4px;font-style:italic}
+.reply-quote strong{display:block;font-style:normal;color:var(--t1);font-weight:600;margin-bottom:4px}
+.msg-reply-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--b);background:none;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,color .2s,background .2s;flex-shrink:0}
+.msg-reply-btn:hover{border-color:var(--a);color:var(--a);background:rgba(37,99,235,.08)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-mark"><span>Steven Daniel</span></div>
+      <div><h2>Steven Daniel</h2><p>Portfolio Admin</p></div>
+    </div>
+    <h1 class="login-title">Sign in</h1>
+    <p class="login-sub">Access your portfolio dashboard to manage content, messages, and analytics.</p>
+    <button class="btn-google" onclick="doGoogleLogin()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <div class="login-divider"><span>or sign in with email</span></div>
+    <div class="lfield"><label>Email address</label><input type="email" id="login-email" placeholder="admin@example.com" value="danielsteven.ds@gmail.com"></div>
+    <div class="lfield"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" value="password"></div>
+    <button class="btn-login" onclick="doLogin()">Sign In →</button>
+    <button class="btn-login" style="background:transparent;border:1px solid var(--b2);color:var(--t1)" onclick="doCreateAdmin()">Create Admin Account</button>
+    <p class="login-hint">Use Supabase Auth email/password or Google. Create the first admin user here if signups are enabled.</p>
+  </div>
+</div>
+
+<!-- APP SHELL -->
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="tb-ham" id="sb-ham" aria-label="Toggle sidebar"><span></span><span></span><span></span></button>
+    <div class="tb-logo">
+      <div class="tb-logo-mark"><span>Steven Daniel</span></div>
+      <span class="tb-logo-name">Steven Daniel</span>
+    </div>
+    <div class="tb-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input placeholder="Search content...">
+    </div>
+    <div class="tb-acts">
+      <button class="tb-btn" id="admin-theme-btn" title="Toggle theme"></button>
+      <button class="tb-btn tb-notif" title="Notifications" onclick="switchView('messages',document.querySelector('[onclick*=messages]'))">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <div class="notif-badge"></div>
+      </button>
+      <a href="index.html" class="tb-btn" title="View Portfolio" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
+      <div class="profile-menu-wrap">
+        <div class="tb-avatar" id="tb-avatar" title="Profile" onclick="toggleProfileMenu(event)">A</div>
+        <div class="profile-menu" id="profile-menu">
+          <div class="profile-menu-user"><p class="profile-menu-name" id="profile-menu-name">Admin</p><p class="profile-menu-email" id="profile-menu-email">admin@example.com</p></div>
+          <button class="profile-menu-btn" onclick="goProfileSettings()">Settings</button>
+          <button class="profile-menu-btn danger" onclick="confirmLogout()">Logout</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="main-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div style="padding:8px 0">
+        <p class="sb-section">Main</p>
+        <div class="sb-item active" onclick="switchView('dashboard',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </div>
+        <p class="sb-section">Content</p>
+        <div class="sb-item" onclick="switchView('projects',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          Projects
+        </div>
+        <div class="sb-item" onclick="switchView('blog',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          Blog Posts
+        </div>
+        <div class="sb-item" onclick="switchView('publications',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          Publications
+        </div>
+        <div class="sb-item" onclick="switchView('certs',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          Certifications
+        </div>
+        <p class="sb-section">Profile</p>
+        <div class="sb-item" onclick="switchView('experience',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          Experience
+        </div>
+        <div class="sb-item" onclick="switchView('education',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          Education
+        </div>
+        <div class="sb-item" onclick="switchView('achievements',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          Achievements
+        </div>
+        <p class="sb-section">Inbox</p>
+        <div class="sb-item" onclick="switchView('messages',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Messages
+          <span class="sb-badge new">4</span>
+        </div>
+        <div class="sb-item" onclick="switchView('comments',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Blog Comments
+        </div>
+        <div class="sb-item" onclick="switchView('media',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Media
+        </div>
+        <p class="sb-section">System</p>
+        <div class="sb-item" onclick="switchView('settings',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </div>
+      </div>
+      <div class="sb-spacer"></div>
+      <div class="sb-footer">
+        <div class="sb-user" onclick="confirmLogout()" title="Sign out">
+          <div class="sb-avatar" id="sb-avatar">A</div>
+          <div><p class="sb-user-name" id="sb-user-name" data-tweak-name>Admin</p><p class="sb-user-role" id="sb-user-email">admin@example.com</p></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <div class="view active" id="view-dashboard">
+        <div class="page-hdr">
+          <div><h1>Dashboard</h1><p>Welcome back — here's what's happening with your portfolio.</p></div>
+          <button class="btn-new" onclick="openModal('project')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Project
+          </button>
+        </div>
+        <div class="stat-row">
+          <div class="sc"><p class="sc-label">Total Projects <span>⚡</span></p><p class="sc-val">20</p><p class="sc-delta up">↑ 2 this month</p></div>
+          <div class="sc"><p class="sc-label">Blog Posts <span>✍️</span></p><p class="sc-val">12</p><p class="sc-delta up">↑ 1 this week</p></div>
+          <div class="sc"><p class="sc-label">New Messages <span>💬</span></p><p class="sc-val">4</p><p class="sc-delta neutral">unread</p></div>
+          <div class="sc"><p class="sc-label">Portfolio Views <span>👁</span></p><p class="sc-val">1.2K</p><p class="sc-delta up">↑ 18% this week</p></div>
+        </div>
+        <div class="chart-row">
+          <div class="chart-card">
+            <p class="chart-title">Portfolio Views — Last 7 Days</p>
+            <p class="chart-sub">Unique visitors from analytics</p>
+            <div class="bar-chart">
+              <div class="bar-row"><span class="bar-label">Mon</span><div class="bar-track"><div class="bar-fill" style="width:60%"></div></div><span class="bar-val">142</span></div>
+              <div class="bar-row"><span class="bar-label">Tue</span><div class="bar-track"><div class="bar-fill" style="width:80%"></div></div><span class="bar-val">192</span></div>
+              <div class="bar-row"><span class="bar-label">Wed</span><div class="bar-track"><div class="bar-fill" style="width:45%"></div></div><span class="bar-val">108</span></div>
+              <div class="bar-row"><span class="bar-label">Thu</span><div class="bar-track"><div class="bar-fill" style="width:95%"></div></div><span class="bar-val">228</span></div>
+              <div class="bar-row"><span class="bar-label">Fri</span><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><span class="bar-val">168</span></div>
+              <div class="bar-row"><span class="bar-label">Sat</span><div class="bar-track"><div class="bar-fill" style="width:55%"></div></div><span class="bar-val">132</span></div>
+              <div class="bar-row"><span class="bar-label">Sun</span><div class="bar-track"><div class="bar-fill" style="width:48%"></div></div><span class="bar-val">115</span></div>
+            </div>
+          </div>
+          <div class="chart-card">
+            <p class="chart-title">Content Breakdown</p>
+            <p class="chart-sub">Published items by type</p>
+            <div class="donut-wrap">
+              <div class="donut">
+                <svg width="120" height="120" viewBox="0 0 42 42">
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1F2937" stroke-width="4"/>
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#2563EB" stroke-width="4" stroke-dasharray="40 60" stroke-dashoffset="0"/>
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#06B6D4" stroke-width="4" stroke-dasharray="25 75" stroke-dashoffset="-40"/>
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#8B5CF6" stroke-width="4" stroke-dasharray="20 80" stroke-dashoffset="-65"/>
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#10B981" stroke-width="4" stroke-dasharray="15 85" stroke-dashoffset="-85"/>
+                </svg>
+                <div class="donut-center"><span class="donut-val">72</span><span class="donut-lbl">total</span></div>
+              </div>
+              <div class="donut-legend">
+                <div class="dl-item"><div class="dl-dot" style="background:#2563EB"></div>Projects <span>20</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#06B6D4"></div>Blog Posts <span>12</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#8B5CF6"></div>Certifications <span>40</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#10B981"></div>Publications <span>4</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="sb-section" style="padding:0 0 12px">Quick Actions</p>
+        <div class="qa-grid">
+          <div class="qa" onclick="openModal('project')"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><p class="qa-label">New Project</p></div>
+          <div class="qa" onclick="openModal('blog')"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><p class="qa-label">New Blog Post</p></div>
+          <div class="qa" onclick="switchView('messages',document.querySelector('[onclick*=messages]'))"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><p class="qa-label">View Messages</p></div>
+          <div class="qa" onclick="openModal('cert')"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div><p class="qa-label">Add Certificate</p></div>
+        </div>
+        <div class="activity-row">
+          <div class="activity-card">
+            <p class="ac-head">Recent Activity</p>
+            <div class="ac-item"><div class="ac-dot green"></div><div class="ac-text"><strong>Flood Prediction</strong> <span>project updated with new metrics</span></div><span class="ac-time">2h ago</span></div>
+            <div class="ac-item"><div class="ac-dot"></div><div class="ac-text"><strong>New message</strong> <span>from Sarah Chen about collaboration</span></div><span class="ac-time">5h ago</span></div>
+            <div class="ac-item"><div class="ac-dot yellow"></div><div class="ac-text"><strong>Blog post</strong> <span>"RAG Systems" published</span></div><span class="ac-time">1d ago</span></div>
+            <div class="ac-item"><div class="ac-dot purple"></div><div class="ac-text"><strong>Certificate</strong> <span>TensorFlow Developer added</span></div><span class="ac-time">2d ago</span></div>
+            <div class="ac-item"><div class="ac-dot green"></div><div class="ac-text"><strong>Publication</strong> <span>ICML paper accepted</span></div><span class="ac-time">3d ago</span></div>
+          </div>
+          <div class="activity-card">
+            <p class="ac-head">Inbox Preview</p>
+            <div class="ac-item" style="cursor:pointer"><div class="ac-dot"></div><div class="ac-text"><strong>Dr. James Osei</strong><br><span>Research collaboration on climate AI...</span></div><span class="ac-time">1h ago</span></div>
+            <div class="ac-item" style="cursor:pointer"><div class="ac-dot"></div><div class="ac-text"><strong>Fatima Al-Hassan</strong><br><span>ML Engineer role at our startup...</span></div><span class="ac-time">4h ago</span></div>
+            <div class="ac-item" style="cursor:pointer"><div class="ac-dot green"></div><div class="ac-text"><strong>Marcus Webb</strong><br><span>Your talk proposal was accepted...</span></div><span class="ac-time">1d ago</span></div>
+            <div class="ac-item" style="cursor:pointer"><div class="ac-dot green"></div><div class="ac-text"><strong>Priya Sharma</strong><br><span>Loved your flood prediction project...</span></div><span class="ac-time">2d ago</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROJECTS -->
+      <div class="view" id="view-projects">
+        <div class="page-hdr">
+          <div><h1>Projects</h1><p>Manage your portfolio projects — edit, publish, or archive.</p></div>
+          <button class="btn-new" onclick="openModal('project')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Project
+          </button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head">
+            <h3>All Projects</h3>
+            <div class="table-acts">
+              <div class="tbl-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input placeholder="Search projects..."></div>
+              <button class="btn-sm">Filter</button>
+            </div>
+          </div>
+          <table>
+            <thead><tr><th>#</th><th>Title</th><th>Technologies</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td class="td-mono">01</td><td class="td-title">Flood Prediction for Resilient Communities</td><td class="td-mono">Python, LSTM, GIS</td><td><span class="badge published">Published</span></td><td class="td-mono">Jun 5, 2025</td><td><div class="td-actions"><button class="ia" title="Edit" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" title="Delete" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
+              <tr><td class="td-mono">02</td><td class="td-title">Enterprise RAG Chatbot</td><td class="td-mono">LangChain, ChromaDB</td><td><span class="badge published">Published</span></td><td class="td-mono">Jun 3, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
+              <tr><td class="td-mono">03</td><td class="td-title">Food-101 Image Classifier</td><td class="td-mono">PyTorch, ResNet50</td><td><span class="badge published">Published</span></td><td class="td-mono">May 28, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
+              <tr><td class="td-mono">04</td><td class="td-title">Titanic Survival Prediction API</td><td class="td-mono">Scikit-learn, FastAPI</td><td><span class="badge published">Published</span></td><td class="td-mono">May 12, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
+              <tr><td class="td-mono">05</td><td class="td-title">Personal Finance Management System</td><td class="td-mono">React, FastAPI, Supabase</td><td><span class="badge draft">Draft</span></td><td class="td-mono">Apr 30, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
+            </tbody>
+          </table>
+          <div class="pagination"><p class="pg-info">Showing 5 of 20 projects</p><div class="pg-btns"><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><button class="pg-btn">→</button></div></div>
+        </div>
+      </div>
+
+      <!-- BLOG -->
+      <div class="view" id="view-blog">
+        <div class="page-hdr">
+          <div><h1>Blog Posts</h1><p>Manage articles, drafts, and publications stored in Supabase.</p></div>
+          <button class="btn-new" onclick="openModal('blog')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Post
+          </button>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head"><h3>All Posts</h3><div class="table-acts"><div class="tbl-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input placeholder="Search posts..."></div><button class="btn-sm">Filter</button></div></div>
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Reading Time</th><th>Status</th><th>Published</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td class="td-title">Building RAG Systems from Scratch: A Production Guide</td><td class="td-mono">AI</td><td class="td-mono">8 min</td><td><span class="badge published">Published</span></td><td class="td-mono">Jun 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
+              <tr><td class="td-title">Time Series Forecasting with LSTMs for Financial Data</td><td class="td-mono">Finance</td><td class="td-mono">6 min</td><td><span class="badge published">Published</span></td><td class="td-mono">May 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
+              <tr><td class="td-title">Computer Vision for Social Good: Detecting Floods</td><td class="td-mono">Data Science</td><td class="td-mono">7 min</td><td><span class="badge published">Published</span></td><td class="td-mono">Apr 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
+              <tr><td class="td-title">Intro to Quantitative Risk Modelling with Python</td><td class="td-mono">Finance</td><td class="td-mono">5 min</td><td><span class="badge draft">Draft</span></td><td class="td-mono">—</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
+            </tbody>
+          </table>
+          <div class="pagination"><p class="pg-info">Showing 4 of 12 posts</p><div class="pg-btns"><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">→</button></div></div>
+        </div>
+      </div>
+
+      <!-- MESSAGES -->
+      <div class="view" id="view-messages">
+        <div class="page-hdr">
+          <div><h1>Messages</h1><p>Contact form submissions stored in Supabase — reply or archive.</p></div>
+          <button class="btn-new" onclick="showToast('Marked all as read')">Mark All Read</button>
+        </div>
+        <div class="msg-list">
+          <div class="msg-item unread">
+            <div class="msg-avatar">JO</div>
+            <div class="msg-content">
+              <p class="msg-from">Dr. James Osei</p>
+              <p class="msg-subject">Research collaboration on climate AI</p>
+              <p class="msg-preview">Hi, I came across your flood prediction project and would love to discuss a potential collaboration on climate resilience...</p>
+            </div>
+            <div class="msg-meta"><span class="msg-time">1h ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Dr. James Osei','Research collaboration on climate AI','Hi, I came across your flood prediction project and would love to discuss a potential collaboration...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
+          </div>
+          <div class="msg-item unread">
+            <div class="msg-avatar">FA</div>
+            <div class="msg-content">
+              <p class="msg-from">Fatima Al-Hassan</p>
+              <p class="msg-subject">ML Engineer opportunity at our AI startup</p>
+              <p class="msg-preview">We're building an AI-powered fintech platform and your background in both ML and financial engineering is exactly what...</p>
+            </div>
+            <div class="msg-meta"><span class="msg-time">4h ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Fatima Al-Hassan','ML Engineer opportunity at our AI startup','We&apos;re building an AI-powered fintech platform and your background in both ML and financial engineering...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
+          </div>
+          <div class="msg-item unread">
+            <div class="msg-avatar">AK</div>
+            <div class="msg-content">
+              <p class="msg-from">Ahmed Koroma</p>
+              <p class="msg-subject">Speaking invitation — AI Summit Sierra Leone</p>
+              <p class="msg-preview">We're organising the inaugural AI Summit in Freetown and would be honoured to have you as a keynote speaker...</p>
+            </div>
+            <div class="msg-meta"><span class="msg-time">8h ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Ahmed Koroma','Speaking invitation — AI Summit Sierra Leone','We&apos;re organising the inaugural AI Summit in Freetown and would be honoured to have you as a keynote speaker...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
+          </div>
+          <div class="msg-item unread">
+            <div class="msg-avatar">MW</div>
+            <div class="msg-content">
+              <p class="msg-from">Marcus Webb</p>
+              <p class="msg-subject">Your ICML workshop talk proposal accepted</p>
+              <p class="msg-preview">Congratulations! Your proposal for the LLMs for Social Good workshop has been accepted. We look forward to your presentation...</p>
+            </div>
+            <div class="msg-meta"><span class="msg-time">1d ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Marcus Webb','Your ICML workshop talk proposal accepted','Congratulations! Your proposal for the LLMs for Social Good workshop has been accepted...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
+          </div>
+          <div class="msg-item">
+            <div class="msg-avatar">PS</div>
+            <div class="msg-content">
+              <p class="msg-from">Priya Sharma</p>
+              <p class="msg-subject">Python mentorship enquiry</p>
+              <p class="msg-preview">I'm interested in your Python and data science mentorship programme. Could you share more details about the curriculum...</p>
+            </div>
+            <div class="msg-meta"><span class="msg-time">2d ago</span><span class="badge read">Read</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Priya Sharma','Python mentorship enquiry','I&apos;m interested in your Python and data science mentorship programme. Could you share more details...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
+          </div>
+          <div class="msg-item">
+            <div class="msg-avatar">LT</div>
+            <div class="msg-content">
+              <p class="msg-from">Liu Tao</p>
+              <p class="msg-subject">Collaboration on LLM evaluation framework</p>
+              <p class="msg-preview">I'm a researcher at NTU working on LLM evaluation. Your RAG chatbot project caught my attention and I'd love to explore...</p>
+            </div>
+            <div class="msg-meta"><span class="msg-time">3d ago</span><span class="badge read">Read</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Liu Tao','Collaboration on LLM evaluation framework','I&apos;m a researcher at NTU working on LLM evaluation. Your RAG chatbot project caught my attention...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="view-comments">
+        <div class="page-hdr"><div><h1>Blog Comments</h1><p>Review comments and reply publicly as admin.</p></div></div>
+        <div class="msg-list"></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="view" id="view-settings">
+        <div class="page-hdr"><div><h1>Settings</h1><p>Manage your portfolio configuration and account preferences.</p></div></div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h3>Profile Information</h3>
+            <p>Update your public-facing details used across the portfolio.</p>
+            <div class="mfield"><label>Display Name</label><input type="text" value="Steven Daniel"></div>
+            <div class="mfield"><label>Email</label><input type="email" value="danielsteven.ds@gmail.com"></div>
+            <div class="mfield"><label>Tagline / Role</label><input type="text" value="AI Engineer, Data Scientist, Researcher"></div>
+            <div class="mfield"><label>LinkedIn URL</label><input type="url" placeholder="https://linkedin.com/in/..."></div>
+            <div class="mfield"><label>GitHub URL</label><input type="url" placeholder="https://github.com/..."></div>
+            <button class="btn-new" style="margin-top:4px" onclick="showToast('Profile saved')">Save Changes</button>
+          </div>
+          <div class="settings-card">
+            <h3>Notifications &amp; Privacy</h3>
+            <p>Control how you're notified when visitors interact with your portfolio.</p>
+            <div class="toggle-row">
+              <div><label>Email on new message</label><p>Get notified when contact form is submitted</p></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><label>Weekly analytics digest</label><p>Portfolio views and traffic summary</p></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><label>Public profile visible</label><p>Allow search engines to index your portfolio</p></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+            <div class="toggle-row">
+              <div><label>Open to opportunities</label><p>Show "Open to Opportunities" badge</p></div>
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            </div>
+          </div>
+          <div class="settings-card">
+            <h3>Supabase Integration</h3>
+            <p>Manage your backend connection, authentication, and database settings.</p>
+            <div class="mfield"><label>Supabase Project URL</label><input type="url" id="supabase-url" placeholder="https://xxx.supabase.co"></div>
+            <div class="mfield"><label>Anon Key</label><input type="text" id="supabase-anon-key" placeholder="eyJhbGciOiJIUzI1NiI..."></div>
+            <div class="mfield"><label>Storage Bucket</label><input type="text" id="supabase-bucket" value="portfolio-media"></div>
+            <div style="display:flex;gap:8px;margin-top:4px">
+              <button class="btn-new" onclick="PortfolioAdminDB.saveConfigFromSettings()">Save Settings</button>
+              <button class="btn-sm" onclick="PortfolioAdminDB.testConnection()">Test Connection</button>
+            </div>
+          </div>
+          <div class="settings-card">
+            <h3>Danger Zone</h3>
+            <p>Irreversible actions. Proceed with caution — these are permanent operations.</p>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
+              <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);color:#EF4444;background:rgba(239,68,68,.06);font-size:13px;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background='rgba(239,68,68,.06)'" onclick="showToast('All messages cleared')">Clear All Messages</button>
+              <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);color:#EF4444;background:rgba(239,68,68,.06);font-size:13px;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background='rgba(239,68,68,.06)'" onclick="showToast('Cache cleared')">Clear Media Cache</button>
+              <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);color:#EF4444;background:rgba(239,68,68,.08);font-size:13px;font-weight:600;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.15)'" onmouseout="this.style.background='rgba(239,68,68,.08)'" onclick="if(confirm('Sign out?'))doLogout()">Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PLACEHOLDER VIEWS -->
+      <div class="view" id="view-publications">
+        <div class="page-hdr"><div><h1>Publications</h1><p>Manage journal papers, conference submissions, and research notes.</p></div><button class="btn-new" onclick="openModal('pub')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Publication</button></div>
+        <div class="table-wrap"><div class="table-head"><h3>All Publications</h3></div>
+        <table><thead><tr><th>Title</th><th>Type</th><th>Venue</th><th>Status</th><th>Year</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td class="td-title">AI-Driven Flood Risk Assessment for Sub-Saharan Communities</td><td class="td-mono">Journal</td><td class="td-mono">JAAES</td><td><span class="badge review">Under Review</span></td><td class="td-mono">2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('pub')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Publication deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
+          <tr><td class="td-title">RAG Architectures for Domain-Specific Knowledge Management</td><td class="td-mono">Conference</td><td class="td-mono">ICML 2025</td><td><span class="badge published">Accepted</span></td><td class="td-mono">2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('pub')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Publication deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
+        </tbody></table></div>
+      </div>
+
+      <div class="view" id="view-certs"><div class="page-hdr"><div><h1>Certifications</h1><p>Add, categorise, and manage your credentials.</p></div><button class="btn-new" onclick="openModal('cert')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Certificate</button></div><div class="table-wrap"><div class="table-head"><h3>All Certifications (12 of 40+)</h3></div><table><thead><tr><th>Certificate</th><th>Issuer</th><th>Category</th><th>Verified</th><th>Year</th><th>Actions</th></tr></thead><tbody><tr><td class="td-title">AI Engineering Professional Certificate</td><td class="td-mono">IBM / Coursera</td><td class="td-mono">AI</td><td><span class="badge published">Verified</span></td><td class="td-mono">2024</td><td><div class="td-actions"><button class="ia del" onclick="showToast('Certificate removed')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr><tr><td class="td-title">Deep Learning Specialization</td><td class="td-mono">DeepLearning.AI</td><td class="td-mono">Deep Learning</td><td><span class="badge published">Verified</span></td><td class="td-mono">2024</td><td><div class="td-actions"><button class="ia del" onclick="showToast('Certificate removed')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr></tbody></table></div></div>
+      <div class="view" id="view-experience"><div class="page-hdr"><div><h1>Experience</h1><p>Manage your career timeline and work history.</p></div><button class="btn-new" onclick="openModal('experience')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Experience</button></div><div class="table-wrap"><div class="table-head"><h3>All Experience</h3></div><table><thead><tr><th>Role</th><th>Organisation</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="view" id="view-education"><div class="page-hdr"><div><h1>Education</h1><p>Manage academic history, degrees, and awards.</p></div><button class="btn-new" onclick="openModal('education')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Education</button></div><div class="table-wrap"><div class="table-head"><h3>All Education</h3></div><table><thead><tr><th>Degree</th><th>Institution</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="view" id="view-achievements"><div class="page-hdr"><div><h1>Achievements</h1><p>Manage fellowships, awards, and recognition.</p></div><button class="btn-new" onclick="openModal('achievement')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Achievement</button></div><div class="table-wrap"><div class="table-head"><h3>All Achievements</h3></div><table><thead><tr><th>Title</th><th>Organisation</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="view" id="view-media">
+        <div class="page-hdr"><div><h1>Media</h1><p>Manage public portfolio images from the admin dashboard.</p></div><button class="btn-new" onclick="savePublicMedia()">Save Public Images</button></div>
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h3>Hero Portrait</h3>
+            <p>Shown in the circular hero image slot on the public portfolio.</p>
+            <div class="admin-img-drop" id="admin-hero-portrait" onclick="adminImgClick('admin-hero-portrait')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-hero-portrait')"><p>Click or drag &amp; drop hero portrait</p><small>Saved to public portfolio</small></div>
+          </div>
+          <div class="settings-card">
+            <h3>About Image</h3>
+            <p>Shown in the About section image frame on the public portfolio.</p>
+            <div class="admin-img-drop" id="admin-about-image" onclick="adminImgClick('admin-about-image')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-about-image')"><p>Click or drag &amp; drop about image</p><small>Saved to public portfolio</small></div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- SIDEBAR OVERLAY -->
+<div class="sb-overlay" id="sb-overlay"></div>
+
+<!-- REPLY MODAL -->
+<div id="reply-overlay">
+  <div class="modal" id="reply-box">
+    <div class="modal-head">
+      <h3>Reply to <span id="reply-to-name"></span></h3>
+      <button class="modal-close" onclick="closeReply()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="mfield"><label>Subject</label><input type="text" id="reply-subject" readonly></div>
+      <div class="reply-quote"><strong id="reply-from-label"></strong><span id="reply-preview-text"></span></div>
+      <div class="mfield"><label>Your Reply</label><textarea id="reply-msg" style="min-height:120px" placeholder="Type your reply..."></textarea></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeReply()">Cancel</button>
+      <button class="btn-save" onclick="sendReply()">Send Reply</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div class="modal" id="modal-box">
+    <div class="modal-head">
+      <h3 id="modal-title">Add Project</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveModal()">Save to Supabase</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><div class="toast-dot"></div><span id="toast-msg">Saved successfully</span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="admin-supabase.js"></script>
+<script>
+// LOGIN
+async function doLogin() {
+  const email = document.getElementById('login-email').value;
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) return;
+  if (window.PortfolioAdminDB?.isConfigured()) {
+    try { await PortfolioAdminDB.signInWithPassword(email, pass); }
+    catch (error) { showToast(error.message || 'Supabase sign-in failed'); return; }
+  }
+  await updateAdminProfile(email);
+  const overlay = document.getElementById('login-overlay');
+  overlay.style.opacity = '0'; overlay.style.transition = 'opacity .4s';
+  setTimeout(() => { overlay.style.display = 'none'; document.getElementById('app').classList.add('visible'); }, 400);
+  showToast(window.PortfolioAdminDB?.isConfigured() ? 'Signed in via Supabase Auth' : 'Signed in locally');
+}
+async function doLogout() {
+  if (window.PortfolioAdminDB?.isConfigured()) await PortfolioAdminDB.signOut();
+  document.getElementById('app').classList.remove('visible');
+  const overlay = document.getElementById('login-overlay');
+  overlay.style.opacity = '1'; overlay.style.display = 'flex';
+  showToast('Signed out');
+}
+function confirmLogout(){
+  closeProfileMenu();
+  if(confirm('Sign out of the admin dashboard?')) doLogout();
+}
+function toggleProfileMenu(event){
+  if(event)event.stopPropagation();
+  document.getElementById('profile-menu')?.classList.toggle('open');
+}
+function closeProfileMenu(){
+  document.getElementById('profile-menu')?.classList.remove('open');
+}
+function goProfileSettings(){
+  closeProfileMenu();
+  switchView('settings',document.querySelector('[onclick*=settings]'));
+}
+document.addEventListener('click',function(event){
+  if(!event.target.closest('.profile-menu-wrap'))closeProfileMenu();
+});
+function userInitials(nameOrEmail){
+  var source=String(nameOrEmail||'Admin').trim();
+  var namePart=source.includes('@')?source.split('@')[0]:source;
+  var parts=namePart.split(/[\s._-]+/).filter(Boolean);
+  return (parts.length>1?parts[0][0]+parts[1][0]:namePart.slice(0,2)).toUpperCase();
+}
+async function updateAdminProfile(fallbackEmail){
+  var email=fallbackEmail||document.getElementById('login-email')?.value||'admin@example.com';
+  var name='Admin';
+  if(window.PortfolioAdminDB?.isConfigured()&&PortfolioAdminDB.getCurrentUser){
+    var user=await PortfolioAdminDB.getCurrentUser();
+    if(user){
+      email=user.email||email;
+      name=user.user_metadata?.full_name||user.user_metadata?.name||email.split('@')[0];
+    }
+  }else if(email){
+    name=email.split('@')[0];
+  }
+  var initials=userInitials(name||email);
+  var tb=document.getElementById('tb-avatar');
+  var sb=document.getElementById('sb-avatar');
+  var n=document.getElementById('sb-user-name');
+  var e=document.getElementById('sb-user-email');
+  var pmn=document.getElementById('profile-menu-name');
+  var pme=document.getElementById('profile-menu-email');
+  if(tb)tb.textContent=initials;
+  if(sb)sb.textContent=initials;
+  if(n)n.textContent=name;
+  if(e)e.textContent=email;
+  if(pmn)pmn.textContent=name;
+  if(pme)pme.textContent=email;
+}
+async function doCreateAdmin() {
+  const email = document.getElementById('login-email').value;
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showToast('Enter email and password first'); return; }
+  if (!window.PortfolioAdminDB?.isConfigured()) { showToast('Save Supabase settings first'); return; }
+  try {
+    await PortfolioAdminDB.signUpWithPassword(email, pass);
+    showToast('Admin account created. Check email if confirmation is enabled.');
+  } catch (error) {
+    showToast(error.message || 'Admin account creation failed');
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+window.addEventListener('load', async function(){
+  if(window.PortfolioAdminDB?.isConfigured()&&PortfolioAdminDB.getCurrentUser){
+    var user=await PortfolioAdminDB.getCurrentUser();
+    if(user){
+      await updateAdminProfile(user.email);
+      document.getElementById('login-overlay').style.display='none';
+      document.getElementById('app').classList.add('visible');
+      if(PortfolioAdminDB.loadDashboard)PortfolioAdminDB.loadDashboard();
+    }
+  }
+});
+
+// VIEW SWITCHING
+function switchView(id, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
+  const target = document.getElementById('view-'+id);
+  if (target) target.classList.add('active');
+  if (el) el.classList.add('active');
+}
+
+// MODAL
+let currentModalType = null;
+const MODALS = {
+  project: {
+    title: 'Add / Edit Project',
+    body: `<div class="mfield"><label>Cover Image <small style="color:var(--t3);font-weight:400">(shown on portfolio card &amp; detail page)</small></label><div class="mfield" style="margin-bottom:0"><label style="font-size:11px">Which portfolio card slot does this update?</label><select id="admin-proj-slot"><option value="">-- Select slot to update --</option><option value="1">Slot 1 — Flood Prediction System</option><option value="2">Slot 2 — RAG Chatbot</option><option value="3">Slot 3 — Food-101 Classifier</option><option value="4">Slot 4 — Titanic API</option><option value="5">Slot 5 — Finance App</option><option value="new">New project (won't update existing card)</option></select></div><div class="admin-img-drop" id="admin-proj-img" onclick="adminImgClick('admin-proj-img')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-proj-img')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Click or drag &amp; drop to upload cover image</p><small>PNG, JPG, WebP &middot; Fills the card header &amp; detail page gallery</small></div></div><div class="mfield"><label>Project Title</label><input type="text" placeholder="e.g. Flood Prediction for Resilient Communities"></div><div class="mrow"><div class="mfield"><label>Type / Category</label><select><option>Machine Learning</option><option>AI / LLM</option><option>Computer Vision</option><option>Data Science</option><option>Financial Engineering</option><option>Programming</option><option>Full Stack</option></select></div><div class="mfield"><label>Status</label><select><option>Published</option><option>Draft</option><option>Archived</option></select></div></div><div class="mfield"><label>Short Description <small style="color:var(--t3);font-weight:400">(card preview)</small></label><textarea placeholder="2-3 sentences summarising the project and its impact..." style="min-height:60px"></textarea></div><div class="mfield"><label>Project Overview <small style="color:var(--t3);font-weight:400">(detail page — first accordion)</small></label><textarea placeholder="Full background, context, data sources, and approach..." style="min-height:80px"></textarea></div><div class="mfield"><label>The Challenge <small style="color:var(--t3);font-weight:400">(detail page accordion)</small></label><textarea placeholder="What problem did you solve? Why was it hard?"></textarea></div><div class="mfield"><label>The Solution <small style="color:var(--t3);font-weight:400">(detail page accordion)</small></label><textarea placeholder="Architecture, tools, key technical decisions..."></textarea></div><div class="mfield"><label>Key Features <small style="color:var(--t3);font-weight:400">(one per line &rarr; shown as checklist)</small></label><textarea placeholder="89% Prediction Accuracy&#10;48h Advance Warning&#10;12 Communities Protected" style="min-height:80px"></textarea></div><div class="mfield"><label>Technologies / Stack <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" placeholder="Python, LSTM, GIS, RandomForest, Streamlit"></div><div class="mfield"><label>Key Metrics <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" placeholder="89% accuracy, 48h warning, 12 communities"></div><div class="mrow"><div class="mfield"><label>Live Project URL</label><input type="url" placeholder="https://..."></div><div class="mfield"><label>GitHub URL</label><input type="url" placeholder="https://github.com/worthysteven/..."></div></div><div class="mrow"><div class="mfield"><label>Demo URL</label><input type="url" placeholder="https://..."></div><div class="mfield"><label>Case Study / Docs URL</label><input type="url" placeholder="https://..."></div></div><div class="mrow"><div class="mfield"><label>Date / Period</label><input type="text" placeholder="Jan 2025"></div><div class="mfield"><label>Organisation / Context</label><input type="text" placeholder="UNDP Research, Personal Project..."></div></div>`
+  },
+  blog: {
+    title: 'New Blog Post',
+    body: `<div class="mfield"><label>Cover Image <small style="color:var(--t3);font-weight:400">(featured image at top of blog post)</small></label><div class="mfield" style="margin-bottom:0"><label style="font-size:11px">Which blog card slot does this update?</label><select id="admin-blog-slot"><option value="">-- Select slot to update --</option><option value="1">Slot 1 — RAG Systems Guide</option><option value="2">Slot 2 — Time Series &amp; LSTMs</option><option value="3">Slot 3 — CV for Social Good</option><option value="new">New post (won't update existing card)</option></select></div><div class="admin-img-drop" id="admin-blog-img" onclick="adminImgClick('admin-blog-img')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-blog-img')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Click or drag &amp; drop to upload cover image</p><small>PNG, JPG, WebP &middot; Appears at top of the blog detail page</small></div></div><div class="mfield"><label>Title</label><input type="text" id="blog-title" placeholder="Post title..."></div><div class="mrow"><div class="mfield"><label>Category</label><select id="blog-category"><option>AI</option><option>Data Science</option><option>Financial Engineering</option><option>Machine Learning</option><option>Computer Vision</option><option>Research</option></select></div><div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="blog-tags" placeholder="RAG, LLMs, Python"></div></div><div class="mfield"><label>Excerpt <small style="color:var(--t3);font-weight:400">(card preview — 1-2 sentences)</small></label><textarea id="blog-excerpt" placeholder="Brief description shown on blog card..." style="min-height:60px"></textarea></div><div class="mfield"><label>Full Content <small style="color:var(--t3);font-weight:400">(Markdown — use ## headings, **bold**, \`code\`)</small></label><textarea id="blog-content" style="min-height:200px;font-family:var(--fm);font-size:12px;line-height:1.6" placeholder="## Introduction&#10;&#10;Write your post here in Markdown...&#10;&#10;## Section 2&#10;&#10;More content..."></textarea></div><div class="mrow"><div class="mfield"><label>Status</label><select id="blog-status"><option>Draft</option><option>Published</option></select></div><div class="mfield"><label>Read Time</label><input type="text" id="blog-read-time" placeholder="8 min read"></div></div>`
+  },
+  cert: {
+    title: 'Add Certificate',
+    body: `<div class="mfield"><label>Certificate Name</label><input type="text" id="cert-name" placeholder="e.g. AWS Certified ML Specialty"></div>
+           <div class="mrow"><div class="mfield"><label>Issuer</label><input type="text" id="cert-issuer" placeholder="Amazon Web Services"></div><div class="mfield"><label>Category</label><select id="cert-category"><option>AI</option><option>Machine Learning</option><option>Deep Learning</option><option>Data Science</option><option>Programming</option><option>UX Design</option><option>Financial Engineering</option></select></div></div>
+           <div class="mrow"><div class="mfield"><label>Year Earned</label><input type="number" id="cert-year" placeholder="2024" min="2010" max="2030"></div><div class="mfield"><label>Verification URL</label><input type="url" id="cert-url" placeholder="https://..."></div></div>
+           <div class="mfield"><label>Credential ID</label><input type="text" id="cert-credential" placeholder="Optional credential identifier"></div>`
+  },
+  pub: {
+    title: 'Add Publication',
+    body: `<div class="mfield"><label>Title</label><input type="text" id="pub-title" placeholder="Publication title..."></div>
+           <div class="mrow"><div class="mfield"><label>Type</label><select id="pub-type"><option>Journal</option><option>Conference</option><option>Thesis</option><option>Research Note</option><option>White Paper</option></select></div><div class="mfield"><label>Status</label><select id="pub-status"><option>Under Review</option><option>Accepted</option><option>Published</option><option>In Progress</option></select></div></div>
+           <div class="mfield"><label>Authors</label><input type="text" id="pub-authors" placeholder="Steven Daniel, Co-Author Name"></div>
+           <div class="mfield"><label>Venue / Journal</label><input type="text" id="pub-venue" placeholder="Journal name or conference"></div>
+           <div class="mrow"><div class="mfield"><label>Year</label><input type="number" id="pub-year" placeholder="2025"></div><div class="mfield"><label>PDF URL (Supabase Storage)</label><input type="url" id="pub-pdf" placeholder="https://..."></div></div>`
+  },
+  experience: {
+    title: 'Add Experience',
+    body: `<div class="mfield"><label>Role / Title</label><input type="text" id="exp-role" placeholder="e.g. Digital Innovation Volunteer"></div>
+           <div class="mrow"><div class="mfield"><label>Organisation</label><input type="text" id="exp-org" placeholder="UNDP-IICPSD"></div><div class="mfield"><label>Date / Period</label><input type="text" id="exp-date" placeholder="2023 — Present"></div></div>
+           <div class="mfield"><label>Description</label><textarea id="exp-desc" placeholder="Describe responsibilities, impact, and outcomes..."></textarea></div>
+           <div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="exp-tags" placeholder="AI for Good, SDGs, Digital Literacy"></div>
+           <div class="mrow"><div class="mfield"><label>Award / Highlight</label><input type="text" id="exp-award" placeholder="Optional highlight shown below entry"></div><div class="mfield"><label>Display Order</label><input type="number" id="exp-order" value="0"></div></div>`
+  },
+  education: {
+    title: 'Add Education',
+    body: `<div class="mfield"><label>Degree / Programme</label><input type="text" id="edu-degree" placeholder="e.g. MSc Financial Engineering"></div>
+           <div class="mrow"><div class="mfield"><label>Institution</label><input type="text" id="edu-institution" placeholder="WorldQuant University"></div><div class="mfield"><label>Date / Period</label><input type="text" id="edu-date" placeholder="2025 — Present"></div></div>
+           <div class="mfield"><label>Description</label><textarea id="edu-desc" placeholder="Programme focus, GPA, research focus..."></textarea></div>
+           <div class="mfield"><label>Thesis / Dissertation</label><input type="text" id="edu-thesis" placeholder="Optional thesis title"></div>
+           <div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="edu-tags" placeholder="Quantitative Finance, Risk Modelling, In Progress"></div>
+           <div class="mrow"><div class="mfield"><label>Award / Highlight</label><input type="text" id="edu-award" placeholder="Optional award shown below entry"></div><div class="mfield"><label>Display Order</label><input type="number" id="edu-order" value="0"></div></div>`
+  },
+  achievement: {
+    title: 'Add Achievement',
+    body: `<div class="mfield"><label>Achievement Title</label><input type="text" id="ach-title" placeholder="e.g. Best Graduating Student"></div>
+           <div class="mrow"><div class="mfield"><label>Organisation</label><input type="text" id="ach-org" placeholder="University of Sierra Leone"></div><div class="mfield"><label>Year</label><input type="text" id="ach-year" placeholder="2022"></div></div>
+           <div class="mfield"><label>Description</label><textarea id="ach-desc" placeholder="Describe the recognition and impact..."></textarea></div>
+           <div class="mrow"><div class="mfield"><label>Icon</label><select id="ach-icon"><option value="award">Award</option><option value="globe">Globe</option><option value="brain">AI / Brain</option></select></div><div class="mfield"><label>Display Order</label><input type="number" id="ach-order" value="0"></div></div>`
+  }
+};
+function buildProjectModalBody(){
+  var custom=[];try{custom=JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){}
+  var nextId=parseInt(localStorage.getItem('pf_proj_next_id')||'6');
+  var opts='<option value="new">\u2795 New Project \u2014 will be Slot '+nextId+'</option>'
+    +'<option value="1">\u270f Edit Slot 1 \u2014 Flood Prediction System</option>'
+    +'<option value="2">\u270f Edit Slot 2 \u2014 RAG Chatbot</option>'
+    +'<option value="3">\u270f Edit Slot 3 \u2014 Food-101 Classifier</option>'
+    +'<option value="4">\u270f Edit Slot 4 \u2014 Titanic API</option>'
+    +'<option value="5">\u270f Edit Slot 5 \u2014 Finance App</option>';
+  custom.forEach(function(p){opts+='<option value="'+p.id+'">\u270f Edit Slot '+p.id+' \u2014 '+(p.title||'Custom Project')+'</option>';});
+  var imgZone=function(n,lbl){
+    return '<div><div style="font-size:11px;font-family:var(--fm);color:var(--t3);margin-bottom:5px">'+lbl+'</div>'
+      +'<div class="admin-img-drop" id="admin-proj-img-'+n+'" onclick="adminImgClick(\'admin-proj-img-'+n+'\')" ondragover="event.preventDefault();this.classList.add(\'drag-ov\')" ondragleave="this.classList.remove(\'drag-ov\')" ondrop="adminImgDrop(event,\'admin-proj-img-'+n+'\')" style="padding:14px 10px">'
+      +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
+      +'<p style="font-size:12px;margin:0">Click or drop</p></div></div>';
+  };
+  return '<div class="mfield"><label>Add New or Edit Existing?</label>'
+    +'<select id="admin-proj-slot" onchange="adminSlotChange(this.value)">'+opts+'</select>'
+    +'<small id="admin-slot-hint" style="font-size:11px;color:var(--t3);margin-top:5px;display:block">New projects get auto-numbered and appear on your portfolio automatically.</small></div>'
+    +'<div class="mfield"><label>Project Images <small style="color:var(--t3);font-weight:400">Image 1 = card header &middot; Images 2&ndash;4 = detail page carousel</small></label>'
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
+    +imgZone(1,'Image 1 \u2014 Card + Gallery')+imgZone(2,'Image 2 \u2014 Gallery')+imgZone(3,'Image 3 \u2014 Gallery')+imgZone(4,'Image 4 \u2014 Gallery')
+    +'</div></div>'
+    +'<div class="mfield"><label>Project Title *</label><input type="text" id="proj-title" placeholder="e.g. Flood Prediction for Resilient Communities"></div>'
+    +'<div class="mrow"><div class="mfield"><label>Type / Category</label><select id="proj-type"><option>Machine Learning</option><option>AI / LLM</option><option>Computer Vision</option><option>Data Science</option><option>Financial Engineering</option><option>Programming</option><option>Full Stack</option></select></div><div class="mfield"><label>Status</label><select id="proj-status"><option>Published</option><option>Draft</option><option>Archived</option></select></div></div>'
+    +'<div class="mfield"><label>Short Description <small style="color:var(--t3);font-weight:400">(card preview)</small></label><textarea id="proj-desc" placeholder="2-3 sentences summarising the project..." style="min-height:60px"></textarea></div>'
+    +'<div class="mfield"><label>Project Overview <small style="color:var(--t3);font-weight:400">(detail page \u2014 first accordion)</small></label><textarea id="proj-overview" placeholder="Full background, context, data sources, and approach..." style="min-height:80px"></textarea></div>'
+    +'<div class="mfield"><label>The Challenge</label><textarea id="proj-challenge" placeholder="What problem did you solve? Why was it hard?"></textarea></div>'
+    +'<div class="mfield"><label>The Solution</label><textarea id="proj-solution" placeholder="Architecture, tools, key technical decisions..."></textarea></div>'
+    +'<div class="mfield"><label>Key Features <small style="color:var(--t3);font-weight:400">(one per line &rarr; checklist on detail page)</small></label><textarea id="proj-features" placeholder="89% Prediction Accuracy&#10;48h Advance Warning&#10;12 Communities Protected" style="min-height:80px"></textarea></div>'
+    +'<div class="mfield"><label>Technologies <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-tags" placeholder="Python, LSTM, GIS, RandomForest"></div>'
+    +'<div class="mfield"><label>Key Metrics <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-metrics" placeholder="89% accuracy, 48h warning"></div>'
+    +'<div class="mrow"><div class="mfield"><label>Live Project URL</label><input type="url" id="proj-url" placeholder="https://..."></div><div class="mfield"><label>GitHub URL <small style="color:var(--t3)">shows button on detail page</small></label><input type="url" id="proj-github" placeholder="https://github.com/worthysteven/..."></div></div>'
+    +'<div class="mrow"><div class="mfield"><label>Demo URL <small style="color:var(--t3)">shows Demo button</small></label><input type="url" id="proj-demo" placeholder="https://..."></div><div class="mfield"><label>Docs / Case Study URL <small style="color:var(--t3)">shows Docs button</small></label><input type="url" id="proj-docs" placeholder="https://..."></div></div>'
+    +'<div class="mfield"><label>Paper / Publication URL <small style="color:var(--t3);font-weight:400">shows Paper button on detail page</small></label><input type="url" id="proj-paper" placeholder="https://arxiv.org/..."></div>'
+    +'<div class="mrow"><div class="mfield"><label>Date / Period</label><input type="text" id="proj-date" placeholder="Jan 2025"></div><div class="mfield"><label>Organisation / Context</label><input type="text" id="proj-org" placeholder="UNDP Research, Personal Project..."></div></div>';
+}
+
+function adminSlotChange(val){
+  var hint=document.getElementById('admin-slot-hint');
+  if(!hint)return;
+  if(val==='new'){var n=parseInt(localStorage.getItem('pf_proj_next_id')||'6');hint.textContent='Will be saved as Slot '+n+'. Appears at the bottom of your portfolio projects section.';}
+  else{hint.textContent='Editing Slot '+val+'. Images and data will update on your portfolio immediately.';}
+}
+
+function openModal(type, id) {
+  currentModalType = type;
+  const m = MODALS[type] || MODALS.project;
+  document.getElementById('modal-title').textContent = m.title;
+  document.getElementById('modal-body').innerHTML = type === 'project' ? buildProjectModalBody() : m.body;
+  if (type === 'project' && id) adminSlotChange(String(id));
+  if (type === 'project' && id) {
+    const slot = document.getElementById('admin-proj-slot');
+    if (slot) slot.value = String(id);
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+async function saveModal() {
+  var slotEl=document.getElementById('admin-proj-slot');
+  if(slotEl){
+    var slotVal=slotEl.value,projId;
+    if(slotVal==='new'){projId=parseInt(localStorage.getItem('pf_proj_next_id')||'6');localStorage.setItem('pf_proj_next_id',projId+1);}
+    else{projId=parseInt(slotVal);}
+    var images={};
+    for(var i=1;i<=4;i++){
+      var imgEl=document.getElementById('admin-proj-img-'+i);
+      if(imgEl&&imgEl.classList.contains('has-img')){
+        var src=imgEl.dataset.imageSrc||imgEl.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
+        images[i]=src;
+        if(src){try{localStorage.setItem('pf_proj_'+projId+'_img_'+i,src);}catch(e){}
+          if(i===1){try{localStorage.setItem('pf_img_pc-img-'+projId,src);}catch(e){}}}
+      }
+    }
+    var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+    var data={id:projId,title:g('proj-title'),type:g('proj-type'),date:g('proj-date'),org:g('proj-org'),
+      desc:g('proj-desc'),overview:g('proj-overview'),challenge:g('proj-challenge'),solution:g('proj-solution'),
+      features:g('proj-features').split('\n').filter(Boolean),
+      tags:g('proj-tags').split(',').map(function(t){return t.trim();}).filter(Boolean),
+      metrics:g('proj-metrics').split(',').map(function(t){return t.trim();}).filter(Boolean),
+      url:g('proj-url')||'#',github_url:g('proj-github'),demo_url:g('proj-demo'),docs_url:g('proj-docs'),paper_url:g('proj-paper'),
+      status:g('proj-status')||'Published'};
+    try{localStorage.setItem('pf_proj_data_'+projId,JSON.stringify(data));}catch(e){}
+    if(slotVal==='new'&&data.title){
+      var custom=[];try{custom=JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){}
+      custom.push(data);try{localStorage.setItem('pf_projects_custom',JSON.stringify(custom));}catch(e){}
+    }
+    if(window.PortfolioAdminDB?.isConfigured()){
+      try{await PortfolioAdminDB.saveProject(data,images);}
+      catch(error){showToast(error.message||'Supabase save failed');return;}
+    }
+  }
+  var blogImg=document.getElementById('admin-blog-img'),blogSlot=document.getElementById('admin-blog-slot');
+  if(blogImg&&blogImg.classList.contains('has-img')&&blogSlot&&blogSlot.value&&blogSlot.value!=='new'){
+    var s2=blogImg.dataset.imageSrc||blogImg.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
+    if(s2)try{localStorage.setItem('pf_img_bc-img-'+blogSlot.value,s2);}catch(e){}
+  }
+  if(!slotEl&&currentModalType==='blog'&&window.PortfolioAdminDB?.isConfigured()){
+    var blogImage='';
+    if(blogImg&&blogImg.classList.contains('has-img')) blogImage=blogImg.dataset.imageSrc||blogImg.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
+    try{await PortfolioAdminDB.saveBlogPost({
+      title:document.getElementById('blog-title')?.value||'Untitled Post',
+      category:document.getElementById('blog-category')?.value||'AI',
+      tags:(document.getElementById('blog-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
+      excerpt:document.getElementById('blog-excerpt')?.value||'',
+      content:document.getElementById('blog-content')?.value||'',
+      status:document.getElementById('blog-status')?.value||'Draft',
+      read_time:document.getElementById('blog-read-time')?.value||''
+    },blogImage);}
+    catch(error){showToast(error.message||'Blog save failed');return;}
+  }
+  if(!slotEl&&currentModalType==='cert'&&window.PortfolioAdminDB?.isConfigured()){
+    try{await PortfolioAdminDB.saveCertification({
+      name:document.getElementById('cert-name')?.value||'Untitled Certificate',
+      issuer:document.getElementById('cert-issuer')?.value||'',
+      category:document.getElementById('cert-category')?.value||'AI',
+      verified:true,
+      year_earned:Number(document.getElementById('cert-year')?.value)||null,
+      verification_url:document.getElementById('cert-url')?.value||'',
+      credential_id:document.getElementById('cert-credential')?.value||''
+    });}
+    catch(error){showToast(error.message||'Certificate save failed');return;}
+  }
+  if(!slotEl&&currentModalType==='pub'&&window.PortfolioAdminDB?.isConfigured()){
+    try{await PortfolioAdminDB.savePublication({
+      title:document.getElementById('pub-title')?.value||'Untitled Publication',
+      pub_type:document.getElementById('pub-type')?.value||'Journal',
+      status:document.getElementById('pub-status')?.value||'Under Review',
+      authors:(document.getElementById('pub-authors')?.value||'').split(',').map(function(a){return a.trim();}).filter(Boolean),
+      venue:document.getElementById('pub-venue')?.value||'',
+      year:Number(document.getElementById('pub-year')?.value)||null,
+      pdf_url:document.getElementById('pub-pdf')?.value||''
+    });}
+    catch(error){showToast(error.message||'Publication save failed');return;}
+  }
+  if(!slotEl&&currentModalType==='experience'&&window.PortfolioAdminDB?.isConfigured()){
+    try{await PortfolioAdminDB.saveExperience({
+      role:document.getElementById('exp-role')?.value||'Untitled Role',
+      organisation:document.getElementById('exp-org')?.value||'',
+      date_period:document.getElementById('exp-date')?.value||'',
+      description:document.getElementById('exp-desc')?.value||'',
+      tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
+      award:document.getElementById('exp-award')?.value||'',
+      display_order:Number(document.getElementById('exp-order')?.value)||0
+    });}
+    catch(error){showToast(error.message||'Experience save failed');return;}
+  }
+  if(!slotEl&&currentModalType==='experience'&&!window.PortfolioAdminDB?.isConfigured()){
+    saveLocalAdminRecord('pf_experience_custom',{id:Date.now(),role:document.getElementById('exp-role')?.value||'Untitled Role',organisation:document.getElementById('exp-org')?.value||'',date_period:document.getElementById('exp-date')?.value||'',description:document.getElementById('exp-desc')?.value||'',tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('exp-award')?.value||'',display_order:Number(document.getElementById('exp-order')?.value)||0});
+  }
+  if(!slotEl&&currentModalType==='education'&&window.PortfolioAdminDB?.isConfigured()){
+    try{await PortfolioAdminDB.saveEducation({
+      degree:document.getElementById('edu-degree')?.value||'Untitled Degree',
+      institution:document.getElementById('edu-institution')?.value||'',
+      date_period:document.getElementById('edu-date')?.value||'',
+      description:document.getElementById('edu-desc')?.value||'',
+      thesis:document.getElementById('edu-thesis')?.value||'',
+      tags:(document.getElementById('edu-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
+      award:document.getElementById('edu-award')?.value||'',
+      display_order:Number(document.getElementById('edu-order')?.value)||0
+    });}
+    catch(error){showToast(error.message||'Education save failed');return;}
+  }
+  if(!slotEl&&currentModalType==='education'&&!window.PortfolioAdminDB?.isConfigured()){
+    saveLocalAdminRecord('pf_education_custom',{id:Date.now(),degree:document.getElementById('edu-degree')?.value||'Untitled Degree',institution:document.getElementById('edu-institution')?.value||'',date_period:document.getElementById('edu-date')?.value||'',description:document.getElementById('edu-desc')?.value||'',thesis:document.getElementById('edu-thesis')?.value||'',tags:(document.getElementById('edu-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('edu-award')?.value||'',display_order:Number(document.getElementById('edu-order')?.value)||0});
+  }
+  if(!slotEl&&currentModalType==='achievement'&&window.PortfolioAdminDB?.isConfigured()){
+    try{await PortfolioAdminDB.saveAchievement({
+      title:document.getElementById('ach-title')?.value||'Untitled Achievement',
+      organisation:document.getElementById('ach-org')?.value||'',
+      year:document.getElementById('ach-year')?.value||'',
+      description:document.getElementById('ach-desc')?.value||'',
+      icon:document.getElementById('ach-icon')?.value||'award',
+      display_order:Number(document.getElementById('ach-order')?.value)||0
+    });}
+    catch(error){showToast(error.message||'Achievement save failed');return;}
+  }
+  if(!slotEl&&currentModalType==='achievement'&&!window.PortfolioAdminDB?.isConfigured()){
+    saveLocalAdminRecord('pf_achievements_custom',{id:Date.now(),title:document.getElementById('ach-title')?.value||'Untitled Achievement',organisation:document.getElementById('ach-org')?.value||'',year:document.getElementById('ach-year')?.value||'',description:document.getElementById('ach-desc')?.value||'',icon:document.getElementById('ach-icon')?.value||'award',display_order:Number(document.getElementById('ach-order')?.value)||0});
+  }
+  closeModal();showToast(window.PortfolioAdminDB?.isConfigured()?'Saved to Supabase':'Saved locally');
+  if(window.PortfolioAdminDB?.loadDashboard)PortfolioAdminDB.loadDashboard();
+}
+function saveLocalAdminRecord(key, record){
+  var rows=[];try{rows=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
+  rows.push(record);localStorage.setItem(key,JSON.stringify(rows));
+}
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id==='modal-overlay') closeModal(); });
+
+// TOAST
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show','success');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show','success'), 2800);
+}
+
+// THEME TOGGLE
+(function(){
+  const btn = document.getElementById('admin-theme-btn');
+  if (!btn) return;
+  const html = document.documentElement;
+  html.dataset.theme = localStorage.getItem('admin-theme') || 'dark';
+  updTheme();
+  btn.addEventListener('click', () => {
+    const n = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.dataset.theme = n; localStorage.setItem('admin-theme', n); updTheme();
+  });
+  function updTheme() {
+    btn.innerHTML = html.dataset.theme === 'dark'
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+})();
+
+// SIDEBAR HAMBURGER TOGGLE
+(function(){
+  const ham = document.getElementById('sb-ham');
+  const sb  = document.querySelector('.sidebar');
+  const ov  = document.getElementById('sb-overlay');
+  if (!ham || !sb || !ov) return;
+  function openSB()  { sb.classList.add('open');  ov.classList.add('open');  ham.classList.add('open');  }
+  function closeSB() { sb.classList.remove('open'); ov.classList.remove('open'); ham.classList.remove('open'); }
+  ham.addEventListener('click', () => sb.classList.contains('open') ? closeSB() : openSB());
+  ov.addEventListener('click', closeSB);
+  document.querySelectorAll('.sb-item').forEach(item =>
+    item.addEventListener('click', () => { if (window.innerWidth <= 768) closeSB(); })
+  );
+})();
+
+// REPLY MODAL
+var _rd = {};
+function openReply(id, from, subject, preview) {
+  if (arguments.length === 3) { preview = subject; subject = from; from = id; id = null; }
+  _rd = { id: id, from: from, subject: subject, preview: preview };
+  document.getElementById('reply-to-name').textContent = from;
+  document.getElementById('reply-subject').value = subject;
+  document.getElementById('reply-from-label').textContent = from + ':';
+  document.getElementById('reply-preview-text').textContent = preview;
+  document.getElementById('reply-msg').value = '';
+  document.getElementById('reply-overlay').classList.add('open');
+  setTimeout(function(){ document.getElementById('reply-msg').focus(); }, 120);
+}
+function closeReply() { document.getElementById('reply-overlay').classList.remove('open'); }
+async function sendReply() {
+  var msg = document.getElementById('reply-msg').value.trim();
+  if (!msg) { document.getElementById('reply-msg').focus(); return; }
+  if(window.PortfolioAdminDB?.isConfigured()){
+    try{await PortfolioAdminDB.replyToMessage(_rd.id,msg);}
+    catch(error){showToast(error.message||'Reply save failed');return;}
+  }
+  closeReply();
+  showToast(window.PortfolioAdminDB?.isConfigured()?'Reply saved in Supabase':'Reply sent to ' + _rd.from);
+}
+document.getElementById('reply-overlay').addEventListener('click', function(e){
+  if (e.target.id === 'reply-overlay') closeReply();
+});
+
+async function savePublicMedia() {
+  var hero = document.getElementById('admin-hero-portrait');
+  var about = document.getElementById('admin-about-image');
+  if (hero && hero.dataset.imageSrc) localStorage.setItem('pf-portrait', hero.dataset.imageSrc);
+  if (about && about.dataset.imageSrc) localStorage.setItem('pf-about-photo', about.dataset.imageSrc);
+  if(window.PortfolioAdminDB?.isConfigured()){
+    try{
+      if(hero&&hero.dataset.imageSrc){
+        var heroRes=await PortfolioAdminDB.saveSiteMedia('hero_portrait',hero.dataset.imageSrc,'Steven Daniel portrait');
+        if(heroRes.image_url)localStorage.setItem('pf-portrait',heroRes.image_url);
+      }
+      if(about&&about.dataset.imageSrc){
+        var aboutRes=await PortfolioAdminDB.saveSiteMedia('about_image',about.dataset.imageSrc,'About Steven Daniel');
+        if(aboutRes.image_url)localStorage.setItem('pf-about-photo',aboutRes.image_url);
+      }
+    }catch(error){showToast(error.message||'Media save failed');return;}
+  }
+  showToast('Public images saved');
+}
+
+// GOOGLE LOGIN (demo)
+function doGoogleLogin() {
+  if(window.PortfolioAdminDB?.isConfigured()){
+    PortfolioAdminDB.signInWithGoogle().catch(function(error){showToast(error.message||'Google sign-in failed');});
+    return;
+  }
+  var overlay = document.getElementById('login-overlay');
+  overlay.style.opacity = '0';
+  overlay.style.transition = 'opacity .4s';
+  setTimeout(function(){
+    overlay.style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    showToast('Signed in with Google');
+  }, 400);
+}
+
+// ADMIN IMAGE UPLOAD (for project & blog modals)
+function adminImgClick(id) {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = 'image/*';
+  inp.onchange = function(e) {
+    var f = e.target.files[0];
+    if (f) adminApplyImg(id, f);
+  };
+  inp.click();
+}
+function adminImgDrop(e, id) {
+  e.preventDefault();
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('drag-ov');
+  var f = e.dataTransfer.files[0];
+  if (f && f.type.startsWith('image/')) adminApplyImg(id, f);
+}
+function adminApplyImg(id, file) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    el.style.backgroundImage = 'url(' + ev.target.result + ')';
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    el.dataset.imageSrc = ev.target.result;
+    el.classList.add('has-img');
+    var p = el.querySelector('p');
+    if (p) p.textContent = '\u2713 ' + file.name + ' ready';
+    var sm = el.querySelector('small');
+    if (sm) sm.textContent = 'Click to change';
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>

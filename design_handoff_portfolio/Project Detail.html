@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Details — Steven Daniel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B1220;--bg2:#0F1A2E;--card:rgba(15,26,46,.85);
+  --b:rgba(148,163,184,.07);--b2:rgba(148,163,184,.14);
+  --a:#2563EB;--a2:#06B6D4;--glow:rgba(37,99,235,.18);
+  --t1:#F8FAFC;--t2:#94A3B8;--t3:#475569;
+  --fh:'IBM Plex Sans',sans-serif;--fb:'Inter',sans-serif;--fm:'IBM Plex Mono',monospace;
+  --r:12px;--rl:20px
+}
+[data-theme="light"]{
+  --bg:#FAFAFA;--bg2:#F1F5F9;--card:rgba(255,255,255,.95);
+  --b:rgba(15,23,42,.06);--b2:rgba(15,23,42,.12);--glow:rgba(37,99,235,.06);
+  --t1:#0F172A;--t2:#475569;--t3:#94A3B8
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:16px;line-height:1.6;overflow-x:hidden;transition:background .3s,color .3s;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 10% 20%,rgba(37,99,235,.07) 0%,transparent 45%),
+              radial-gradient(circle at 90% 80%,rgba(6,182,212,.05) 0%,transparent 45%)}
+[data-theme="light"] body::before{opacity:.4}
+*{position:relative;z-index:1}
+a{text-decoration:none;color:inherit}
+h1,h2,h3{font-family:var(--fh);font-weight:600;line-height:1.15;color:var(--t1)}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;border-bottom:1px solid transparent;transition:background .3s,border-color .3s}
+#nav.scrolled{background:rgba(11,18,32,.92);backdrop-filter:blur(20px);border-color:var(--b)}
+[data-theme="light"] #nav.scrolled{background:rgba(250,250,250,.94)}
+.nav-i{display:flex;align-items:center;gap:16px;padding:16px 28px;max-width:1240px;margin:0 auto}
+.nav-logo{font-family:var(--fm);font-size:14px;color:var(--t1);white-space:nowrap}
+.nav-logo .a{color:var(--a)}
+.nav-bread{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);flex:1;margin:0 12px}
+.nav-bread a{color:var(--t2);transition:color .2s}.nav-bread a:hover{color:var(--t1)}
+.nav-bread .sep{color:var(--t3)}
+.nav-acts{display:flex;align-items:center;gap:8px}
+.nav-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;border:1px solid var(--b2);color:var(--t2);background:none;cursor:pointer;transition:border-color .2s,color .2s}
+.nav-btn:hover{border-color:var(--a);color:var(--t1)}
+
+/* PAGE */
+.detail-page{max-width:1200px;margin:0 auto;padding:100px 28px 80px}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+
+/* LEFT */
+.img-main{width:100%;aspect-ratio:4/3;border-radius:var(--rl);overflow:hidden;position:relative;margin-bottom:14px;border:1px solid var(--b2)}
+.img-main-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:background .4s ease}
+.img-main-content{text-align:center;padding:24px;pointer-events:none}
+.img-nav-btn{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:rgba(11,18,32,.75);backdrop-filter:blur(8px);border:1px solid var(--b2);color:var(--t1);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;transition:border-color .2s,background .2s}
+.img-nav-btn:hover{border-color:var(--a);background:var(--glow)}
+.img-nav-btn.prev{left:12px}.img-nav-btn.next{right:12px}
+.img-thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}
+.img-thumb{aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:border-color .2s,opacity .2s;opacity:.45}
+.img-thumb.active,.img-thumb:hover{opacity:1}
+.img-thumb.active{border-color:var(--a)}
+.tech-tags{display:flex;flex-wrap:wrap;gap:8px}
+.tech-tag{padding:5px 14px;border-radius:100px;font-size:12px;font-family:var(--fm);background:var(--card);border:1px solid var(--b2);color:var(--t2)}
+
+/* RIGHT */
+.detail-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}
+.detail-badge{display:inline-flex;padding:5px 13px;border-radius:100px;font-size:12px;font-family:var(--fm);font-weight:600;background:rgba(37,99,235,.1);color:var(--a);border:1px solid rgba(37,99,235,.2)}
+.detail-metaitem{display:flex;align-items:center;gap:5px;font-size:12px;font-family:var(--fm);color:var(--t3)}
+.detail-title{font-size:clamp(22px,2.8vw,36px);font-weight:700;letter-spacing:-.02em;margin-bottom:12px;line-height:1.15}
+.detail-url{display:inline-flex;align-items:center;gap:7px;font-size:14px;color:var(--a);margin-bottom:18px;transition:color .2s}
+.detail-url:hover{color:var(--a2)}
+.detail-desc{font-size:15px;color:var(--t2);line-height:1.75;margin-bottom:16px;text-wrap:pretty}
+.metrics-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px}
+.metric-pill{padding:5px 13px;border-radius:100px;font-size:12px;font-family:var(--fm);background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.15);color:var(--a)}
+
+/* ACCORDION */
+.accordion{border:1px solid var(--b);border-radius:var(--r);overflow:hidden;margin-bottom:8px;background:var(--card);backdrop-filter:blur(8px)}
+.acc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;transition:background .2s;user-select:none;gap:12px}
+.acc-head:hover{background:rgba(37,99,235,.05)}
+.acc-label{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--t1)}
+.acc-label svg{color:var(--a);flex-shrink:0}
+.acc-chev{color:var(--t3);transition:transform .25s;flex-shrink:0}
+.acc-chev.open{transform:rotate(180deg)}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.acc-body.open{max-height:600px}
+.acc-body-inner{padding:4px 18px 18px;font-size:14px;color:var(--t2);line-height:1.75;text-wrap:pretty}
+
+/* KEY FEATURES */
+.kf-wrap{margin:22px 0 28px}
+.kf-head{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;margin-bottom:14px;font-family:var(--fh)}
+.kf-head svg{color:var(--a)}
+.kf-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px}
+.kf-item{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2)}
+.kf-item svg{color:var(--a2);flex-shrink:0}
+
+/* CTA */
+.detail-cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn-p{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:var(--r);background:var(--a);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:filter .2s,transform .15s;box-shadow:0 0 24px rgba(37,99,235,.25)}
+.btn-p:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.btn-g{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:var(--r);background:none;color:var(--t1);font-size:14px;font-weight:500;border:1px solid var(--b2);cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.btn-g:hover{border-color:var(--a);background:var(--glow);transform:translateY(-2px)}
+
+/* PREV/NEXT */
+.pnav{display:flex;justify-content:space-between;align-items:center;padding:32px 0 0;border-top:1px solid var(--b);margin-top:56px;gap:16px}
+.pnav-btn{display:flex;align-items:center;gap:14px;padding:14px 20px;border-radius:var(--r);border:1px solid var(--b);background:var(--card);backdrop-filter:blur(8px);color:var(--t1);cursor:pointer;transition:border-color .2s,transform .2s;text-decoration:none;max-width:48%}
+.pnav-btn:hover{border-color:var(--a);transform:translateY(-2px)}
+.pnav-lbl{display:block;font-size:11px;color:var(--t3);font-family:var(--fm);margin-bottom:3px}
+.pnav-title{font-size:13px;font-weight:500;line-height:1.35;display:block}
+
+/* BACK LINK */
+.back-link{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);margin-bottom:32px;transition:color .2s;cursor:pointer}
+.back-link:hover{color:var(--a)}
+
+/* MOBILE */
+@media(max-width:900px){.detail-grid{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .detail-page{padding:88px 20px 60px}
+  .kf-grid{grid-template-columns:1fr}
+  .pnav{flex-direction:column}
+  .pnav-btn{max-width:100%;width:100%}
+  .nav-bread{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-i">
+    <a class="nav-logo" href="Portfolio v2.html"><span class="a">&lt;</span>SD<span class="a">/&gt;</span></a>
+    <div class="nav-bread">
+      <a href="Portfolio v2.html">Home</a>
+      <span class="sep">/</span>
+      <a href="Portfolio v2.html#projects">Projects</a>
+      <span class="sep">/</span>
+      <span style="color:var(--t1);font-weight:500" id="bread-title">Details</span>
+    </div>
+    <div class="nav-acts">
+      <a href="Portfolio v2.html" class="nav-btn" title="Back to Portfolio">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <button class="nav-btn" id="theme-btn" aria-label="Toggle theme"></button>
+    </div>
+  </div>
+</nav>
+
+<div class="detail-page">
+  <div class="detail-grid">
+
+    <!-- LEFT: IMAGE CAROUSEL + TAGS -->
+    <div class="detail-left">
+      <div class="img-main" id="main-img">
+        <div class="img-main-inner" id="main-img-inner">
+          <div class="img-main-content" id="main-img-content"></div>
+        </div>
+        <button class="img-nav-btn prev" onclick="shiftImg(-1)" aria-label="Previous">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <button class="img-nav-btn next" onclick="shiftImg(1)" aria-label="Next">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="img-thumbs" id="img-thumbs"></div>
+      <div class="tech-tags" id="tech-tags"></div>
+    </div>
+
+    <!-- RIGHT: PROJECT INFO -->
+    <div class="detail-right">
+      <div class="detail-meta" id="detail-meta"></div>
+      <h1 class="detail-title" id="detail-title"></h1>
+      <a class="detail-url" id="detail-url" href="#" target="_blank">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span id="detail-url-text"></span>
+      </a>
+      <p class="detail-desc" id="detail-desc"></p>
+      <div class="metrics-row" id="metrics-row"></div>
+      <div id="detail-accordions"></div>
+      <div class="kf-wrap" id="kf-wrap"></div>
+      <div class="detail-cta" id="detail-cta"></div>
+    </div>
+  </div>
+
+  <div class="pnav" id="pnav"></div>
+</div>
+
+<script>
+// ── THEME ──────────────────────────────────────────────
+(function(){
+  const btn=document.getElementById('theme-btn');
+  const html=document.documentElement;
+  html.dataset.theme=localStorage.getItem('pf-theme')||'dark';
+  upd();
+  btn.addEventListener('click',()=>{
+    const n=html.dataset.theme==='dark'?'light':'dark';
+    html.dataset.theme=n;localStorage.setItem('pf-theme',n);upd();
+  });
+  function upd(){btn.innerHTML=html.dataset.theme==='dark'
+    ?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    :'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';}
+})();
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40));
+
+// ── PROJECT DATA ────────────────────────────────────────
+const PROJECTS=[
+  {id:1,num:'01',title:'Flood Prediction for Resilient Communities',type:'Machine Learning',date:'Jan 2025',org:'UNDP Research',url:'#',urlText:'flood-prediction.demo',
+   desc:'ML-powered flood risk prediction system using satellite imagery and meteorological data to provide 48-hour advance warnings for vulnerable West African communities.',
+   overview:'The system processes real-time satellite feeds, weather station data, and historical flood records to generate probabilistic risk maps at 500m resolution. A multi-model ensemble combining LSTM networks for temporal pattern detection and Random Forest for feature importance powers the core predictions, delivered via an offline-first Streamlit dashboard with SMS alerts.',
+   challenge:'West African communities face severe flood risks with minimal early warning infrastructure. Existing global models lack the local resolution needed for village-level evacuation decisions, and connectivity constraints make cloud-only solutions impractical for the target communities.',
+   solution:'Multi-model ensemble (LSTM + Random Forest + GIS) for spatial and temporal risk mapping. Deployed as a Streamlit dashboard with offline-first mobile companion. SMS alerts via Africa\'s Talking API notify community leaders 48 hours before predicted flood events.',
+   features:['89% Prediction Accuracy','48h Advance Warning','12 Communities Covered','Real-time Satellite Integration','Offline Mobile App','SMS Alert System'],
+   metrics:['89% accuracy','48h advance warning','12 communities'],
+   tags:['Python','LSTM','GIS','RandomForest','Streamlit','AWS'],
+   gradients:['linear-gradient(135deg,#061428 0%,rgba(37,99,235,.35) 60%,rgba(6,182,212,.2) 100%)','linear-gradient(135deg,rgba(37,99,235,.2) 0%,rgba(6,182,212,.25) 100%)','linear-gradient(135deg,rgba(16,185,129,.2) 0%,rgba(37,99,235,.15) 100%)','linear-gradient(135deg,rgba(6,182,212,.18) 0%,rgba(16,185,129,.12) 100%)']},
+  {id:2,num:'02',title:'Enterprise RAG Chatbot',type:'AI / LLM',date:'Mar 2025',org:'Personal Project',url:'#',urlText:'rag-chatbot.demo',
+   desc:'Retrieval-augmented generation system with multi-document support, conversation memory, and semantic search across enterprise knowledge bases.',
+   overview:'Built on LangChain with ChromaDB vector store, this system handles multi-turn conversations across large document collections. Features semantic chunking, hybrid dense+sparse retrieval, cross-encoder re-ranking, and per-source citation tracking — all wrapped in a FastAPI backend and React frontend.',
+   challenge:'Enterprise knowledge is siloed across hundreds of documents. Generic LLMs hallucinate facts not in the company knowledge base, eroding trust. Existing search tools lack conversational context and can\'t synthesise information across multiple sources.',
+   solution:'A RAG pipeline ingesting, chunking, and embedding documents into ChromaDB. Hybrid SPLADE + dense retrieval with cross-encoder re-ranking. Conversation memory via LangChain ConversationBufferWindowMemory. FastAPI endpoints consumed by a React chat UI.',
+   features:['Multi-document RAG','Conversation Memory','Hybrid Search','Citation Tracking','FastAPI Backend','React Chat UI'],
+   metrics:['95% retrieval accuracy','<2s response time'],
+   tags:['LangChain','ChromaDB','OpenAI','FastAPI','React','Python'],
+   gradients:['linear-gradient(135deg,#061428 0%,rgba(6,182,212,.3) 100%)','linear-gradient(135deg,rgba(6,182,212,.18) 0%,rgba(37,99,235,.22) 100%)','linear-gradient(135deg,rgba(37,99,235,.2) 0%,rgba(6,182,212,.14) 100%)','linear-gradient(135deg,rgba(6,182,212,.22) 0%,#061428 100%)']},
+  {id:3,num:'03',title:'Food-101 Image Classifier',type:'Computer Vision',date:'Nov 2024',org:'Personal Project',url:'#',urlText:'food101.demo',
+   desc:'Deep learning model classifying 101 food categories with 85% top-1 accuracy using transfer learning and progressive data augmentation.',
+   overview:'Fine-tuned ResNet50 on the Food-101 dataset with ImageNet weights. Progressive resizing from 224px to 448px and Mixup augmentation (α=0.4) improved generalization significantly. The trained model is served via a FastAPI endpoint and wrapped in an interactive web demo.',
+   challenge:'The Food-101 dataset contains 101,000 images across 101 categories with high intra-class variation and ~20% label noise, making classification challenging. Balancing accuracy with inference speed for a real-time web demo adds engineering complexity.',
+   solution:'Transfer learning from ImageNet-pretrained ResNet50 with progressive layer unfreezing, Mixup augmentation, label smoothing (ε=0.1), and cosine annealing with warm restarts. Model distillation to a MobileNetV3 for low-latency serving.',
+   features:['85% Top-1 Accuracy','101 Food Categories','Transfer Learning','Progressive Resizing','FastAPI Serving','Web Demo'],
+   metrics:['85% top-1 accuracy','101 classes'],
+   tags:['PyTorch','ResNet50','Transfer Learning','FastAPI','NumPy'],
+   gradients:['linear-gradient(135deg,#061428 0%,rgba(139,92,246,.3) 100%)','linear-gradient(135deg,rgba(139,92,246,.18) 0%,rgba(6,182,212,.15) 100%)','linear-gradient(135deg,rgba(6,182,212,.2) 0%,rgba(139,92,246,.14) 100%)','linear-gradient(135deg,rgba(139,92,246,.25) 0%,#061428 100%)']},
+  {id:4,num:'04',title:'Titanic Survival Prediction API',type:'Machine Learning',date:'Sep 2024',org:'Personal Project',url:'#',urlText:'titanic-api.railway.app',
+   desc:'Production-ready ML API with SHAP-based model explanations, A/B testing support, and containerised deployment on Railway.',
+   overview:'A complete ML pipeline from preprocessing to model serving. The API exposes per-prediction SHAP explanations alongside predictions, supports A/B testing between model variants via configurable traffic-split headers, and is fully documented with auto-generated OpenAPI docs. Prometheus metrics track drift and latency.',
+   challenge:'ML models are often black boxes stakeholders cannot trust. Deploying models reliably at production scale requires containerisation, monitoring, and A/B testing infrastructure — complexity most toy projects skip entirely.',
+   solution:'Scikit-learn voting ensemble (Random Forest + XGBoost + Logistic Regression), SHAP for per-prediction explanations, Docker containerisation with health checks, Railway deployment, and Prometheus + Grafana observability stack.',
+   features:['SHAP Explanations','A/B Testing','Docker Containerised','OpenAPI Docs','Prometheus Metrics','Railway Deployment'],
+   metrics:['82% accuracy','Full explainability'],
+   tags:['Scikit-learn','FastAPI','Docker','SHAP','XGBoost','Railway'],
+   gradients:['linear-gradient(135deg,#061428 0%,rgba(16,185,129,.28) 100%)','linear-gradient(135deg,rgba(16,185,129,.15) 0%,rgba(37,99,235,.15) 100%)','linear-gradient(135deg,rgba(37,99,235,.2) 0%,rgba(16,185,129,.12) 100%)','linear-gradient(135deg,rgba(16,185,129,.22) 0%,#061428 100%)']},
+  {id:5,num:'05',title:'Personal Finance Management System',type:'Data Science',date:'Apr 2025',org:'Personal Project',url:'#',urlText:'financeapp.demo',
+   desc:'Full-stack fintech application with ML-driven spending insights, budget recommendations, and automated transaction categorisation using NLP.',
+   overview:'A comprehensive personal finance platform using NLP for transaction categorisation, K-Means clustering for spending pattern detection, and ARIMA-based forecasting for monthly budget recommendations. React frontend + FastAPI + Supabase for auth, real-time data, and storage.',
+   challenge:'Most people lack visibility into spending patterns and struggle to build effective budgets. Manual categorisation of bank transactions averages 45 minutes per month per user — tedious, error-prone, and ultimately abandoned.',
+   solution:'NLP-powered transaction categorisation (97% accuracy), K-Means clustering to detect anomalous spending patterns, and ARIMA forecasting for next-month budget recommendations. Supabase handles auth, real-time updates, and file storage.',
+   features:['NLP Categorisation 97%','Budget Forecasting','Spending Analytics','Goal Tracking','Data Export','Bank API Integration'],
+   metrics:['97% categorisation accuracy','Full-stack fintech'],
+   tags:['React','FastAPI','Supabase','NLP','ARIMA','Docker'],
+   gradients:['linear-gradient(135deg,#061428 0%,rgba(245,158,11,.22) 100%)','linear-gradient(135deg,rgba(245,158,11,.12) 0%,rgba(37,99,235,.15) 100%)','linear-gradient(135deg,rgba(37,99,235,.2) 0%,rgba(245,158,11,.1) 100%)','linear-gradient(135deg,rgba(245,158,11,.16) 0%,#061428 100%)']}
+];
+
+// ── MERGE CUSTOM PROJECTS FROM ADMIN ─────────────────────────────
+const customProjects=(function(){try{return JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){return [];}})();
+const ALL_PROJECTS=PROJECTS.concat(customProjects.map(function(p,i){
+  return Object.assign({num:'0'+(PROJECTS.length+i+1),url:'#',urlText:'',
+    gradients:['linear-gradient(135deg,#061428 0%,rgba(37,99,235,.3) 100%)','linear-gradient(135deg,rgba(37,99,235,.2) 0%,rgba(6,182,212,.2) 100%)','linear-gradient(135deg,rgba(6,182,212,.15) 0%,rgba(37,99,235,.15) 100%)','linear-gradient(135deg,#061428 0%,rgba(6,182,212,.25) 100%)'],
+    features:p.features||[],metrics:p.metrics||[],tags:p.tags||[]},p);
+}));
+
+let cur=null,imgIdx=0,curImgs=[];
+
+function getProjectImgs(p){
+  var imgs=[];
+  for(var i=1;i<=4;i++){var k=localStorage.getItem('pf_proj_'+p.id+'_img_'+i);if(k)imgs.push({type:'img',src:k});}
+  if(!imgs.length)return p.gradients.map(function(g){return{type:'gradient',src:g};});
+  while(imgs.length<4&&imgs.length<p.gradients.length)imgs.push({type:'gradient',src:p.gradients[imgs.length]||p.gradients[0]});
+  return imgs;
+}
+function getExtraData(p){try{var d=localStorage.getItem('pf_proj_data_'+p.id);return d?JSON.parse(d):{};}catch(e){return{};}}
+
+function render(p){
+  cur=p;imgIdx=0;curImgs=getProjectImgs(p);
+  const extra=getExtraData(p);
+  document.title=p.title+' — Steven Daniel';
+  document.getElementById('bread-title').textContent=p.title.length>30?p.title.slice(0,30)+'…':p.title;
+
+  document.getElementById('detail-meta').innerHTML=`
+    <span class="detail-badge">${p.type}</span>
+    <span class="detail-metaitem">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      ${p.date}
+    </span>
+    <span class="detail-metaitem">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+      ${p.org}
+    </span>`;
+
+  document.getElementById('detail-title').textContent=p.title;
+  // Live URL — hide if not set
+  const liveUrl=extra.url||p.url||'#';
+  const urlEl=document.getElementById('detail-url');
+  if(liveUrl&&liveUrl!=='#'){urlEl.href=liveUrl;urlEl.style.display='';document.getElementById('detail-url-text').textContent=extra.urlText||p.urlText||liveUrl.replace('https://','');}
+  else{urlEl.style.display='none';}
+  document.getElementById('detail-desc').textContent=p.desc||extra.desc||'';
+  document.getElementById('metrics-row').innerHTML=(p.metrics||extra.metrics||[]).map(m=>`<span class="metric-pill">${m}</span>`).join('');
+
+  const chevron=(open)=>`<svg class="acc-chev${open?' open':''}" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+  document.getElementById('detail-accordions').innerHTML=`
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Project Overview</div>${chevron(true)}
+      </div>
+      <div class="acc-body open"><div class="acc-body-inner">${p.overview}</div></div>
+    </div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>The Challenge</div>${chevron(false)}
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">${p.challenge}</div></div>
+    </div>
+    <div class="accordion">
+      <div class="acc-head" onclick="toggleAcc(this)">
+        <div class="acc-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>The Solution</div>${chevron(false)}
+      </div>
+      <div class="acc-body"><div class="acc-body-inner">${p.solution}</div></div>
+    </div>`;
+
+  document.getElementById('kf-wrap').innerHTML=(p.features||extra.features||[]).length?`
+    <div class="kf-head"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Key Features</div>
+    <div class="kf-grid">${(p.features||extra.features||[]).map(f=>`<div class="kf-item"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>${f}</div>`).join('')}</div>`:'';
+
+  // CONDITIONAL CTA BUTTONS — only show if URLs exist
+  const githubUrl=extra.github_url||'';
+  const demoUrl=extra.demo_url||'';
+  const docsUrl=extra.docs_url||'';
+  const paperUrl=extra.paper_url||'';
+  const liveFinal=extra.url||p.url||'';
+  let ctaHtml='';
+  if(liveFinal&&liveFinal!=='#') ctaHtml+=`<a href="${liveFinal}" class="btn-p" target="_blank" rel="noopener">View Live Project</a>`;
+  if(githubUrl) ctaHtml+=`<a href="${githubUrl}" class="btn-g" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:2px"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>GitHub</a>`;
+  if(demoUrl)   ctaHtml+=`<a href="${demoUrl}" class="btn-g" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px"><polygon points="5 3 19 12 5 21 5 3"/></svg>Demo</a>`;
+  if(docsUrl)   ctaHtml+=`<a href="${docsUrl}" class="btn-g" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Docs</a>`;
+  if(paperUrl)  ctaHtml+=`<a href="${paperUrl}" class="btn-g" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Paper</a>`;
+  ctaHtml+=`<button class="btn-g" onclick="goNext()">Next Project →</button>`;
+  document.getElementById('detail-cta').innerHTML=ctaHtml;
+
+  document.getElementById('tech-tags').innerHTML=(p.tags||extra.tags||[]).map(t=>`<span class="tech-tag">${t}</span>`).join('');
+
+  const idx=ALL_PROJECTS.findIndex(x=>x.id===p.id);
+  const prev=ALL_PROJECTS[idx-1],next=ALL_PROJECTS[idx+1];
+  document.getElementById('pnav').innerHTML=`
+    ${prev?`<a class="pnav-btn" href="Project Detail.html?id=${prev.id}">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      <div><span class="pnav-lbl">Previous</span><span class="pnav-title">${prev.title}</span></div></a>`:'<div></div>'}
+    ${next?`<a class="pnav-btn" href="Project Detail.html?id=${next.id}" style="text-align:right">
+      <div><span class="pnav-lbl">Next</span><span class="pnav-title">${next.title}</span></div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>`:'<div></div>'}`;
+
+  renderImgs();
+}
+
+function renderImgs(){
+  const p=cur,frame=curImgs[imgIdx];
+  const inner=document.getElementById('main-img-inner');
+  if(frame&&frame.type==='img'){
+    inner.style.cssText='background:var(--bg2);background-image:url('+frame.src+');background-size:cover;background-position:center;width:100%;height:100%;display:flex;align-items:center;justify-content:center';
+    document.getElementById('main-img-content').innerHTML='';
+  } else {
+    const g=frame?frame.src:(p.gradients[0]||'');
+    inner.style.cssText='background:'+g+';background-image:none;width:100%;height:100%;display:flex;align-items:center;justify-content:center;transition:background .4s ease';
+    document.getElementById('main-img-content').innerHTML=`
+      <div style="display:inline-flex;padding:5px 12px;border-radius:100px;font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--a2);border:1px solid rgba(6,182,212,.2);background:rgba(6,182,212,.08);margin-bottom:14px">${p.type}</div>
+      <div style="font-size:15px;font-weight:600;color:rgba(248,250,252,.85);line-height:1.4;max-width:280px;margin:0 auto">${p.title}</div>
+      <div style="font-size:11px;color:rgba(148,163,184,.6);margin-top:10px;font-family:var(--fm);letter-spacing:.06em">${p.num||''} &middot; ${imgIdx+1}/${curImgs.length}</div>`;
+  }
+  document.getElementById('img-thumbs').innerHTML=curImgs.map((img,i)=>`
+    <div class="img-thumb${i===imgIdx?' active':''}" onclick="setImg(${i})" style="${img.type==='img'?'background-image:url('+img.src+');background-size:cover;background-position:center':'background:'+img.src}"></div>`).join('');
+}
+
+function setImg(i){imgIdx=i;renderImgs();}
+function shiftImg(d){imgIdx=(imgIdx+d+curImgs.length)%curImgs.length;renderImgs();}
+function toggleAcc(head){
+  const body=head.nextElementSibling,chev=head.querySelector('.acc-chev'),open=body.classList.contains('open');
+  body.classList.toggle('open',!open);chev.classList.toggle('open',!open);
+}
+function goNext(){
+  const idx=ALL_PROJECTS.findIndex(x=>x.id===cur.id);
+  location.href='Project Detail.html?id='+ALL_PROJECTS[(idx+1)%ALL_PROJECTS.length].id;
+}
+
+const id=parseInt(new URLSearchParams(location.search).get('id'))||1;
+render(ALL_PROJECTS.find(p=>p.id===id)||ALL_PROJECTS[0]);
+</script>
+</body>
+</html>

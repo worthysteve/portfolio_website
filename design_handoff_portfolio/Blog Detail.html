@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blog — Steven Daniel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0B1220;--bg2:#0F1A2E;--card:rgba(15,26,46,.85);
+  --b:rgba(148,163,184,.07);--b2:rgba(148,163,184,.14);
+  --a:#2563EB;--a2:#06B6D4;--glow:rgba(37,99,235,.18);
+  --t1:#F8FAFC;--t2:#94A3B8;--t3:#475569;
+  --fh:'IBM Plex Sans',sans-serif;--fb:'Inter',sans-serif;--fm:'IBM Plex Mono',monospace;
+  --r:12px;--rl:20px
+}
+[data-theme="light"]{
+  --bg:#F8FAFC;--bg2:#F1F5F9;--card:rgba(255,255,255,.95);
+  --b:rgba(15,23,42,.06);--b2:rgba(15,23,42,.12);--glow:rgba(37,99,235,.06);
+  --t1:#0F172A;--t2:#475569;--t3:#94A3B8
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:var(--fb);font-size:16px;line-height:1.6;overflow-x:hidden;transition:background .3s,color .3s;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(circle at 10% 15%,rgba(37,99,235,.06) 0%,transparent 45%)}
+[data-theme="light"] body::before{opacity:.3}
+*{position:relative;z-index:1}
+a{text-decoration:none;color:inherit}
+h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1)}
+
+/* NAV */
+#nav{position:fixed;top:0;left:0;right:0;z-index:100;border-bottom:1px solid transparent;transition:background .3s,border-color .3s}
+#nav.scrolled{background:rgba(11,18,32,.92);backdrop-filter:blur(20px);border-color:var(--b)}
+[data-theme="light"] #nav.scrolled{background:rgba(248,250,252,.94)}
+.nav-i{display:flex;align-items:center;gap:16px;padding:16px 28px;max-width:1240px;margin:0 auto}
+.nav-logo{font-family:var(--fm);font-size:14px;color:var(--t1);white-space:nowrap}
+.nav-logo .a{color:var(--a)}
+.nav-bread{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);flex:1;margin:0 12px}
+.nav-bread a{color:var(--t2);transition:color .2s}.nav-bread a:hover{color:var(--t1)}
+.nav-bread .sep{color:var(--t3)}
+.nav-acts{display:flex;align-items:center;gap:8px}
+.nav-btn{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;border:1px solid var(--b2);color:var(--t2);background:none;cursor:pointer;transition:border-color .2s,color .2s}
+.nav-btn:hover{border-color:var(--a);color:var(--t1)}
+
+/* PAGE LAYOUT */
+.blog-page{max-width:1200px;margin:0 auto;padding:100px 28px 80px}
+.blog-grid{display:grid;grid-template-columns:1fr 340px;gap:40px;align-items:start}
+
+/* MAIN ARTICLE */
+.article-featured-img{width:100%;aspect-ratio:16/9;border-radius:var(--rl);overflow:hidden;margin-bottom:0;border:1px solid var(--b2)}
+.article-featured-inner{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+
+.author-block{display:flex;align-items:center;gap:14px;padding:20px 0 16px}
+.author-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;flex-shrink:0}
+.author-name{font-size:14px;font-weight:600;color:var(--a)}
+.author-date{font-size:12px;color:var(--t3);font-family:var(--fm)}
+
+.meta-bar{display:flex;align-items:center;gap:18px;padding:12px 0;border-top:1px solid var(--b);border-bottom:1px solid var(--b);margin-bottom:24px;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--t2)}
+.meta-item svg{color:var(--t3);flex-shrink:0}
+.meta-item.likes{color:var(--t2)}
+
+.article-title{font-size:clamp(24px,3vw,38px);font-weight:700;letter-spacing:-.02em;margin-bottom:24px;line-height:1.1}
+.article-body{font-size:16px;color:var(--t2);line-height:1.85;text-wrap:pretty}
+.article-body p{margin-bottom:18px}
+.article-body h2{font-size:22px;color:var(--t1);margin:32px 0 14px}
+.article-body h3{font-size:18px;color:var(--t1);margin:24px 0 10px}
+.article-body code{font-family:var(--fm);font-size:13px;background:var(--card);border:1px solid var(--b2);padding:2px 7px;border-radius:5px;color:var(--a2)}
+.article-body pre{background:var(--card);border:1px solid var(--b2);border-radius:var(--r);padding:16px;margin:16px 0;overflow-x:auto}
+.article-body pre code{border:none;background:none;padding:0}
+.article-body ul{padding-left:22px;margin-bottom:18px;color:var(--t2)}
+.article-body li{margin-bottom:6px}
+.article-body strong{color:var(--t1);font-weight:600}
+
+/* ARTICLE TAGS */
+.article-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:24px}
+.article-tag{padding:4px 12px;border-radius:100px;font-size:12px;font-family:var(--fm);background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.15);color:var(--a)}
+
+/* INTERACTION ROW */
+.interact-row{display:flex;align-items:center;gap:16px;padding:20px 0;border-top:1px solid var(--b);border-bottom:1px solid var(--b);margin:28px 0;flex-wrap:wrap}
+.btn-like{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:600;border:1px solid rgba(239,68,68,.3);color:#EF4444;background:rgba(239,68,68,.08);cursor:pointer;transition:background .2s,border-color .2s}
+.btn-like.liked{background:rgba(239,68,68,.2);border-color:rgba(239,68,68,.5)}
+.btn-like:hover{background:rgba(239,68,68,.18)}
+.btn-comment{display:inline-flex;align-items:center;gap:8px;padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:500;border:1px solid var(--b2);color:var(--t2);background:none;cursor:pointer;transition:border-color .2s,color .2s}
+.btn-comment:hover{border-color:var(--a);color:var(--a)}
+.share-row{display:flex;align-items:center;gap:10px;margin-left:auto}
+.share-lbl{font-size:13px;color:var(--t2)}
+.share-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--b2);background:none;color:var(--t2);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
+.share-btn:hover{border-color:var(--a2);color:var(--t1);background:var(--glow)}
+
+/* COMMENTS */
+.comments-section{margin-top:32px}
+.comments-title{font-size:20px;font-weight:600;color:var(--a);margin-bottom:8px}
+.comments-empty{font-size:14px;color:var(--t3);margin-bottom:32px}
+.comment-form-card{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);padding:28px;margin-top:24px;backdrop-filter:blur(8px)}
+.comment-form-title{font-size:18px;font-weight:600;color:var(--a);margin-bottom:20px}
+.cfield{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.cfield label{font-size:13px;color:var(--t2);font-weight:500}
+.cfield input,.cfield textarea{background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r);padding:11px 14px;color:var(--t1);font-size:14px;font-family:var(--fb);outline:none;transition:border-color .2s;width:100%}
+.cfield input:focus,.cfield textarea:focus{border-color:var(--a)}
+[data-theme="light"] .cfield input,[data-theme="light"] .cfield textarea{background:rgba(241,245,249,.8)}
+.cfield textarea{resize:vertical;min-height:110px}
+.btn-submit{padding:11px 24px;border-radius:var(--r);background:var(--a);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:filter .2s,transform .15s}
+.btn-submit:hover{filter:brightness(1.1);transform:translateY(-1px)}
+
+.comments-list{display:flex;flex-direction:column;gap:16px;margin-bottom:28px}
+.comment-item{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:16px 20px;backdrop-filter:blur(8px)}
+.comment-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.comment-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0}
+.comment-name{font-size:13px;font-weight:600}
+.comment-time{font-size:11px;color:var(--t3);font-family:var(--fm);margin-left:auto}
+.comment-text{font-size:14px;color:var(--t2);line-height:1.65}
+
+/* SIDEBAR */
+.blog-sidebar{display:flex;flex-direction:column;gap:20px;position:sticky;top:88px}
+.sb-card{background:var(--card);border:1px solid var(--b);border-radius:var(--rl);padding:20px;backdrop-filter:blur(8px)}
+.sb-card h4{font-size:16px;font-weight:600;color:var(--t1);margin-bottom:14px;font-family:var(--fh)}
+.sb-search{display:flex;gap:8px}
+.sb-search input{flex:1;background:var(--bg2);border:1px solid var(--b2);border-radius:var(--r);padding:9px 12px;color:var(--t1);font-size:13px;font-family:var(--fb);outline:none;transition:border-color .2s}
+.sb-search input:focus{border-color:var(--a)}
+[data-theme="light"] .sb-search input{background:rgba(241,245,249,.8)}
+.sb-search button{width:36px;height:36px;border-radius:var(--r);background:var(--a);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
+.sb-post{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--b);cursor:pointer;transition:background .15s}
+.sb-post:last-child{border-bottom:none;padding-bottom:0}
+.sb-post:hover .sb-post-title{color:var(--a)}
+.sb-post-img{width:52px;height:52px;border-radius:8px;flex-shrink:0;overflow:hidden}
+.sb-post-title{font-size:13px;font-weight:500;line-height:1.35;margin-bottom:4px;transition:color .2s}
+.sb-post-meta{font-size:11px;color:var(--t3);font-family:var(--fm)}
+.sb-cat{display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--b);cursor:pointer;transition:color .2s}
+.sb-cat:last-child{border-bottom:none;padding-bottom:0}
+.sb-cat:hover{color:var(--a)}
+.sb-cat-name{font-size:14px;color:var(--a);font-weight:500}
+.sb-cat-count{font-size:12px;color:var(--t3);font-family:var(--fm)}
+.sb-tags{display:flex;flex-wrap:wrap;gap:7px}
+.sb-tag{padding:5px 12px;border-radius:100px;font-size:12px;font-family:var(--fm);background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.15);color:var(--a);cursor:pointer;transition:background .2s}
+.sb-tag:hover{background:rgba(37,99,235,.15)}
+
+/* PUBLICATION TYPE BADGE */
+.pub-type-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 13px;border-radius:100px;font-size:12px;font-family:var(--fm);font-weight:600;margin-bottom:14px}
+.pub-type-pill.journal{background:rgba(37,99,235,.1);color:var(--a);border:1px solid rgba(37,99,235,.2)}
+.pub-type-pill.conference{background:rgba(6,182,212,.1);color:var(--a2);border:1px solid rgba(6,182,212,.2)}
+.pub-type-pill.thesis{background:rgba(139,92,246,.1);color:#8B5CF6;border:1px solid rgba(139,92,246,.2)}
+.pub-type-pill.note{background:rgba(16,185,129,.1);color:#10B981;border:1px solid rgba(16,185,129,.2)}
+
+/* PREV/NEXT */
+.pnav{display:flex;justify-content:space-between;gap:16px;padding:28px 0 0;border-top:1px solid var(--b);margin-top:40px}
+.pnav-btn{display:flex;align-items:center;gap:12px;padding:12px 18px;border-radius:var(--r);border:1px solid var(--b);background:var(--card);backdrop-filter:blur(8px);color:var(--t1);cursor:pointer;transition:border-color .2s,transform .2s;text-decoration:none;max-width:48%}
+.pnav-btn:hover{border-color:var(--a);transform:translateY(-2px)}
+.pnav-lbl{display:block;font-size:11px;color:var(--t3);font-family:var(--fm);margin-bottom:2px}
+.pnav-title{font-size:12px;font-weight:500;line-height:1.35;display:block}
+
+/* MOBILE */
+@media(max-width:900px){.blog-grid{grid-template-columns:1fr}.blog-sidebar{position:static}}
+@media(max-width:768px){
+  .blog-page{padding:88px 20px 60px}
+  .share-row{margin-left:0;margin-top:8px}
+  .interact-row{flex-direction:column;align-items:flex-start}
+  .nav-bread{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <div class="nav-i">
+    <a class="nav-logo" href="Portfolio v2.html"><span class="a">&lt;</span>SD<span class="a">/&gt;</span></a>
+    <div class="nav-bread">
+      <a href="Portfolio v2.html">Home</a>
+      <span class="sep">/</span>
+      <a href="Portfolio v2.html#blog">Blog</a>
+      <span class="sep">/</span>
+      <span style="color:var(--t1);font-weight:500" id="bread-title">Article</span>
+    </div>
+    <div class="nav-acts">
+      <a href="Portfolio v2.html" class="nav-btn" title="Back to Portfolio">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </a>
+      <button class="nav-btn" id="theme-btn" aria-label="Toggle theme"></button>
+    </div>
+  </div>
+</nav>
+
+<div class="blog-page">
+  <div class="blog-grid">
+
+    <!-- MAIN ARTICLE -->
+    <article>
+      <div class="article-featured-img"><div class="article-featured-inner" id="feat-img"></div></div>
+      <div class="author-block">
+        <div class="author-avatar" id="author-av">SD</div>
+        <div>
+          <div class="author-name">Steven Daniel</div>
+          <div class="author-date" id="author-date">Jun 2025</div>
+        </div>
+      </div>
+      <div class="meta-bar">
+        <div class="meta-item likes" id="meta-likes">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          1
+        </div>
+        <div class="meta-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span id="meta-comments">0 Comments</span>
+        </div>
+        <div class="meta-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span id="meta-date">Jun 2025</span>
+        </div>
+        <div class="meta-item">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="meta-time">8 min read</span>
+        </div>
+      </div>
+      <div id="pub-badge"></div>
+      <h1 class="article-title" id="article-title">Article Title</h1>
+      <div class="article-tags" id="article-tags"></div>
+      <div class="article-body" id="article-body"></div>
+
+      <!-- INTERACT -->
+      <div class="interact-row">
+        <button class="btn-like" id="like-btn" onclick="toggleLike()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <span id="like-text">Liked</span>
+        </button>
+        <button class="btn-comment" onclick="document.getElementById('comment-form').scrollIntoView()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Add Comment (<span id="comment-count">0</span>)
+        </button>
+        <div class="share-row">
+          <span class="share-lbl">Share:</span>
+          <button class="share-btn" title="Facebook" onclick="shareToFacebook()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </button>
+          <button class="share-btn" title="X / Twitter" onclick="shareToTwitter()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </button>
+          <button class="share-btn" title="LinkedIn" onclick="shareToLinkedIn()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </button>
+          <button class="share-btn" title="WhatsApp" onclick="shareToWhatsApp()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+          </button>
+          <button class="share-btn" title="Email" onclick="shareByEmail()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- COMMENTS -->
+      <div class="comments-section">
+        <h3 class="comments-title" id="comments-heading">Comments (0)</h3>
+        <div class="comments-list" id="comments-list"></div>
+        <p class="comments-empty" id="comments-empty">No comments yet. Be the first to comment!</p>
+      </div>
+
+      <!-- COMMENT FORM -->
+      <div class="comment-form-card" id="comment-form">
+        <h3 class="comment-form-title">Add A Comment</h3>
+        <div class="cfield"><label>Name *</label><input type="text" id="cf-name" placeholder="Enter your name"></div>
+        <div class="cfield"><label>Email (optional)</label><input type="email" id="cf-email" placeholder="Enter your email"></div>
+        <div class="cfield"><label>Comment *</label><textarea id="cf-msg" placeholder="Enter your comment..."></textarea></div>
+        <button class="btn-submit" onclick="submitComment()">Submit Comment</button>
+      </div>
+
+      <!-- PREV / NEXT -->
+      <div class="pnav" id="pnav"></div>
+    </article>
+
+    <!-- SIDEBAR -->
+    <aside class="blog-sidebar">
+      <div class="sb-card">
+        <h4>Search Here</h4>
+        <div class="sb-search">
+          <input type="text" placeholder="Search" id="sb-search-inp" onkeydown="if(event.key==='Enter')doSearch()">
+          <button onclick="doSearch()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></button>
+        </div>
+      </div>
+      <div class="sb-card">
+        <h4>Latest Posts</h4>
+        <div id="sb-latest"></div>
+      </div>
+      <div class="sb-card">
+        <h4>Categories</h4>
+        <div id="sb-cats"></div>
+      </div>
+      <div class="sb-card">
+        <h4>Tags</h4>
+        <div class="sb-tags" id="sb-tags"></div>
+      </div>
+    </aside>
+
+  </div>
+</div>
+
+<script>
+// ── THEME ────────────────────────────────────────────────────────────
+(function(){
+  const btn=document.getElementById('theme-btn');
+  const html=document.documentElement;
+  html.dataset.theme=localStorage.getItem('pf-theme')||'dark';
+  upd();
+  btn.addEventListener('click',()=>{const n=html.dataset.theme==='dark'?'light':'dark';html.dataset.theme=n;localStorage.setItem('pf-theme',n);upd();});
+  function upd(){btn.innerHTML=html.dataset.theme==='dark'
+    ?'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+    :'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';}
+})();
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40));
+
+// ── DATA ─────────────────────────────────────────────────────────────
+const BLOGS=[
+  {id:1,type:'blog',title:'Building RAG Systems from Scratch: A Production Guide',category:'AI',tags:['AI','LLMs','Python'],date:'Jun 2025',readTime:'8 min read',
+   gradient:'linear-gradient(135deg,#061428 0%,rgba(37,99,235,.35) 60%,rgba(6,182,212,.2) 100%)',
+   content:`<p>Retrieval-Augmented Generation (RAG) has become the go-to architecture for enterprise LLM applications. Unlike naive prompting, RAG grounds model outputs in your actual data, dramatically reducing hallucinations and keeping answers current without expensive retraining.</p>
+<h2>Why RAG?</h2>
+<p>Enterprise knowledge is dynamic — it changes daily. Fine-tuning a model on this knowledge is expensive, slow, and quickly stale. RAG solves this by retrieving relevant documents at inference time and conditioning the model's response on them. The result: accurate, cited, up-to-date answers at a fraction of the cost.</p>
+<h2>Architecture Overview</h2>
+<p>A production RAG system has three core components: an <strong>ingestion pipeline</strong> (chunking + embedding documents into a vector store), a <strong>retrieval engine</strong> (finding relevant chunks at query time), and a <strong>generation layer</strong> (the LLM that synthesises retrieved context into an answer).</p>
+<h3>1. Document Ingestion</h3>
+<p>Chunking strategy dramatically impacts retrieval quality. Naive fixed-size chunking loses semantic context at boundaries. Semantic chunking — splitting on sentence boundaries and topic shifts — consistently outperforms in my benchmarks. I use LangChain's <code>SemanticChunker</code> with <code>percentile</code> breakpoint threshold.</p>
+<h3>2. Hybrid Retrieval</h3>
+<p>Dense-only retrieval (embedding similarity) struggles with exact keyword matches and rare terms. Hybrid retrieval combines dense embeddings (OpenAI <code>text-embedding-3-small</code>) with sparse BM25 via the SPLADE model. A weighted Reciprocal Rank Fusion (RRF) merge consistently outperforms either approach alone.</p>
+<h3>3. Re-ranking</h3>
+<p>After retrieving the top-K candidates, a cross-encoder re-ranker (Cohere's <code>rerank-english-v2.0</code>) scores each candidate against the query holistically. This two-stage approach keeps latency low while maximising precision on the final context window.</p>
+<h2>Key Lessons</h2>
+<ul>
+<li><strong>Chunk size matters more than you think.</strong> 512 tokens with 50-token overlap is a strong default for technical documents.</li>
+<li><strong>Eval early and often.</strong> Set up RAGAS metrics (faithfulness, answer relevancy, context precision) from day one.</li>
+<li><strong>Citations build trust.</strong> Always return source document IDs and page references alongside the answer.</li>
+<li><strong>Cache aggressively.</strong> Semantic caching of frequent queries reduces costs by 40–60% in production.</li>
+</ul>
+<p>RAG is not a silver bullet — it requires careful tuning, good evaluation, and ongoing monitoring. But for enterprise knowledge applications, it remains the most practical path to reliable, grounded LLM behaviour.</p>`},
+  {id:2,type:'blog',title:'Time Series Forecasting with LSTMs for Financial Data',category:'Financial Engineering',tags:['Finance','LSTM','Python'],date:'May 2025',readTime:'6 min read',
+   gradient:'linear-gradient(135deg,#061428 0%,rgba(6,182,212,.3) 60%,rgba(37,99,235,.15) 100%)',
+   content:`<p>Financial time series present unique challenges: non-stationarity, fat tails, and regime changes that confound traditional statistical models. LSTMs, with their ability to capture long-range dependencies through gated memory cells, offer a powerful alternative — but only if you respect the specific quirks of financial data.</p>
+<h2>The Problem with Standard Approaches</h2>
+<p>ARIMA and its variants assume stationarity and linear relationships. Real financial data is neither. Volatility clusters, mean-reversion in some regimes but trending in others, and macro events create structural breaks that a fixed-parameter model cannot handle. LSTMs, being non-parametric sequence models, can theoretically adapt — but naïve application leads to overfit models that look great in-sample and fail completely out-of-sample.</p>
+<h2>Data Preprocessing is Everything</h2>
+<p>Before even thinking about the architecture, the preprocessing pipeline determines everything. I use <strong>log returns</strong> rather than prices (which are non-stationary), <strong>rolling z-score normalisation</strong> (window size 252 trading days) to handle regime changes, and <strong>feature engineering</strong> that includes: RSI(14), MACD signal line, rolling volatility, order book imbalance, and macro indicators like VIX.</p>
+<h3>Avoiding Lookahead Bias</h3>
+<p>The most common mistake in financial ML is lookahead bias — accidentally including future information in your features. All preprocessing transformations must use only data available at prediction time. I use a strict <code>TimeSeriesSplit</code> with a purge gap of 5 days between train and validation folds.</p>
+<h2>Architecture and Training</h2>
+<p>A two-layer LSTM (128 → 64 units) with dropout (p=0.3) and a linear output head performs well across multiple asset classes in my experiments. Key training details: sequence length of 60 bars, batch size of 32, AdamW optimiser with weight decay 1e-4, and cosine annealing with warm restarts.</p>
+<h2>Backtesting Properly</h2>
+<p>Walk-forward optimisation is non-negotiable. I retrain the model monthly on an expanding window, evaluate on the next month out-of-sample, and aggregate performance across all folds. Sharpe ratio > 1.2 with max drawdown < 15% is my acceptance threshold before any live consideration.</p>
+<p>LSTMs are not the final word in financial forecasting — Transformers and state-space models show promise — but they remain practical, well-understood, and effective when applied rigorously.</p>`},
+  {id:3,type:'blog',title:'Computer Vision for Social Good: Detecting Floods via Satellite Imagery',category:'Data Science',tags:['Computer Vision','Social Good','Python'],date:'Apr 2025',readTime:'7 min read',
+   gradient:'linear-gradient(135deg,#061428 0%,rgba(16,185,129,.28) 60%,rgba(37,99,235,.15) 100%)',
+   content:`<p>When I started working on flood detection for West African communities, I quickly realised that the challenge wasn't purely technical — it was about building something that could actually be deployed and trusted by communities with limited connectivity, digital literacy barriers, and deep scepticism of technology that has repeatedly overpromised.</p>
+<h2>The Problem</h2>
+<p>West Africa experiences severe seasonal flooding that displaces millions annually. Existing early warning systems are either too coarse (global satellite products at 500m resolution are useless for village-level decisions) or require connectivity and expertise that vulnerable communities don't have. We needed a local, offline-capable, community-trusted solution.</p>
+<h2>Data Sources</h2>
+<p>I combined three data sources: <strong>Sentinel-1 SAR imagery</strong> (cloud-penetrating, critical during rainy seasons when optical satellites are blind), <strong>Sentinel-2 multispectral imagery</strong> (12-band optical, useful in clear conditions), and <strong>historical flood polygon datasets</strong> from the Copernicus Emergency Management Service as ground truth labels.</p>
+<h3>Preprocessing SAR Data</h3>
+<p>SAR data requires careful preprocessing: orbit file application, thermal noise removal, radiometric calibration, terrain correction, and speckle filtering (Lee filter, 5×5 window). I use the ESA SNAP Toolbox via <code>snappy</code> Python bindings for this pipeline.</p>
+<h2>The Model</h2>
+<p>A modified U-Net with a ResNet34 encoder (pretrained on ImageNet) achieves 89% pixel-level IoU on the test set. Key modifications: attention gates to suppress false positives from urban water bodies, and a temporal consistency loss term that penalises predictions that contradict the previous timestep by more than a physically plausible amount.</p>
+<h2>Deployment Constraints</h2>
+<p>The hardest part was deployment. I quantised the model to INT8 using TensorFlow Lite, reducing model size from 84MB to 21MB. This runs inference in under 3 seconds on a Raspberry Pi 4 with 4GB RAM — enabling a solar-powered offline edge device that community leaders can operate without internet access.</p>
+<p>Technology for social good is not just about building the best model. It's about understanding the human system the technology sits within, and designing for that system first.</p>`}
+];
+
+const PUBS=[
+  {id:1,type:'pub',pubType:'journal',title:'AI-Driven Flood Risk Assessment for Sub-Saharan African Communities',tags:['AI','Climate','GIS'],date:'2025',readTime:'15 min read',
+   gradient:'linear-gradient(135deg,#061428 0%,rgba(37,99,235,.3) 60%,rgba(16,185,129,.15) 100%)',
+   content:`<p>This paper presents a novel framework for flood risk assessment in Sub-Saharan Africa using ensemble machine learning models trained on multi-source remote sensing data and historical flood records. We demonstrate 89% prediction accuracy with 48-hour advance warning capability across 12 pilot communities in Sierra Leone.</p>
+<h2>Abstract</h2>
+<p>Flooding represents one of the most destructive natural hazards facing Sub-Saharan Africa, displacing millions annually. Existing global early warning systems lack the spatial resolution and local calibration required for community-level decision-making. This work addresses that gap through a locally-calibrated, multi-model ensemble approach combining LSTM temporal networks with geospatial Random Forest classifiers.</p>
+<h2>Methodology</h2>
+<p>We collected Sentinel-1 SAR imagery, weather station data from 23 monitoring stations, and historical flood polygon data spanning 2010–2024. The ensemble combines LSTM networks (sequence length 72 hours) for temporal pattern detection with a Random Forest spatial risk model trained on DEM-derived features, soil moisture indices, and land cover classification.</p>
+<h2>Results</h2>
+<p>The proposed system achieves 89.2% prediction accuracy (F1=0.87) with a 48-hour prediction horizon. False positive rate is 8.3%, acceptable for humanitarian early warning where the cost of missed warnings vastly exceeds the cost of unnecessary evacuations. Community trials in 12 villages showed 94% message delivery via SMS integration.</p>
+<h2>Conclusion</h2>
+<p>This work demonstrates that locally-calibrated ML ensembles can achieve operational flood prediction accuracy in data-sparse African contexts. Future work will extend to 72-hour prediction horizons and integrate real-time social media signals as auxiliary flood indicators.</p>`},
+  {id:2,type:'pub',pubType:'conference',title:'RAG Architectures for Domain-Specific Knowledge Management in Low-Resource Settings',tags:['LLMs','RAG','NLP'],date:'ICML 2025',readTime:'12 min read',
+   gradient:'linear-gradient(135deg,#061428 0%,rgba(6,182,212,.3) 60%,rgba(37,99,235,.15) 100%)',
+   content:`<p>This paper investigates the performance of retrieval-augmented generation (RAG) architectures under low-resource constraints typical of developing-world deployments, where compute budgets, connectivity, and data availability are significantly restricted compared to standard benchmarks.</p>
+<h2>Abstract</h2>
+<p>RAG has emerged as the dominant paradigm for grounding LLM outputs in organisational knowledge. However, most published work assumes high-resource settings: powerful embedding models, large vector stores, and reliable high-bandwidth connectivity. We study RAG performance degradation under realistic low-resource constraints and propose architectural adaptations that recover 85% of high-resource performance at 20% of the compute cost.</p>
+<h2>Key Contributions</h2>
+<p>We introduce Sparse-Dense Hybrid RAG (SDH-RAG), combining TF-IDF sparse retrieval with a compact 384-dimensional dense embedding model (BAAI/bge-small-en-v1.5, 134M parameters). This combination achieves comparable recall to full-scale dense retrieval while reducing memory requirements by 74% and retrieval latency by 68%.</p>
+<p>We also propose a caching strategy — Semantic Query Caching — that stores LLM responses to semantically similar queries, reducing repeated LLM calls by 43% in enterprise settings with predictable query distributions.</p>`}
+];
+
+const ALL=[...BLOGS,...PUBS];
+let liked=false,comments=[],curItem=null;
+
+function getParam(k){return new URLSearchParams(location.search).get(k);}
+
+function render(item){
+  curItem=item;
+  document.title=item.title+' — Steven Daniel';
+  const shortTitle=item.title.length>35?item.title.slice(0,35)+'…':item.title;
+  document.getElementById('bread-title').textContent=shortTitle;
+
+  // Featured image
+  document.getElementById('feat-img').style.background=item.gradient;
+  document.getElementById('feat-img').innerHTML=`
+    <div style="text-align:center;padding:32px">
+      <div style="font-family:var(--fm);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:rgba(6,182,212,.8);margin-bottom:12px">${item.category||item.pubType}</div>
+      <div style="font-size:16px;font-weight:600;color:rgba(248,250,252,.85);line-height:1.4;max-width:500px;margin:0 auto">${item.title}</div>
+    </div>`;
+
+  // Author
+  document.getElementById('author-date').textContent=item.date;
+  document.getElementById('meta-date').textContent=item.date;
+  document.getElementById('meta-time').textContent=item.readTime;
+
+  // Publication type badge
+  if(item.type==='pub'){
+    const cls=item.pubType||'note';
+    const labels={journal:'Journal',conference:'Conference',thesis:'Thesis',note:'Research Note'};
+    document.getElementById('pub-badge').innerHTML=`<div class="pub-type-pill ${cls}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>${labels[cls]}</div>`;
+    document.getElementById('bread-title').parentElement.previousElementSibling.textContent='Publications';
+  } else {
+    document.getElementById('pub-badge').innerHTML='';
+  }
+
+  document.getElementById('article-title').textContent=item.title;
+  document.getElementById('article-tags').innerHTML=(item.tags||[]).map(t=>`<span class="article-tag">${t}</span>`).join('');
+  document.getElementById('article-body').innerHTML=item.content;
+
+  // Nav
+  const list=item.type==='pub'?PUBS:BLOGS;
+  const idx=list.findIndex(x=>x.id===item.id);
+  const prev=list[idx-1],next=list[idx+1];
+  const suffix=item.type==='pub'?'type=pub&':'';
+  document.getElementById('pnav').innerHTML=`
+    ${prev?`<a class="pnav-btn" href="Blog Detail.html?${suffix}id=${prev.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg><div><span class="pnav-lbl">Previous</span><span class="pnav-title">${prev.title}</span></div></a>`:'<div></div>'}
+    ${next?`<a class="pnav-btn" href="Blog Detail.html?${suffix}id=${next.id}" style="text-align:right"><div><span class="pnav-lbl">Next</span><span class="pnav-title">${next.title}</span></div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></a>`:'<div></div>'}`;
+
+  renderSidebar(item);
+}
+
+function renderSidebar(active){
+  // Latest posts (from BLOGS)
+  document.getElementById('sb-latest').innerHTML=BLOGS.slice(0,3).map(p=>`
+    <div class="sb-post" onclick="location.href='Blog Detail.html?id=${p.id}'">
+      <div class="sb-post-img" style="background:${p.gradient}"></div>
+      <div><div class="sb-post-title">${p.title}</div><div class="sb-post-meta">${p.readTime}</div></div>
+    </div>`).join('');
+
+  // Categories
+  const cats=[...new Set([...BLOGS,...PUBS].map(p=>p.category||p.pubType))].filter(Boolean);
+  document.getElementById('sb-cats').innerHTML=cats.map(c=>`
+    <div class="sb-cat"><span class="sb-cat-name">${c}</span><span class="sb-cat-count">${[...BLOGS,...PUBS].filter(p=>(p.category||p.pubType)===c).length}</span></div>`).join('');
+
+  // Tags
+  const tags=[...new Set([...BLOGS,...PUBS].flatMap(p=>p.tags||[]))];
+  document.getElementById('sb-tags').innerHTML=tags.map(t=>`<span class="sb-tag">${t}</span>`).join('');
+}
+
+// ── LIKE ────────────────────────────────────────────────────────────
+function toggleLike(){
+  liked=!liked;
+  const btn=document.getElementById('like-btn');
+  const txt=document.getElementById('like-text');
+  btn.classList.toggle('liked',liked);
+  txt.textContent=liked?'Liked':'Like';
+}
+
+// ── COMMENTS ────────────────────────────────────────────────────────
+function submitComment(){
+  const name=document.getElementById('cf-name').value.trim();
+  const msg=document.getElementById('cf-msg').value.trim();
+  if(!name||!msg){alert('Please fill in your name and comment.');return;}
+  const now=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  comments.push({name,msg,date:now,initials:name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2)});
+  document.getElementById('cf-name').value='';
+  document.getElementById('cf-email').value='';
+  document.getElementById('cf-msg').value='';
+  renderComments();
+}
+function renderComments(){
+  const empty=document.getElementById('comments-empty');
+  const list=document.getElementById('comments-list');
+  const count=document.getElementById('comment-count');
+  const heading=document.getElementById('comments-heading');
+  count.textContent=comments.length;
+  heading.textContent=`Comments (${comments.length})`;
+  if(comments.length===0){empty.style.display='block';list.innerHTML='';return;}
+  empty.style.display='none';
+  list.innerHTML=comments.map(c=>`
+    <div class="comment-item">
+      <div class="comment-header">
+        <div class="comment-avatar">${c.initials}</div>
+        <div class="comment-name">${c.name}</div>
+        <div class="comment-time">${c.date}</div>
+      </div>
+      <div class="comment-text">${c.msg}</div>
+    </div>`).join('');
+}
+
+// ── SHARE ────────────────────────────────────────────────────────────
+function shareToFacebook(){window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),'_blank');}
+function shareToTwitter(){window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(curItem?.title||'')+' by @realstevend&url='+encodeURIComponent(location.href),'_blank');}
+function shareToLinkedIn(){window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(location.href),'_blank');}
+function shareToWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent((curItem?.title||'')+' '+location.href),'_blank');}
+function shareByEmail(){location.href='mailto:?subject='+encodeURIComponent(curItem?.title||'')+'&body='+encodeURIComponent('Check this out: '+location.href);}
+
+// ── SEARCH ──────────────────────────────────────────────────────────
+function doSearch(){
+  const q=document.getElementById('sb-search-inp').value.trim().toLowerCase();
+  if(!q) return;
+  const found=BLOGS.find(p=>p.title.toLowerCase().includes(q));
+  if(found) location.href='Blog Detail.html?id='+found.id;
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+const isPub=getParam('type')==='pub';
+const id=parseInt(getParam('id'))||1;
+const item=isPub?(PUBS.find(p=>p.id===id)||PUBS[0]):(BLOGS.find(p=>p.id===id)||BLOGS[0]);
+render(item);
+renderComments();
+</script>
+</body>
+</html>
