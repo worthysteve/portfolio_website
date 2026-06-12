@@ -68,6 +68,8 @@ create table if not exists experience (
   role text not null,
   organisation text,
   date_period text,
+  start_date date,
+  end_date date,
   description text,
   tags text[],
   award text,
@@ -137,6 +139,9 @@ create table if not exists messages (
   reply_text text,
   created_at timestamptz default now()
 );
+
+alter table experience add column if not exists start_date date;
+alter table experience add column if not exists end_date date;
 
 alter table projects enable row level security;
 alter table blog_posts enable row level security;

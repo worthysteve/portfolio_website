@@ -105,6 +105,22 @@ function applyImg(el, src) {
 initManagedImageSlot('slot-portrait', 'pf-portrait');
 initManagedImageSlot('slot-about', 'pf-about-photo');
 
+function getResumeUrl() {
+  return localStorage.getItem('pf-resume-url') || 'resume.pdf';
+}
+function applyResumeUrl(url) {
+  if (!url) return;
+  localStorage.setItem('pf-resume-url', url);
+  document.querySelectorAll('a[href="resume.pdf"],a[data-resume-link]').forEach(function(link){
+    link.href = url;
+    link.dataset.resumeLink = 'true';
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.removeAttribute('download');
+  });
+}
+applyResumeUrl(getResumeUrl());
+
 // SCROLL REVEAL
 (function(){
   const obs = new IntersectionObserver(entries => {
@@ -122,17 +138,21 @@ initManagedImageSlot('slot-about', 'pf-about-photo');
 
 // ANIMATED COUNTERS
 (function(){
+  window.animateStatNumber = function(el) {
+    if (!el) return;
+    const target=+el.dataset.count||0, suf=el.dataset.suffix||'', dur=900, start=Date.now();
+    const tick = () => {
+      const p=Math.min((Date.now()-start)/dur,1), ease=1-Math.pow(1-p,3);
+      el.textContent = Math.floor(ease*target)+suf;
+      if (p < 1) requestAnimationFrame(tick); else el.textContent = target+suf;
+    };
+    requestAnimationFrame(tick);
+  };
   const obs = new IntersectionObserver(entries => {
     entries.forEach(e => {
       if (e.isIntersecting) {
         e.target.querySelectorAll('[data-count]').forEach(el => {
-          const target=+el.dataset.count, suf=el.dataset.suffix||'', dur=1700, start=Date.now();
-          const tick = () => {
-            const p=Math.min((Date.now()-start)/dur,1), ease=1-Math.pow(1-p,3);
-            el.textContent = Math.floor(ease*target)+suf;
-            if (p < 1) requestAnimationFrame(tick); else el.textContent = target+suf;
-          };
-          requestAnimationFrame(tick);
+          window.animateStatNumber(el);
         });
         obs.unobserve(e.target);
       }
@@ -161,7 +181,7 @@ initManagedImageSlot('slot-about', 'pf-about-photo');
     {label:'Achievements',   cat:'Navigate', icon:'★', href:'#achievements'},
     {label:'Contact',        cat:'Navigate', icon:'◎', href:'#contact'},
     {label:'Toggle Theme',   cat:'Action',   icon:'◑', href:null, fn:()=>{ document.getElementById('theme-btn').click(); close(); }},
-    {label:'Download Resume',cat:'Action',   icon:'↓', href:null, fn:()=>{ window.location.href='resume.pdf'; close(); }},
+    {label:'View / Download Resume',cat:'Action',   icon:'↓', href:null, fn:()=>{ window.open(getResumeUrl(), '_blank', 'noopener'); close(); }},
   ];
 
   let sel = 0;
@@ -299,11 +319,112 @@ function supabaseClient() {
   if (!url || !key || !window.supabase) return null;
   return window.supabase.createClient(url, key);
 }
+function projectSearchText(project) {
+  return [
+    project && project.type,
+    project && project.title,
+    project && project.description,
+    project && project.overview,
+    Array.isArray(project && project.tags) ? project.tags.join(' ') : '',
+    Array.isArray(project && project.features) ? project.features.join(' ') : ''
+  ].join(' ').toLowerCase();
+}
+function isAiProject(project) {
+  var text=projectSearchText(project);
+  return /\b(ai|ml|machine learning|deep learning|dl|computer vision|cv|nlp|llm|rag|neural|pytorch|tensorflow|scikit|sklearn|model|classification|prediction|forecast|data science)\b/.test(text);
+}
+function isWebProject(project) {
+  var text=projectSearchText(project);
+  return /\b(web|website|web app|application|full stack|frontend|front-end|backend|back-end|html|css|javascript|react|next|vue|angular|django|flask|fastapi|dash|streamlit|node|express|dashboard|portfolio|supabase)\b/.test(text);
+}
+function isResearchProject(project) {
+  var text=projectSearchText(project);
+  return /\b(research|paper|publication|journal|conference|thesis|study|review|experiment|workshop)\b/.test(text);
+}
+function isDataFinanceProject(project) {
+  var text=projectSearchText(project);
+  return /\b(data science|analytics|analysis|eda|business intelligence|bi|finance|financial|financial engineering|quant|quantitative|portfolio|risk|pricing|derivative|monte carlo|trading|backtest|backtesting|econometric|time series)\b/.test(text);
+}
+function parseExperienceDate(value, fallbackMonth, fallbackDay) {
+  if (!value) return null;
+  var text=String(value).trim();
+  var iso=text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return new Date(Number(iso[1]), Number(iso[2])-1, Number(iso[3]));
+  var year=text.match(/\b(19|20)\d{2}\b/);
+  if (year) return new Date(Number(year[0]), fallbackMonth, fallbackDay);
+  return null;
+}
+function getExperienceRange(item) {
+  var now=new Date();
+  var start=parseExperienceDate(item.start_date,0,1);
+  var end=parseExperienceDate(item.end_date,11,31);
+  if (!start || !end) {
+    var period=String(item.date_period||'');
+    var years=period.match(/\b(19|20)\d{2}\b/g)||[];
+    if (!start && years[0]) start=new Date(Number(years[0]),0,1);
+    if (!end && /present|current|now|ongoing/i.test(period)) end=now;
+    if (!end && years[1]) end=new Date(Number(years[1]),11,31);
+  }
+  if (!start) return null;
+  if (!end) end=now;
+  if (end < start) return null;
+  return {start:start,end:end};
+}
+function countExperienceYears(experience) {
+  if (!Array.isArray(experience) || !experience.length) return 0;
+  var ranges=experience.map(getExperienceRange).filter(Boolean).sort(function(a,b){return a.start-b.start;});
+  if (!ranges.length) return experience.length;
+  var merged=[];
+  ranges.forEach(function(range){
+    var last=merged[merged.length-1];
+    if (!last || range.start>last.end) merged.push({start:new Date(range.start),end:new Date(range.end)});
+    else if (range.end>last.end) last.end=new Date(range.end);
+  });
+  var totalMonths=merged.reduce(function(sum,range){
+    var months=(range.end.getFullYear()-range.start.getFullYear())*12+(range.end.getMonth()-range.start.getMonth());
+    if (range.end.getDate()>=range.start.getDate()) months+=1;
+    return sum+Math.max(1,months);
+  },0);
+  return Math.max(1,Math.floor(totalMonths/12));
+}
+function updatePortfolioStats(data) {
+  data=data||{};
+  var projects=Array.isArray(data.projects)?data.projects:[];
+  var publications=Array.isArray(data.publications)?data.publications:[];
+  var certifications=Array.isArray(data.certifications)?data.certifications:[];
+  var experience=Array.isArray(data.experience)?data.experience:[];
+  var values={
+    'total-projects':projects.length,
+    'ai-projects':projects.filter(isAiProject).length,
+    'web-projects':projects.filter(isWebProject).length,
+    'data-finance-projects':projects.filter(isDataFinanceProject).length,
+    'research-projects':projects.filter(isResearchProject).length+publications.length,
+    'certifications':certifications.length,
+    'experience-years':countExperienceYears(experience)
+  };
+  Object.keys(values).forEach(function(key){
+    var el=document.querySelector('[data-stat="'+key+'"]');
+    if(!el)return;
+    el.dataset.count=String(values[key]);
+    if (window.animateStatNumber && el.closest('.stats-g')) window.animateStatNumber(el);
+    else el.textContent=String(values[key])+(el.dataset.suffix||'');
+  });
+}
+function updateStatDirect(key,value) {
+  var el=document.querySelector('[data-stat="'+key+'"]');
+  if(!el)return;
+  el.dataset.count=String(value);
+  el.textContent=String(value)+(el.dataset.suffix||'');
+}
+function clearDynamicSection(selector) {
+  var el=document.querySelector(selector);
+  if(el)el.innerHTML='';
+}
 
 function renderProjectCard(project, options) {
   var grid=document.querySelector('.prj-g');
   if(!grid || !project || !project.id) return;
-  var catMap={'Machine Learning':'ml','AI / LLM':'ai','Computer Vision':'cv','Data Science':'ds','Financial Engineering':'fe','Programming':'prog','Full Stack':'prog'};
+  var catMap={'Machine Learning':'ml','AI / LLM':'ai','Computer Vision':'cv','Data Science':'ds','Financial Engineering':'fe','Programming':'prog','Full Stack':'prog','Web Application':'prog','Website':'prog'};
   var type=project.type||'Machine Learning';
   var cat=catMap[type]||'ml';
   var image=localStorage.getItem('pf_proj_'+project.id+'_img_1')||localStorage.getItem('pf_img_pc-img-'+project.id)||project.image_1_url||'';
@@ -478,6 +599,7 @@ function applySiteMedia(media) {
   (media||[]).forEach(function(item){
     var key=item.id==='hero_portrait'?'pf-portrait':item.id==='about_image'?'pf-about-photo':'';
     var slot=item.id==='hero_portrait'?'slot-portrait':item.id==='about_image'?'slot-about':'';
+    if(item.id==='resume_pdf'&&item.image_url)applyResumeUrl(item.image_url);
     if(key&&item.image_url)localStorage.setItem(key,item.image_url);
     if(slot&&item.image_url){
       var el=document.getElementById(slot);
@@ -488,48 +610,71 @@ function applySiteMedia(media) {
 
 // ADMIN-MANAGED PUBLIC CONTENT
 (function(){
+  var statsData={projects:[],publications:[],certifications:[],experience:[]};
+  function setStats(key,value){
+    statsData[key]=Array.isArray(value)?value:[];
+    updatePortfolioStats(statsData);
+  }
+  var localProjects=[];
   for(var slot=1;slot<=5;slot++){
     try{
       var saved=JSON.parse(localStorage.getItem('pf_proj_data_'+slot)||'null');
-      if(saved)renderProjectCard(saved,{label:String(slot).padStart(2,'0')});
+      if(saved){localProjects.push(saved);renderProjectCard(saved,{label:String(slot).padStart(2,'0')});}
     }catch(e){}
   }
   var custom=[];try{custom=JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){}
-  custom.forEach(function(project,index){ renderProjectCard(project,{label:String(index+6).padStart(2,'0')}); });
+  custom.forEach(function(project,index){ localProjects.push(project);renderProjectCard(project,{label:String(index+6).padStart(2,'0')}); });
+  if(localProjects.length)setStats('projects',localProjects);
+  else {
+    updateStatDirect('total-projects',document.querySelectorAll('.prj-g .pc').length);
+    updateStatDirect('research-projects',document.querySelectorAll('.research-g .rc,.pub-list .pub').length);
+    updateStatDirect('certifications',document.querySelectorAll('.certs-g .cert').length);
+  }
 
   var client=supabaseClient();
   if(!client)return;
   client.from('projects').select('*').eq('status','published').order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
+    if(result.data.length)clearDynamicSection('.prj-g');
     result.data.forEach(function(row){
       renderProjectCard({
         id:row.id,title:row.title,type:row.type,desc:row.description,tags:row.tags||[],metrics:row.metrics||[],
         url:row.live_url,github_url:row.github_url,demo_url:row.demo_url,image_1_url:row.image_1_url
       });
     });
+    setStats('projects',result.data);
   });
   client.from('blog_posts').select('*').eq('status','published').eq('type','blog').order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
+    if(result.data.length)clearDynamicSection('.blog-g');
     result.data.forEach(renderBlogCard);
   });
   client.from('certifications').select('*').order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
+    if(result.data.length)clearDynamicSection('.certs-g');
     renderCertificationGrid(result.data);
+    setStats('certifications',result.data);
   });
   client.from('publications').select('*').order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
+    if(result.data.length)clearDynamicSection('.pub-list');
     renderPublicationList(result.data);
+    setStats('publications',result.data);
   });
   client.from('experience').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
+    if(result.data.length)clearDynamicSection('#experience .timeline');
     renderTimeline('experience',result.data,'experience');
+    setStats('experience',result.data);
   });
   client.from('education').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
+    if(result.data.length)clearDynamicSection('#education .timeline');
     renderTimeline('education',result.data,'education');
   });
   client.from('achievements').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
+    if(result.data.length)clearDynamicSection('.ach-g');
     renderAchievementGrid(result.data);
   });
   client.from('site_media').select('*').then(function(result){

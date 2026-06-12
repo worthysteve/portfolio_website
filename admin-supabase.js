@@ -110,6 +110,10 @@
   function renderProjects(projects) {
     const tbody = document.querySelector('#view-projects tbody');
     if (!tbody) return;
+    if (!projects.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No projects yet. Add your first project.</div></td></tr>';
+      return;
+    }
     tbody.innerHTML = projects.map(function(project, index){
       const tags = project.tags || [];
       const status = project.status || 'published';
@@ -129,6 +133,10 @@
   function renderMessages(messages) {
     const list = document.querySelector('#view-messages .msg-list');
     if (!list) return;
+    if (!messages.length) {
+      list.innerHTML = '<div class="empty-state">No messages yet. Contact form submissions will appear here.</div>';
+      return;
+    }
     list.innerHTML = messages.map(function(message){
       const unread = (message.status || 'unread') === 'unread';
       const initials = String(message.name || 'Visitor').split(/\s+/).filter(Boolean).slice(0,2).map(function(part){ return part[0]; }).join('').toUpperCase() || 'V';
@@ -150,6 +158,10 @@
   function renderBlogComments(comments) {
     const list = document.querySelector('#view-comments .msg-list');
     if (!list) return;
+    if (!comments.length) {
+      list.innerHTML = '<div class="empty-state">No blog comments yet.</div>';
+      return;
+    }
     list.innerHTML = comments.map(function(comment){
       const preview = comment.comment || '';
       return '<div class="msg-item">'
@@ -168,6 +180,10 @@
   function renderBlogPosts(posts) {
     const tbody = document.querySelector('#view-blog tbody');
     if (!tbody) return;
+    if (!posts.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No blog posts yet. Create your first post.</div></td></tr>';
+      return;
+    }
     tbody.innerHTML = posts.map(function(post){
       const status = post.status || 'draft';
       return '<tr>'
@@ -186,6 +202,10 @@
   function renderCertifications(certs) {
     const tbody = document.querySelector('#view-certs tbody');
     if (!tbody) return;
+    if (!certs.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No certifications yet.</div></td></tr>';
+      return;
+    }
     tbody.innerHTML = certs.map(function(cert){
       return '<tr>'
         + '<td class="td-title">' + escapeHtml(cert.name) + '</td>'
@@ -201,6 +221,10 @@
   function renderPublications(publications) {
     const tbody = document.querySelector('#view-publications tbody');
     if (!tbody) return;
+    if (!publications.length) {
+      tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No publications yet.</div></td></tr>';
+      return;
+    }
     tbody.innerHTML = publications.map(function(pub){
       const status = pub.status || 'Under Review';
       return '<tr>'
@@ -219,6 +243,10 @@
   function renderExperience(experience) {
     const tbody = document.querySelector('#view-experience tbody');
     if (!tbody) return;
+    if (!experience.length) {
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No experience entries yet.</div></td></tr>';
+      return;
+    }
     tbody.innerHTML = experience.map(function(item){
       return '<tr>'
         + '<td class="td-title">' + escapeHtml(item.role) + '</td>'
@@ -233,6 +261,10 @@
   function renderEducation(education) {
     const tbody = document.querySelector('#view-education tbody');
     if (!tbody) return;
+    if (!education.length) {
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No education entries yet.</div></td></tr>';
+      return;
+    }
     tbody.innerHTML = education.map(function(item){
       return '<tr>'
         + '<td class="td-title">' + escapeHtml(item.degree) + '</td>'
@@ -247,6 +279,10 @@
   function renderAchievements(achievements) {
     const tbody = document.querySelector('#view-achievements tbody');
     if (!tbody) return;
+    if (!achievements.length) {
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty-state">No achievements yet.</div></td></tr>';
+      return;
+    }
     tbody.innerHTML = achievements.map(function(item){
       return '<tr>'
         + '<td class="td-title">' + escapeHtml(item.title) + '</td>'
@@ -271,6 +307,23 @@
     if (certLegend) certLegend.textContent = certs.length || '40';
   }
 
+  function renderDashboardInbox(messages) {
+    const list = document.getElementById('dashboard-inbox-preview');
+    if (!list) return;
+    if (!messages.length) {
+      list.innerHTML = '<div class="empty-state">No messages yet.</div>';
+      return;
+    }
+    list.innerHTML = messages.slice(0, 4).map(function(message){
+      const unread = (message.status || 'unread') === 'unread';
+      return '<div class="ac-item" style="cursor:pointer" onclick="switchView(\'messages\',document.querySelector(\'[onclick*=messages]\'))">'
+        + '<div class="ac-dot' + (unread ? '' : ' green') + '"></div>'
+        + '<div class="ac-text"><strong>' + escapeHtml(message.name || 'Visitor') + '</strong><br><span>' + escapeHtml(message.subject || message.message || 'No subject') + '</span></div>'
+        + '<span class="ac-time">' + escapeHtml(relativeTime(message.created_at)) + '</span>'
+        + '</div>';
+    }).join('');
+  }
+
   async function loadDashboard() {
     if (!init()) {
       const localProjects = fallbackProjects.concat(readLocalCustomProjects());
@@ -283,6 +336,7 @@
       renderEducation(fallbackEducation.concat(readLocalRecords('pf_education_custom')));
       renderAchievements(fallbackAchievements.concat(readLocalRecords('pf_achievements_custom')));
       renderStats(localProjects, fallbackPosts, fallbackMessages, fallbackCerts);
+      renderDashboardInbox(fallbackMessages);
       return { connected: false };
     }
     const results = await Promise.all([
@@ -303,20 +357,21 @@
       show('Supabase read failed: ' + first.name + ' — ' + (first.error.message || first.error.code || 'check schema/RLS'));
       console.warn('Supabase dashboard read failures', failed);
     }
-    const projects = byName.projects.data || fallbackProjects.concat(readLocalCustomProjects());
-    const posts = byName.blog_posts.data || fallbackPosts;
-    const messages = byName.messages.data || fallbackMessages;
-    const certs = byName.certifications.data || fallbackCerts;
+    const projects = byName.projects.data || [];
+    const posts = byName.blog_posts.data || [];
+    const messages = byName.messages.data || [];
+    const certs = byName.certifications.data || [];
     renderProjects(projects);
     renderMessages(messages);
     renderBlogPosts(posts);
     renderCertifications(certs);
-    renderPublications(byName.publications.data || fallbackPublications);
-    renderExperience(byName.experience.data || fallbackExperience.concat(readLocalRecords('pf_experience_custom')));
-    renderEducation(byName.education.data || fallbackEducation.concat(readLocalRecords('pf_education_custom')));
-    renderAchievements(byName.achievements.data || fallbackAchievements.concat(readLocalRecords('pf_achievements_custom')));
+    renderPublications(byName.publications.data || []);
+    renderExperience(byName.experience.data || []);
+    renderEducation(byName.education.data || []);
+    renderAchievements(byName.achievements.data || []);
     renderBlogComments(byName.blog_comments.data || []);
     renderStats(projects, posts, messages, certs);
+    renderDashboardInbox(messages);
     return { connected: failed.length === 0, failures: failed };
   }
 
@@ -342,6 +397,31 @@
     const array = new Uint8Array(bytes.length);
     for (let i = 0; i < bytes.length; i++) array[i] = bytes.charCodeAt(i);
     return new Blob([array], { type: mime });
+  }
+
+  function safeFileName(name) {
+    return String(name || 'file')
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/^-+|-+$/g, '') || 'file';
+  }
+
+  async function uploadFile(file, folder) {
+    if (!init()) return { connected: false };
+    if (!file) throw new Error('Choose a file first');
+    const cfg = getConfig();
+    const cleanFolder = String(folder || 'files').replace(/^\/+|\/+$/g, '') || 'files';
+    const path = cleanFolder + '/' + Date.now() + '-' + safeFileName(file.name);
+    const { error } = await client.storage.from(cfg.bucket).upload(path, file, {
+      contentType: file.type || 'application/octet-stream',
+      upsert: true
+    });
+    if (error) throw error;
+    return {
+      connected: true,
+      path: path,
+      url: client.storage.from(cfg.bucket).getPublicUrl(path).data.publicUrl
+    };
   }
 
   async function uploadProjectImages(projectId, images) {
@@ -517,6 +597,14 @@
     return { connected: true };
   }
 
+  async function resetPassword(email) {
+    if (!init()) return { connected: false };
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: redirectTo });
+    if (error) throw error;
+    return { connected: true };
+  }
+
   async function signUpWithPassword(email, password) {
     if (!init()) return { connected: false };
     const { error } = await client.auth.signUp({ email: email, password: password });
@@ -614,6 +702,7 @@
     isConfigured,
     loadDashboard,
     saveProject,
+    uploadFile,
     saveBlogPost,
     saveCertification,
     savePublication,
@@ -624,6 +713,7 @@
     deleteProject,
     deleteRecord,
     signInWithPassword,
+    resetPassword,
     signUpWithPassword,
     signInWithGoogle,
     signOut,

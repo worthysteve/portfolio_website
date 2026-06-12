@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portfolio Admin — Dashboard</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -34,7 +35,7 @@ button{cursor:pointer;font-family:var(--fb)}
   box-shadow:0 40px 80px rgba(0,0,0,.5);
 }
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:32px}
-.login-logo-mark{min-width:104px;height:36px;padding:0 12px;border-radius:9px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center}
+.login-logo-mark{width:40px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center}
 .login-logo-mark span{font-family:var(--fm);font-size:12px;font-weight:700;color:#fff}
 .login-logo h2{font-family:var(--fh);font-size:16px;font-weight:600}
 .login-logo p{font-size:12px;color:var(--t3);font-family:var(--fm)}
@@ -48,6 +49,11 @@ button{cursor:pointer;font-family:var(--fb)}
 .btn-login:hover{filter:brightness(1.1)}
 .login-hint{font-size:12px;color:var(--t3);text-align:center;margin-top:16px;font-family:var(--fm)}
 .login-hint span{color:var(--a2)}
+.login-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:12px 0 4px}
+.remember-label{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--t2);cursor:pointer;user-select:none}
+.remember-label input{accent-color:var(--a)}
+.forgot-btn{background:none;border:0;color:var(--a2);font-size:12px;font-family:var(--fb);padding:0;cursor:pointer}
+.forgot-btn:hover{text-decoration:underline}
 
 /* SHELL */
 #app{display:none;height:100%;flex-direction:column}
@@ -61,7 +67,7 @@ button{cursor:pointer;font-family:var(--fb)}
   flex-shrink:0;
 }
 .tb-logo{display:flex;align-items:center;gap:10px;margin-right:auto}
-.tb-logo-mark{min-width:94px;height:28px;padding:0 10px;border-radius:7px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center}
+.tb-logo-mark{width:32px;height:28px;border-radius:7px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center}
 .tb-logo-mark span{font-family:var(--fm);font-size:10px;font-weight:700;color:#fff}
 .tb-logo-name{font-family:var(--fh);font-size:14px;font-weight:600}
 .tb-search{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);padding:7px 12px;width:240px;color:var(--t3)}
@@ -254,6 +260,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 
 /* MESSAGES */
 .msg-list{display:flex;flex-direction:column;gap:0;background:var(--card);border:1px solid var(--b);border-radius:var(--rl);overflow:hidden}
+.empty-state{padding:28px 22px;color:var(--t3);font-size:13px;text-align:center;font-family:var(--fm)}
 .msg-item{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid var(--b);cursor:pointer;transition:background .15s;position:relative}
 .msg-item:last-child{border-bottom:none}
 .msg-item:hover{background:rgba(255,255,255,.025)}
@@ -320,6 +327,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .reply-quote strong{display:block;font-style:normal;color:var(--t1);font-weight:600;margin-bottom:4px}
 .msg-reply-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--b);background:none;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,color .2s,background .2s;flex-shrink:0}
 .msg-reply-btn:hover{border-color:var(--a);color:var(--a);background:rgba(37,99,235,.08)}
+
+/* ===== ADMIN FILE DROP ===== */
+.admin-file-drop{background:var(--s2);border:2px dashed var(--b2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;display:flex;flex-direction:column;align-items:center;gap:7px}
+.admin-file-drop:hover,.admin-file-drop.drag-ov{border-color:var(--a);background:rgba(37,99,235,.06)}
+.admin-file-drop.has-file{border-color:var(--a2);border-style:solid;background:rgba(6,182,212,.06)}
+.admin-file-drop p{font-size:13px;color:var(--t2);line-height:1.4;margin:0}
+.admin-file-drop small{font-size:11px;color:var(--t3);font-family:var(--fm)}
 </style>
 </head>
 <body>
@@ -328,7 +342,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div id="login-overlay">
   <div class="login-box">
     <div class="login-logo">
-      <div class="login-logo-mark"><span>Steven Daniel</span></div>
+      <div class="login-logo-mark"><span>SD</span></div>
       <div><h2>Steven Daniel</h2><p>Portfolio Admin</p></div>
     </div>
     <h1 class="login-title">Sign in</h1>
@@ -338,8 +352,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
       Continue with Google
     </button>
     <div class="login-divider"><span>or sign in with email</span></div>
-    <div class="lfield"><label>Email address</label><input type="email" id="login-email" placeholder="admin@example.com" value="danielsteven.ds@gmail.com"></div>
-    <div class="lfield"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" value="password"></div>
+    <div class="lfield"><label>Email address</label><input type="email" id="login-email" placeholder="admin@example.com" autocomplete="username"></div>
+    <div class="lfield"><label>Password</label><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="login-row">
+      <label class="remember-label"><input type="checkbox" id="remember-me"> Remember me</label>
+      <button type="button" class="forgot-btn" onclick="doForgotPassword()">Forgot password?</button>
+    </div>
     <button class="btn-login" onclick="doLogin()">Sign In →</button>
     <button class="btn-login" style="background:transparent;border:1px solid var(--b2);color:var(--t1)" onclick="doCreateAdmin()">Create Admin Account</button>
     <p class="login-hint">Use Supabase Auth email/password or Google. Create the first admin user here if signups are enabled.</p>
@@ -352,7 +370,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
   <div class="topbar">
     <button class="tb-ham" id="sb-ham" aria-label="Toggle sidebar"><span></span><span></span><span></span></button>
     <div class="tb-logo">
-      <div class="tb-logo-mark"><span>Steven Daniel</span></div>
+      <div class="tb-logo-mark"><span>SD</span></div>
       <span class="tb-logo-name">Steven Daniel</span>
     </div>
     <div class="tb-search">
@@ -520,10 +538,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
           </div>
           <div class="activity-card">
             <p class="ac-head">Inbox Preview</p>
-            <div class="ac-item" style="cursor:pointer"><div class="ac-dot"></div><div class="ac-text"><strong>Dr. James Osei</strong><br><span>Research collaboration on climate AI...</span></div><span class="ac-time">1h ago</span></div>
-            <div class="ac-item" style="cursor:pointer"><div class="ac-dot"></div><div class="ac-text"><strong>Fatima Al-Hassan</strong><br><span>ML Engineer role at our startup...</span></div><span class="ac-time">4h ago</span></div>
-            <div class="ac-item" style="cursor:pointer"><div class="ac-dot green"></div><div class="ac-text"><strong>Marcus Webb</strong><br><span>Your talk proposal was accepted...</span></div><span class="ac-time">1d ago</span></div>
-            <div class="ac-item" style="cursor:pointer"><div class="ac-dot green"></div><div class="ac-text"><strong>Priya Sharma</strong><br><span>Loved your flood prediction project...</span></div><span class="ac-time">2d ago</span></div>
+            <div id="dashboard-inbox-preview"><div class="empty-state">No messages yet.</div></div>
           </div>
         </div>
       </div>
@@ -725,7 +740,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div class="view" id="view-education"><div class="page-hdr"><div><h1>Education</h1><p>Manage academic history, degrees, and awards.</p></div><button class="btn-new" onclick="openModal('education')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Education</button></div><div class="table-wrap"><div class="table-head"><h3>All Education</h3></div><table><thead><tr><th>Degree</th><th>Institution</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
       <div class="view" id="view-achievements"><div class="page-hdr"><div><h1>Achievements</h1><p>Manage fellowships, awards, and recognition.</p></div><button class="btn-new" onclick="openModal('achievement')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Achievement</button></div><div class="table-wrap"><div class="table-head"><h3>All Achievements</h3></div><table><thead><tr><th>Title</th><th>Organisation</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
       <div class="view" id="view-media">
-        <div class="page-hdr"><div><h1>Media</h1><p>Manage public portfolio images from the admin dashboard.</p></div><button class="btn-new" onclick="savePublicMedia()">Save Public Images</button></div>
+        <div class="page-hdr"><div><h1>Media</h1><p>Manage public portfolio images and resume PDF from the admin dashboard.</p></div><button class="btn-new" onclick="savePublicMedia()">Save Public Media</button></div>
         <div class="settings-grid">
           <div class="settings-card">
             <h3>Hero Portrait</h3>
@@ -736,6 +751,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <h3>About Image</h3>
             <p>Shown in the About section image frame on the public portfolio.</p>
             <div class="admin-img-drop" id="admin-about-image" onclick="adminImgClick('admin-about-image')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-about-image')"><p>Click or drag &amp; drop about image</p><small>Saved to public portfolio</small></div>
+          </div>
+          <div class="settings-card">
+            <h3>Resume PDF</h3>
+            <p>Used by the Download Resume button on the public portfolio.</p>
+            <div class="admin-file-drop" id="admin-resume-pdf" onclick="adminFileClick('admin-resume-pdf','application/pdf')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminFileDrop(event,'admin-resume-pdf','application/pdf')"><p>Click or drag &amp; drop resume PDF</p><small>PDF only &middot; Saved to Supabase Storage</small></div>
           </div>
         </div>
       </div>
@@ -788,19 +808,48 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <script src="admin-supabase.js"></script>
 <script>
 // LOGIN
-async function doLogin() {
-  const email = document.getElementById('login-email').value;
-  const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) return;
-  if (window.PortfolioAdminDB?.isConfigured()) {
-    try { await PortfolioAdminDB.signInWithPassword(email, pass); }
-    catch (error) { showToast(error.message || 'Supabase sign-in failed'); return; }
+const LOGIN_MEMORY_KEY = 'pf-admin-remembered-email';
+function hydrateRememberedLogin(){
+  const remembered = localStorage.getItem(LOGIN_MEMORY_KEY) || '';
+  const emailInput = document.getElementById('login-email');
+  const rememberInput = document.getElementById('remember-me');
+  if(remembered && emailInput && rememberInput){
+    emailInput.value = remembered;
+    rememberInput.checked = true;
   }
+}
+function persistRememberedLogin(email){
+  const remember = document.getElementById('remember-me')?.checked;
+  if(remember) localStorage.setItem(LOGIN_MEMORY_KEY, email);
+  else localStorage.removeItem(LOGIN_MEMORY_KEY);
+}
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showToast('Enter email and password'); return; }
+  if (!window.PortfolioAdminDB?.isConfigured()) {
+    showToast('Supabase must be configured before admin login');
+    return;
+  }
+  try { await PortfolioAdminDB.signInWithPassword(email, pass); }
+  catch (error) { showToast(error.message || 'Invalid email or password'); return; }
+  persistRememberedLogin(email);
   await updateAdminProfile(email);
   const overlay = document.getElementById('login-overlay');
   overlay.style.opacity = '0'; overlay.style.transition = 'opacity .4s';
   setTimeout(() => { overlay.style.display = 'none'; document.getElementById('app').classList.add('visible'); }, 400);
-  showToast(window.PortfolioAdminDB?.isConfigured() ? 'Signed in via Supabase Auth' : 'Signed in locally');
+  showToast('Signed in via Supabase Auth');
+}
+async function doForgotPassword(){
+  const email = document.getElementById('login-email').value.trim();
+  if(!email){ showToast('Enter your email address first'); return; }
+  if(!window.PortfolioAdminDB?.isConfigured()){ showToast('Supabase must be configured first'); return; }
+  try{
+    await PortfolioAdminDB.resetPassword(email);
+    showToast('Password reset email sent');
+  }catch(error){
+    showToast(error.message || 'Password reset failed');
+  }
 }
 async function doLogout() {
   if (window.PortfolioAdminDB?.isConfigured()) await PortfolioAdminDB.signOut();
@@ -872,7 +921,9 @@ async function doCreateAdmin() {
   }
 }
 document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+document.getElementById('login-email').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 window.addEventListener('load', async function(){
+  hydrateRememberedLogin();
   if(window.PortfolioAdminDB?.isConfigured()&&PortfolioAdminDB.getCurrentUser){
     var user=await PortfolioAdminDB.getCurrentUser();
     if(user){
@@ -917,12 +968,14 @@ const MODALS = {
            <div class="mrow"><div class="mfield"><label>Type</label><select id="pub-type"><option>Journal</option><option>Conference</option><option>Thesis</option><option>Research Note</option><option>White Paper</option></select></div><div class="mfield"><label>Status</label><select id="pub-status"><option>Under Review</option><option>Accepted</option><option>Published</option><option>In Progress</option></select></div></div>
            <div class="mfield"><label>Authors</label><input type="text" id="pub-authors" placeholder="Steven Daniel, Co-Author Name"></div>
            <div class="mfield"><label>Venue / Journal</label><input type="text" id="pub-venue" placeholder="Journal name or conference"></div>
-           <div class="mrow"><div class="mfield"><label>Year</label><input type="number" id="pub-year" placeholder="2025"></div><div class="mfield"><label>PDF URL (Supabase Storage)</label><input type="url" id="pub-pdf" placeholder="https://..."></div></div>`
+           <div class="mrow"><div class="mfield"><label>Year</label><input type="number" id="pub-year" placeholder="2025"></div><div class="mfield"><label>PDF URL</label><input type="url" id="pub-pdf" placeholder="https://..."></div></div>
+           <div class="mfield"><label>Upload Article / Paper PDF <small style="color:var(--t3);font-weight:400">fills the PDF URL automatically</small></label><div class="admin-file-drop" id="pub-pdf-file" onclick="adminFileClick('pub-pdf-file','application/pdf')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminFileDrop(event,'pub-pdf-file','application/pdf')"><p>Click or drop publication PDF</p><small>PDF only &middot; optional</small></div></div>`
   },
   experience: {
     title: 'Add Experience',
     body: `<div class="mfield"><label>Role / Title</label><input type="text" id="exp-role" placeholder="e.g. Digital Innovation Volunteer"></div>
            <div class="mrow"><div class="mfield"><label>Organisation</label><input type="text" id="exp-org" placeholder="UNDP-IICPSD"></div><div class="mfield"><label>Date / Period</label><input type="text" id="exp-date" placeholder="2023 — Present"></div></div>
+           <div class="mrow"><div class="mfield"><label>Start Date</label><input type="date" id="exp-start"></div><div class="mfield"><label>End Date <small style="color:var(--t3);font-weight:400">(leave blank for present)</small></label><input type="date" id="exp-end"></div></div>
            <div class="mfield"><label>Description</label><textarea id="exp-desc" placeholder="Describe responsibilities, impact, and outcomes..."></textarea></div>
            <div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="exp-tags" placeholder="AI for Good, SDGs, Digital Literacy"></div>
            <div class="mrow"><div class="mfield"><label>Award / Highlight</label><input type="text" id="exp-award" placeholder="Optional highlight shown below entry"></div><div class="mfield"><label>Display Order</label><input type="number" id="exp-order" value="0"></div></div>`
@@ -978,7 +1031,9 @@ function buildProjectModalBody(){
     +'<div class="mfield"><label>Key Metrics <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-metrics" placeholder="89% accuracy, 48h warning"></div>'
     +'<div class="mrow"><div class="mfield"><label>Live Project URL</label><input type="url" id="proj-url" placeholder="https://..."></div><div class="mfield"><label>GitHub URL <small style="color:var(--t3)">shows button on detail page</small></label><input type="url" id="proj-github" placeholder="https://github.com/worthysteven/..."></div></div>'
     +'<div class="mrow"><div class="mfield"><label>Demo URL <small style="color:var(--t3)">shows Demo button</small></label><input type="url" id="proj-demo" placeholder="https://..."></div><div class="mfield"><label>Docs / Case Study URL <small style="color:var(--t3)">shows Docs button</small></label><input type="url" id="proj-docs" placeholder="https://..."></div></div>'
+    +'<div class="mfield"><label>Upload Case Study PDF <small style="color:var(--t3);font-weight:400">fills the Docs / Case Study URL automatically</small></label><div class="admin-file-drop" id="proj-docs-file" onclick="adminFileClick(\'proj-docs-file\',\'application/pdf\')" ondragover="event.preventDefault();this.classList.add(\'drag-ov\')" ondragleave="this.classList.remove(\'drag-ov\')" ondrop="adminFileDrop(event,\'proj-docs-file\',\'application/pdf\')"><p>Click or drop case study PDF</p><small>PDF only &middot; optional</small></div></div>'
     +'<div class="mfield"><label>Paper / Publication URL <small style="color:var(--t3);font-weight:400">shows Paper button on detail page</small></label><input type="url" id="proj-paper" placeholder="https://arxiv.org/..."></div>'
+    +'<div class="mfield"><label>Upload Paper PDF <small style="color:var(--t3);font-weight:400">fills the Paper / Publication URL automatically</small></label><div class="admin-file-drop" id="proj-paper-file" onclick="adminFileClick(\'proj-paper-file\',\'application/pdf\')" ondragover="event.preventDefault();this.classList.add(\'drag-ov\')" ondragleave="this.classList.remove(\'drag-ov\')" ondrop="adminFileDrop(event,\'proj-paper-file\',\'application/pdf\')"><p>Click or drop research paper PDF</p><small>PDF only &middot; optional</small></div></div>'
     +'<div class="mrow"><div class="mfield"><label>Date / Period</label><input type="text" id="proj-date" placeholder="Jan 2025"></div><div class="mfield"><label>Organisation / Context</label><input type="text" id="proj-org" placeholder="UNDP Research, Personal Project..."></div></div>';
 }
 
@@ -1002,6 +1057,24 @@ function openModal(type, id) {
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+async function uploadAdminPdfToInput(dropId, inputId, folder) {
+  var drop = document.getElementById(dropId);
+  if (!drop || !drop._adminFile) return true;
+  if (!window.PortfolioAdminDB?.isConfigured()) {
+    showToast('Connect Supabase before uploading PDFs');
+    return false;
+  }
+  try {
+    var result = await PortfolioAdminDB.uploadFile(drop._adminFile, folder);
+    var input = document.getElementById(inputId);
+    if (input) input.value = result.url;
+    drop.dataset.fileUrl = result.url;
+    return true;
+  } catch (error) {
+    showToast(error.message || 'PDF upload failed');
+    return false;
+  }
+}
 async function saveModal() {
   var slotEl=document.getElementById('admin-proj-slot');
   if(slotEl){
@@ -1019,6 +1092,8 @@ async function saveModal() {
       }
     }
     var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
+    if(!await uploadAdminPdfToInput('proj-docs-file','proj-docs','projects/'+projId+'/documents'))return;
+    if(!await uploadAdminPdfToInput('proj-paper-file','proj-paper','projects/'+projId+'/papers'))return;
     var data={id:projId,title:g('proj-title'),type:g('proj-type'),date:g('proj-date'),org:g('proj-org'),
       desc:g('proj-desc'),overview:g('proj-overview'),challenge:g('proj-challenge'),solution:g('proj-solution'),
       features:g('proj-features').split('\n').filter(Boolean),
@@ -1068,6 +1143,7 @@ async function saveModal() {
     catch(error){showToast(error.message||'Certificate save failed');return;}
   }
   if(!slotEl&&currentModalType==='pub'&&window.PortfolioAdminDB?.isConfigured()){
+    if(!await uploadAdminPdfToInput('pub-pdf-file','pub-pdf','publications'))return;
     try{await PortfolioAdminDB.savePublication({
       title:document.getElementById('pub-title')?.value||'Untitled Publication',
       pub_type:document.getElementById('pub-type')?.value||'Journal',
@@ -1084,6 +1160,8 @@ async function saveModal() {
       role:document.getElementById('exp-role')?.value||'Untitled Role',
       organisation:document.getElementById('exp-org')?.value||'',
       date_period:document.getElementById('exp-date')?.value||'',
+      start_date:document.getElementById('exp-start')?.value||null,
+      end_date:document.getElementById('exp-end')?.value||null,
       description:document.getElementById('exp-desc')?.value||'',
       tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
       award:document.getElementById('exp-award')?.value||'',
@@ -1092,7 +1170,7 @@ async function saveModal() {
     catch(error){showToast(error.message||'Experience save failed');return;}
   }
   if(!slotEl&&currentModalType==='experience'&&!window.PortfolioAdminDB?.isConfigured()){
-    saveLocalAdminRecord('pf_experience_custom',{id:Date.now(),role:document.getElementById('exp-role')?.value||'Untitled Role',organisation:document.getElementById('exp-org')?.value||'',date_period:document.getElementById('exp-date')?.value||'',description:document.getElementById('exp-desc')?.value||'',tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('exp-award')?.value||'',display_order:Number(document.getElementById('exp-order')?.value)||0});
+    saveLocalAdminRecord('pf_experience_custom',{id:Date.now(),role:document.getElementById('exp-role')?.value||'Untitled Role',organisation:document.getElementById('exp-org')?.value||'',date_period:document.getElementById('exp-date')?.value||'',start_date:document.getElementById('exp-start')?.value||null,end_date:document.getElementById('exp-end')?.value||null,description:document.getElementById('exp-desc')?.value||'',tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('exp-award')?.value||'',display_order:Number(document.getElementById('exp-order')?.value)||0});
   }
   if(!slotEl&&currentModalType==='education'&&window.PortfolioAdminDB?.isConfigured()){
     try{await PortfolioAdminDB.saveEducation({
@@ -1207,8 +1285,13 @@ document.getElementById('reply-overlay').addEventListener('click', function(e){
 async function savePublicMedia() {
   var hero = document.getElementById('admin-hero-portrait');
   var about = document.getElementById('admin-about-image');
+  var resume = document.getElementById('admin-resume-pdf');
   if (hero && hero.dataset.imageSrc) localStorage.setItem('pf-portrait', hero.dataset.imageSrc);
   if (about && about.dataset.imageSrc) localStorage.setItem('pf-about-photo', about.dataset.imageSrc);
+  if (resume && resume._adminFile && !window.PortfolioAdminDB?.isConfigured()) {
+    showToast('Connect Supabase before uploading PDFs');
+    return;
+  }
   if(window.PortfolioAdminDB?.isConfigured()){
     try{
       if(hero&&hero.dataset.imageSrc){
@@ -1219,9 +1302,14 @@ async function savePublicMedia() {
         var aboutRes=await PortfolioAdminDB.saveSiteMedia('about_image',about.dataset.imageSrc,'About Steven Daniel');
         if(aboutRes.image_url)localStorage.setItem('pf-about-photo',aboutRes.image_url);
       }
+      if(resume&&resume._adminFile){
+        var fileRes=await PortfolioAdminDB.uploadFile(resume._adminFile,'resume');
+        localStorage.setItem('pf-resume-url',fileRes.url);
+        await PortfolioAdminDB.saveSiteMedia('resume_pdf',fileRes.url,'Steven Daniel resume PDF');
+      }
     }catch(error){showToast(error.message||'Media save failed');return;}
   }
-  showToast('Public images saved');
+  showToast('Public media saved');
 }
 
 // GOOGLE LOGIN (demo)
@@ -1273,6 +1361,38 @@ function adminApplyImg(id, file) {
     if (sm) sm.textContent = 'Click to change';
   };
   reader.readAsDataURL(file);
+}
+function adminFileClick(id, accept) {
+  var inp = document.createElement('input');
+  inp.type = 'file';
+  inp.accept = accept || 'application/pdf';
+  inp.onchange = function(e) {
+    var f = e.target.files[0];
+    if (f) adminApplyFile(id, f, accept);
+  };
+  inp.click();
+}
+function adminFileDrop(e, id, accept) {
+  e.preventDefault();
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('drag-ov');
+  var f = e.dataTransfer.files[0];
+  if (f) adminApplyFile(id, f, accept);
+}
+function adminApplyFile(id, file, accept) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var wantsPdf = String(accept || '').indexOf('pdf') > -1;
+  if (wantsPdf && file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
+    showToast('Please choose a PDF file');
+    return;
+  }
+  el._adminFile = file;
+  el.classList.add('has-file');
+  var p = el.querySelector('p');
+  if (p) p.textContent = '\u2713 ' + file.name + ' ready';
+  var sm = el.querySelector('small');
+  if (sm) sm.textContent = 'Uploads when you save';
 }
 </script>
 </body>

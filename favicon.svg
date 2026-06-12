@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Steven Daniel favicon</title>
+  <desc id="desc">A polished SD monogram favicon in blue and cyan.</desc>
+  <defs>
+    <linearGradient id="bg" x1="8" y1="4" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="14" y1="10" x2="50" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#93C5FD"/>
+      <stop offset="1" stop-color="#67E8F9"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#020617" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <rect width="64" height="64" rx="18" fill="#0B1220"/>
+  <rect x="6" y="6" width="52" height="52" rx="16" fill="url(#bg)" filter="url(#shadow)"/>
+  <rect x="9" y="9" width="46" height="46" rx="14" fill="#0B1220" opacity=".22"/>
+  <path d="M20 24.2c0-4.3 3.3-7.2 8.5-7.2 3.4 0 6.4 1.1 8.7 3l-3.1 4.2c-1.8-1.4-3.7-2.1-5.8-2.1-1.8 0-2.9.7-2.9 1.8 0 1.3 1 1.7 4.8 2.6 5.2 1.2 8.3 3 8.3 7.6 0 4.7-3.7 7.6-9.1 7.6-4 0-7.8-1.4-10.3-3.8l3.4-4.1c2.1 1.8 4.5 2.8 7 2.8 2.2 0 3.4-.8 3.4-2.1 0-1.2-.9-1.8-4.5-2.6-5.3-1.2-8.4-2.9-8.4-7.7Z" fill="#F8FAFC"/>
+  <path d="M38.3 17.5h6.3c6.6 0 10.9 4.4 10.9 11s-4.3 11.2-10.9 11.2h-6.3V17.5Zm6.1 16.9c3.3 0 5.3-2.2 5.3-5.8s-2-5.8-5.3-5.8h-.7v11.6h.7Z" fill="url(#edge)"/>
+  <path d="M13 49h38" stroke="#E0F2FE" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+</svg>

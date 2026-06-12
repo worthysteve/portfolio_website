@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Blog — Steven Daniel</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -34,8 +35,9 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
 #nav.scrolled{background:rgba(11,18,32,.92);backdrop-filter:blur(20px);border-color:var(--b)}
 [data-theme="light"] #nav.scrolled{background:rgba(248,250,252,.94)}
 .nav-i{display:flex;align-items:center;gap:16px;padding:16px 28px;max-width:1240px;margin:0 auto}
-.nav-logo{font-family:var(--fm);font-size:14px;color:var(--t1);white-space:nowrap}
-.nav-logo .a{color:var(--a)}
+.nav-logo{display:flex;align-items:center;gap:12px;margin-right:auto;color:var(--t1);white-space:nowrap}
+.nav-logo-mark{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,var(--a),var(--a2));display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--fm);font-size:14px;font-weight:700;letter-spacing:-.03em;box-shadow:0 8px 24px rgba(37,99,235,.22)}
+.nav-logo-name{font-family:var(--fh);font-size:20px;font-weight:700;letter-spacing:-.03em;color:var(--t1)}
 .nav-bread{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--t2);flex:1;margin:0 12px}
 .nav-bread a{color:var(--t2);transition:color .2s}.nav-bread a:hover{color:var(--t1)}
 .nav-bread .sep{color:var(--t3)}
@@ -169,7 +171,7 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
 
 <nav id="nav">
   <div class="nav-i">
-    <a class="nav-logo" href="index.html"><span class="a">&lt;</span><code>/SD</code><span class="a">&gt;</span></a>
+    <a class="nav-logo" href="index.html"><span class="nav-logo-mark">SD</span><span class="nav-logo-name">{Steven Daniel}</span></a>
     <div class="nav-bread">
       <a href="index.html">Home</a>
       <span class="sep">/</span>
