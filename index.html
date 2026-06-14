@@ -142,12 +142,14 @@
         <p class="slabel">About Me</p>
         <h2 class="stitle">Researcher. Engineer.<br><em style="font-style:normal;color:var(--a2)">Innovator.</em></h2>
         <p>A passionate <strong>AI Engineer and Researcher</strong> pursuing dual Master's programmes in Information Systems and Financial Engineering. My work sits at the intersection of artificial intelligence, data science, and domain expertise, with a focus on building production-ready intelligent systems that create measurable real-world impact.</p>
-        <p>Recognised as <strong>Best Graduating Student</strong>, selected as a <strong>UNDP Frontier Tech Leader</strong>, and awarded an <strong>AI/ML Fellowship</strong> — committed to leveraging frontier technology for social good, from climate resilience to financial inclusion in underserved communities.</p>
+        <p>Recognised as <strong>Best Graduating Student</strong>, selected as a <strong><a href="https://www.undp.org/policy-centre/istanbul/press-releases/frontier-tech-leaders-programme-kicks-first-machine-learning-bootcamp" target="_blank" rel="noopener noreferrer">UNDP IICPSD </a>Frontier Tech Leader</strong> for the cohort 1 of the <strong><a href="https://www.undp.org/policy-centre/istanbul/press-releases/frontier-tech-leaders-programme-kicks-first-machine-learning-bootcamp" target="_blank" rel="noopener noreferrer">FTL Machine Learning Bootcamp</a></strong> Cohort 1, and awarded an <strong>AI/ML Fellow </strong> position as one of only two Sierra Leoneans out of 1301 applications and chosen as one of only two in the <strong></strong>AI/ML track out of 250 applicants at The <a href="https://developersfoundry.org/" target="_blank" rel="noopener noreferrer"><strong>Developers Foundry</a> Fellowship</strong> Cohort 1 organized by <a href="https://tech4dev.com/" target="_blank" rel="noopener noreferrer"><strong>Tech4Dev</strong></a> — committed to leveraging frontier technology for social good, from climate resilience to financial inclusion in underserved communities.</p>
         <div class="cred-g">
           <div class="cred"><div class="cred-dot"></div><div class="cred-t"><strong>MSc Information Systems</strong><span>Gazi University, Turkey</span></div></div>
           <div class="cred"><div class="cred-dot"></div><div class="cred-t"><strong>MSc Financial Engineering</strong><span>WorldQuant University</span></div></div>
           <div class="cred"><div class="cred-dot"></div><div class="cred-t"><strong>Best Graduating Student</strong><span>University of Sierra Leone</span></div></div>
-          <div class="cred"><div class="cred-dot"></div><div class="cred-t"><strong>UNDP Frontier Tech Leader</strong><span>AI / ML Fellow</span></div></div>
+          <div class="cred"><div class="cred-dot"></div><div class="cred-t"><strong>Alumni UNDP IICPSD Frontier Tech Leader</strong><span>FTL Machine Learning Bootcamp</span></div></div>
+          <div class="cred"><div class="cred-dot"></div><div class="cred-t"><strong>Alumni AI/ML Fellow</strong><span>Developers Foundry Fellowship - Tech4Dev</span></div></div>
+          <div class="cred"><div class="cred-dot"></div><div class="cred-t"><strong>FTL Local Community Support Sierra Leone</strong><span>FTL Programme - UNDP IICPSD</span></div></div>
         </div>
         <div class="stags">
           <span class="stag">Python</span><span class="stag">PyTorch</span><span class="stag">TensorFlow</span><span class="stag">LangChain</span><span class="stag">FastAPI</span><span class="stag">React</span><span class="stag">SQL</span><span class="stag">AWS</span><span class="stag">Docker</span><span class="stag">Scikit-learn</span><span class="stag">HuggingFace</span><span class="stag">Supabase</span>
@@ -382,10 +384,15 @@
       <button class="cf-btn" data-cat="ai">AI</button>
       <button class="cf-btn" data-cat="ml">Machine Learning</button>
       <button class="cf-btn" data-cat="dl">Deep Learning / CV</button>
+      <button class="cf-btn" data-cat="cv">Computer Vision</button>
       <button class="cf-btn" data-cat="ds">Data Science</button>
+      <button class="cf-btn" data-cat="nlp">Natural Language Processing</button>
+      <button class="cf-btn" data-cat="llm">Large Language Models</button>
       <button class="cf-btn" data-cat="pr">Programming</button>
       <button class="cf-btn" data-cat="ux">UX Design</button>
+      <button class="cf-btn" data-cat="pm">Project Management</button>
       <button class="cf-btn" data-cat="fe">Financial Engineering</button>
+      
     </div>
     <div class="certs-g rstagger">
       <div class="cert" data-cat="ai"><div class="cbadge cb-ai">IBM</div><div><p class="cname">AI Engineering Professional Certificate</p><p class="cissuer">IBM / Coursera</p></div></div>
@@ -548,11 +555,12 @@
       <div class="cform-box reveal">
         <form class="cform" onsubmit="handleContact(event)">
           <div class="frow">
-            <div class="ffield"><label>First Name</label><input type="text" placeholder="Jane" required></div>
-            <div class="ffield"><label>Last Name</label><input type="text" placeholder="Smith" required></div>
+            <div class="ffield"><label>First Name</label><input type="text" name="first_name" placeholder="Jane" required></div>
+            <div class="ffield"><label>Last Name</label><input type="text" name="last_name" placeholder="Smith" required></div>
           </div>
-          <div class="ffield"><label>Subject</label><input type="text" placeholder="Collaboration, role, research..."></div>
-          <div class="ffield"><label>Message</label><textarea placeholder="Tell me about your idea or project..." required></textarea></div>
+          <div class="ffield"><label>Email Address</label><input type="email" name="email" placeholder="jane@example.com" autocomplete="email" required></div>
+          <div class="ffield"><label>Subject</label><input type="text" name="subject" placeholder="Collaboration, role, research..."></div>
+          <div class="ffield"><label>Message</label><textarea name="message" placeholder="Tell me about your idea or project..." required></textarea></div>
           <button type="submit" class="btn-send">Send Message →</button>
         </form>
       </div>

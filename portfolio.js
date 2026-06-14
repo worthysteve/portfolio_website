@@ -247,14 +247,17 @@ document.querySelectorAll('a[data-resume-link]').forEach(function(link){
 async function handleContact(e) {
   e.preventDefault();
   const btn = e.target.querySelector('.btn-send');
-  const inputs=e.target.querySelectorAll('input,textarea');
-  const name=((inputs[0]?.value||'')+' '+(inputs[1]?.value||'')).trim();
-  const subject=inputs[2]?.value||'Portfolio message';
-  const message=inputs[3]?.value||'';
+  const form=e.target;
+  const firstName=form.querySelector('[name="first_name"]')?.value||'';
+  const lastName=form.querySelector('[name="last_name"]')?.value||'';
+  const name=(firstName+' '+lastName).trim();
+  const email=form.querySelector('[name="email"]')?.value.trim()||'';
+  const subject=form.querySelector('[name="subject"]')?.value||'Portfolio message';
+  const message=form.querySelector('[name="message"]')?.value||'';
   btn.textContent = 'Sending...';
   const client=supabaseClient();
   if(client){
-    const result=await client.from('messages').insert({name:name,subject:subject,message:message,status:'unread'});
+    const result=await client.from('messages').insert({name:name,email:email,subject:subject,message:message,status:'unread'});
     if(result.error){
       btn.textContent='Send Failed';
       setTimeout(() => { btn.textContent='Send Message →'; }, 2500);
@@ -521,17 +524,101 @@ function renderBlogCard(post) {
 function renderCertificationGrid(certs) {
   var grid=document.querySelector('.certs-g');
   if(!grid || !certs || !certs.length) return;
-  var catMap={'AI':'ai','Machine Learning':'ml','Deep Learning':'dl','Data Science':'ds','Programming':'pr','UX':'ux','Financial Engineering':'fe'};
-  grid.innerHTML=certs.map(function(cert){
+  var catMap={
+    'AI':'ai',
+    'Machine Learning':'ml',
+    'Deep Learning':'dl',
+    'Deep Learning':'dl',
+    'Computer Vision':'cv',
+    'Data Science':'ds',
+    'Natural Language Processing':'nlp',
+    'Large Language Models':'llm',
+    'Programming':'pr',
+    'UX':'ux',
+    'UX Design':'ux',
+    'Project Management':'pm',
+    'Financial Engineering':'fe'
+  };
+  function certSortValue(cert){
+    return (Number(cert.year_earned)||0)*100+(Number(cert.month_earned)||0);
+  }
+  function certEarnedLabel(cert){
+    var year=Number(cert.year_earned)||0;
+    var month=Number(cert.month_earned)||0;
+    if(!year)return '';
+    if(!month)return String(year);
+    return new Date(year,month-1,1).toLocaleDateString(undefined,{month:'short',year:'numeric'});
+  }
+  function renderCertificateEmbed(embedCode){
+    var raw=String(embedCode||'').trim();
+    if(!raw)return '';
+    var iframe=raw.match(/<iframe\b[^>]*src=["']([^"']+)["'][^>]*><\/iframe>/i);
+    if(iframe && /^https?:\/\//i.test(iframe[1])){
+      var width=(raw.match(/\bwidth=["']?(\d+)/i)||[])[1]||'100%';
+      var height=(raw.match(/\bheight=["']?(\d+)/i)||[])[1]||'180';
+      return '<div class="cert-embed"><iframe src="'+escapeHtml(iframe[1])+'" width="'+escapeHtml(width)+'" height="'+escapeHtml(height)+'" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>';
+    }
+    var badgeId=(raw.match(/data-share-badge-id=["']([^"']+)["']/i)||[])[1];
+    var badgeHost=(raw.match(/data-share-badge-host=["']([^"']+)["']/i)||[])[1]||'https://www.credly.com';
+    var badgeWidth=(raw.match(/data-iframe-width=["']?(\d+)/i)||[])[1]||'150';
+    var badgeHeight=(raw.match(/data-iframe-height=["']?(\d+)/i)||[])[1]||'270';
+    if(badgeId && /^https:\/\/www\.credly\.com$/i.test(badgeHost)){
+      return '<div class="cert-embed cert-embed-credly">'
+        +'<div data-iframe-width="'+escapeHtml(badgeWidth)+'" data-iframe-height="'+escapeHtml(badgeHeight)+'" data-share-badge-id="'+escapeHtml(badgeId)+'" data-share-badge-host="'+escapeHtml(badgeHost)+'"></div>'
+        +'</div>';
+    }
+    return '';
+  }
+  function renderCertificateImage(cert){
+    var imageUrl=cert.certificate_image_url;
+    var verificationUrl=cert.verification_url;
+    var name=cert.name;
+    var src=String(imageUrl||'').trim();
+    if(!/^https?:\/\//i.test(src))return '';
+    var open=hasUrl(verificationUrl)?' onclick="window.open(\''+String(verificationUrl).replace(/'/g,'&#39;')+'\',\'_blank\')"':'';
+    var provider=cert.provided_by||cert.issuer||'Issuer';
+    var shortProvider=String(provider).split(/\s+/).filter(Boolean).slice(0,1).join(' ');
+    if(String(provider).length>10||String(provider).split(/\s+/).filter(Boolean).length>1)shortProvider+=' ...';
+    var shortName=String(name||'Certificate').split(/\s+/).filter(Boolean).slice(0,2).join(' ');
+    if(String(name||'').split(/\s+/).filter(Boolean).length>2)shortName+=' ...';
+    var shortIssuer=String(cert.issuer||'').split(/\s+/).filter(Boolean).slice(0,2).join(' ');
+    if(String(cert.issuer||'').split(/\s+/).filter(Boolean).length>2)shortIssuer+=' ...';
+    return '<div class="cert-embed cert-image-embed"'+open+'>'
+      +'<div class="cert-image-card">'
+      +'<div class="cert-image-art"><img src="'+escapeHtml(src)+'" alt="'+escapeHtml(name||'Certificate image')+'" loading="lazy"></div>'
+      +'<div class="cert-image-copy"><p class="cert-image-title">'+escapeHtml(shortName)+'</p><p class="cert-image-issuer">Issuer: '+escapeHtml(shortIssuer)+'</p></div>'
+      +'<div class="cert-image-footer">PROVIDED BY <strong>'+escapeHtml(shortProvider)+'</strong></div>'
+      +'</div>'
+      +'</div>';
+  }
+  function hydrateCertificateEmbeds(){
+    if(!document.querySelector('.cert-embed-credly'))return;
+    var old=document.getElementById('credly-embed-script');
+    if(old)old.remove();
+    var script=document.createElement('script');
+    script.id='credly-embed-script';
+    script.async=true;
+    script.src='https://cdn.credly.com/assets/utilities/embed.js';
+    document.body.appendChild(script);
+  }
+  var sortedCerts=certs.slice().sort(function(a,b){
+    return certSortValue(b)-certSortValue(a)||new Date(b.created_at||0)-new Date(a.created_at||0);
+  });
+  grid.innerHTML=sortedCerts.map(function(cert){
     var cat=catMap[cert.category]||String(cert.category||'ai').toLowerCase().slice(0,2);
     var issuer=cert.issuer||'';
+    var earned=certEarnedLabel(cert);
+    var embed=renderCertificateEmbed(cert.embed_code);
+    if(!embed)embed=renderCertificateImage(cert);
     var badge=(issuer.split(/\s+/).filter(Boolean)[0]||cert.category||'Cert').slice(0,3).toUpperCase();
-    var link=hasUrl(cert.verification_url)?' onclick="window.open(\''+String(cert.verification_url).replace(/'/g,'&#39;')+'\',\'_blank\')"':'';
-    return '<div class="cert" data-cat="'+escapeHtml(cat)+'"'+link+'>'
-      +'<div class="cbadge cb-'+escapeHtml(cat)+'">'+escapeHtml(badge)+'</div>'
-      +'<div><p class="cname">'+escapeHtml(cert.name)+'</p><p class="cissuer">'+escapeHtml(issuer)+(cert.year_earned?' · '+escapeHtml(cert.year_earned):'')+'</p></div>'
+    var link=hasUrl(cert.verification_url)&&!embed?' onclick="window.open(\''+String(cert.verification_url).replace(/'/g,'&#39;')+'\',\'_blank\')"':'';
+    return '<div class="cert'+(embed?' has-embed':'')+'" data-cat="'+escapeHtml(cat)+'"'+link+'>'
+      +'<div class="cert-top"><div class="cbadge cb-'+escapeHtml(cat)+'">'+escapeHtml(badge)+'</div>'
+      +'<div><p class="cname">'+escapeHtml(cert.name)+'</p><p class="cissuer">'+escapeHtml(issuer)+(earned?' · '+escapeHtml(earned):'')+'</p></div></div>'
+      +embed
       +'</div>';
   }).join('');
+  hydrateCertificateEmbeds();
 }
 
 function renderPublicationList(publications) {
@@ -659,7 +746,7 @@ function applySiteMedia(media) {
     if(result.data.length)clearDynamicSection('.blog-g');
     result.data.forEach(renderBlogCard);
   });
-  client.from('certifications').select('*').order('created_at',{ascending:false}).then(function(result){
+  client.from('certifications').select('*').order('year_earned',{ascending:false}).order('month_earned',{ascending:false}).order('created_at',{ascending:false}).then(function(result){
     if(result.error||!result.data)return;
     if(result.data.length)clearDynamicSection('.certs-g');
     renderCertificationGrid(result.data);

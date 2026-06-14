@@ -45,9 +45,13 @@ create table if not exists certifications (
   issuer text,
   category text,
   verified boolean default true,
+  month_earned integer,
   year_earned integer,
   verification_url text,
   credential_id text,
+  certificate_image_url text,
+  provided_by text,
+  embed_code text,
   created_at timestamptz default now()
 );
 
@@ -154,6 +158,12 @@ alter table site_media enable row level security;
 alter table blog_comments enable row level security;
 alter table blog_likes enable row level security;
 alter table messages enable row level security;
+
+alter table certifications
+  add column if not exists month_earned integer,
+  add column if not exists certificate_image_url text,
+  add column if not exists provided_by text,
+  add column if not exists embed_code text;
 
 drop policy if exists "Public can read published projects" on projects;
 create policy "Public can read published projects"

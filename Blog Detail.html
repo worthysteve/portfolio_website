@@ -396,6 +396,7 @@ const PUBS=[
 ];
 
 const ALL=[...BLOGS,...PUBS];
+let BLOG_NAV=BLOGS.slice(),PUB_NAV=PUBS.slice();
 let liked=false,comments=[],curItem=null,replyParentId=null,likeCount=0;
 
 function getParam(k){return new URLSearchParams(location.search).get(k);}
@@ -525,9 +526,9 @@ function render(item){
   document.getElementById('article-body').innerHTML=renderMarkdownContent(item.content);
 
   // Nav
-  const list=item.type==='pub'?PUBS:BLOGS;
-  const idx=list.findIndex(x=>x.id===item.id);
-  const prev=list[idx-1],next=list[idx+1];
+  const list=item.type==='pub'?PUB_NAV:BLOG_NAV;
+  const idx=list.findIndex(x=>Number(x.id)===Number(item.id));
+  const prev=idx>0?list[idx-1]:null,next=idx>=0&&idx<list.length-1?list[idx+1]:null;
   const suffix=item.type==='pub'?'type=pub&':'';
   document.getElementById('pnav').innerHTML=`
     ${prev?`<a class="pnav-btn" href="Blog Detail.html?${suffix}id=${prev.id}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg><div><span class="pnav-lbl">Previous</span><span class="pnav-title">${prev.title}</span></div></a>`:'<div></div>'}
@@ -538,8 +539,8 @@ function render(item){
 }
 
 function renderSidebar(active){
-  // Latest posts (from BLOGS)
-  const latest=(active&&active.type==='blog'&&!BLOGS.some(p=>p.id===active.id))?[active,...BLOGS].slice(0,3):BLOGS.slice(0,3);
+  // Latest posts
+  const latest=(active&&active.type==='blog'&&!BLOG_NAV.some(p=>Number(p.id)===Number(active.id)))?[active,...BLOG_NAV].slice(0,3):BLOG_NAV.slice(0,3);
   document.getElementById('sb-latest').innerHTML=latest.map(p=>`
     <div class="sb-post" onclick="location.href='Blog Detail.html?id=${p.id}'">
       <div class="sb-post-img" style="background:${p.imageUrl?'url('+p.imageUrl+') center/cover':p.gradient}"></div>
@@ -547,12 +548,12 @@ function renderSidebar(active){
     </div>`).join('');
 
   // Categories
-  const cats=[...new Set([...BLOGS,...PUBS].map(p=>p.category||p.pubType))].filter(Boolean);
+  const cats=[...new Set([...BLOG_NAV,...PUB_NAV].map(p=>p.category||p.pubType))].filter(Boolean);
   document.getElementById('sb-cats').innerHTML=cats.map(c=>`
-    <div class="sb-cat"><span class="sb-cat-name">${c}</span><span class="sb-cat-count">${[...BLOGS,...PUBS].filter(p=>(p.category||p.pubType)===c).length}</span></div>`).join('');
+    <div class="sb-cat"><span class="sb-cat-name">${c}</span><span class="sb-cat-count">${[...BLOG_NAV,...PUB_NAV].filter(p=>(p.category||p.pubType)===c).length}</span></div>`).join('');
 
   // Tags
-  const tags=[...new Set([...BLOGS,...PUBS].flatMap(p=>p.tags||[]))];
+  const tags=[...new Set([...BLOG_NAV,...PUB_NAV].flatMap(p=>p.tags||[]))];
   document.getElementById('sb-tags').innerHTML=tags.map(t=>`<span class="sb-tag">${t}</span>`).join('');
 }
 
@@ -671,14 +672,16 @@ function shareByEmail(){location.href='mailto:?subject='+encodeURIComponent(curI
 function doSearch(){
   const q=document.getElementById('sb-search-inp').value.trim().toLowerCase();
   if(!q) return;
-  const found=BLOGS.find(p=>p.title.toLowerCase().includes(q));
+  const found=BLOG_NAV.find(p=>p.title.toLowerCase().includes(q));
   if(found) location.href='Blog Detail.html?id='+found.id;
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────
 const isPub=getParam('type')==='pub';
 const id=parseInt(getParam('id'))||1;
-const fallbackItem=isPub?PUBS.find(p=>p.id===id):BLOGS.find(p=>p.id===id);
+const hasRemoteSource=Boolean(supabaseClient());
+if(hasRemoteSource){BLOG_NAV=[];PUB_NAV=[];}
+const fallbackItem=hasRemoteSource?null:(isPub?PUBS.find(p=>p.id===id):BLOGS.find(p=>p.id===id));
 const loadingItem=fallbackItem||{
   id:id,
   type:isPub?'pub':'blog',
@@ -697,9 +700,23 @@ renderComments();
   const client=supabaseClient();
   if(!client) return;
   const table=isPub?'publications':'blog_posts';
+  const listResults=await Promise.all([
+    client.from('blog_posts').select('*').eq('status','published').order('created_at',{ascending:false}),
+    client.from('publications').select('*').order('created_at',{ascending:false})
+  ]);
+  if(!listResults[0].error&&Array.isArray(listResults[0].data))BLOG_NAV=listResults[0].data.map(mapSupabaseBlog);
+  if(!listResults[1].error&&Array.isArray(listResults[1].data))PUB_NAV=listResults[1].data.map(mapSupabasePublication);
   const result=await client.from(table).select('*').eq('id',id).maybeSingle();
-  if(result.error||!result.data) return;
-  render(isPub?mapSupabasePublication(result.data):mapSupabaseBlog(result.data));
+  if(result.error||!result.data) {
+    const fromList=(isPub?PUB_NAV:BLOG_NAV).find(function(item){return Number(item.id)===Number(id);});
+    if(fromList)render(fromList);
+    return;
+  }
+  const mapped=isPub?mapSupabasePublication(result.data):mapSupabaseBlog(result.data);
+  const navList=isPub?PUB_NAV:BLOG_NAV;
+  const existingIndex=navList.findIndex(function(item){return Number(item.id)===Number(mapped.id);});
+  if(existingIndex>=0)navList[existingIndex]=mapped;else navList.unshift(mapped);
+  render(mapped);
   renderComments();
 })();
 </script>

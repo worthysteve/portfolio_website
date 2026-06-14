@@ -757,7 +757,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
         </tbody></table></div>
       </div>
 
-      <div class="view" id="view-certs"><div class="page-hdr"><div><h1>Certifications</h1><p>Add, categorise, and manage your credentials.</p></div><button class="btn-new" onclick="openModal('cert')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Certificate</button></div><div class="table-wrap"><div class="table-head"><h3>All Certifications (12 of 40+)</h3></div><table><thead><tr><th>Certificate</th><th>Issuer</th><th>Category</th><th>Verified</th><th>Year</th><th>Actions</th></tr></thead><tbody><tr><td class="td-title">AI Engineering Professional Certificate</td><td class="td-mono">IBM / Coursera</td><td class="td-mono">AI</td><td><span class="badge published">Verified</span></td><td class="td-mono">2024</td><td><div class="td-actions"><button class="ia del" onclick="showToast('Certificate removed')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr><tr><td class="td-title">Deep Learning Specialization</td><td class="td-mono">DeepLearning.AI</td><td class="td-mono">Deep Learning</td><td><span class="badge published">Verified</span></td><td class="td-mono">2024</td><td><div class="td-actions"><button class="ia del" onclick="showToast('Certificate removed')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr></tbody></table></div></div>
+      <div class="view" id="view-certs"><div class="page-hdr"><div><h1>Certifications</h1><p>Add, categorise, and manage your credentials.</p></div><button class="btn-new" onclick="openModal('cert')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Certificate</button></div><div class="table-wrap"><div class="table-head"><h3>All Certifications</h3></div><table><thead><tr><th>Certificate</th><th>Issuer</th><th>Category</th><th>Verified</th><th>Earned</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
       <div class="view" id="view-experience"><div class="page-hdr"><div><h1>Experience</h1><p>Manage your career timeline and work history.</p></div><button class="btn-new" onclick="openModal('experience')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Experience</button></div><div class="table-wrap"><div class="table-head"><h3>All Experience</h3></div><table><thead><tr><th>Role</th><th>Organisation</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
       <div class="view" id="view-education"><div class="page-hdr"><div><h1>Education</h1><p>Manage academic history, degrees, and awards.</p></div><button class="btn-new" onclick="openModal('education')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Education</button></div><div class="table-wrap"><div class="table-head"><h3>All Education</h3></div><table><thead><tr><th>Degree</th><th>Institution</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
       <div class="view" id="view-achievements"><div class="page-hdr"><div><h1>Achievements</h1><p>Manage fellowships, awards, and recognition.</p></div><button class="btn-new" onclick="openModal('achievement')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Achievement</button></div><div class="table-wrap"><div class="table-head"><h3>All Achievements</h3></div><table><thead><tr><th>Title</th><th>Organisation</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
@@ -797,6 +797,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <button class="modal-close" onclick="closeReply()">✕</button>
     </div>
     <div class="modal-body">
+      <div class="mfield"><label>Reply To</label><input type="email" id="reply-email" readonly><small id="reply-email-hint" style="display:block;margin-top:5px;color:var(--t3);font-size:11px"></small></div>
       <div class="mfield"><label>Subject</label><input type="text" id="reply-subject" readonly></div>
       <div class="reply-quote"><strong id="reply-from-label"></strong><span id="reply-preview-text"></span></div>
       <div class="mfield"><label>Your Reply</label><textarea id="reply-msg" style="min-height:120px" placeholder="Type your reply..."></textarea></div>
@@ -990,10 +991,11 @@ function switchView(id, el) {
 
 // MODAL
 let currentModalType = null;
+let currentEditId = null;
 const MODALS = {
   project: {
     title: 'Add / Edit Project',
-    body: `<div class="mfield"><label>Cover Image <small style="color:var(--t3);font-weight:400">(shown on portfolio card &amp; detail page)</small></label><div class="mfield" style="margin-bottom:0"><label style="font-size:11px">Which portfolio card slot does this update?</label><select id="admin-proj-slot"><option value="">-- Select slot to update --</option><option value="1">Slot 1 — Flood Prediction System</option><option value="2">Slot 2 — RAG Chatbot</option><option value="3">Slot 3 — Food-101 Classifier</option><option value="4">Slot 4 — Titanic API</option><option value="5">Slot 5 — Finance App</option><option value="new">New project (won't update existing card)</option></select></div><div class="admin-img-drop" id="admin-proj-img" onclick="adminImgClick('admin-proj-img')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-proj-img')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Click or drag &amp; drop to upload cover image</p><small>PNG, JPG, WebP &middot; Fills the card header &amp; detail page gallery</small></div></div><div class="mfield"><label>Project Title</label><input type="text" placeholder="e.g. Flood Prediction for Resilient Communities"></div><div class="mrow"><div class="mfield"><label>Type / Category</label><select><option>Machine Learning</option><option>AI / LLM</option><option>Computer Vision</option><option>Data Science</option><option>Financial Engineering</option><option>Programming</option><option>Full Stack</option></select></div><div class="mfield"><label>Status</label><select><option>Published</option><option>Draft</option><option>Archived</option></select></div></div><div class="mfield"><label>Short Description <small style="color:var(--t3);font-weight:400">(card preview)</small></label><textarea placeholder="2-3 sentences summarising the project and its impact..." style="min-height:60px"></textarea></div><div class="mfield"><label>Project Overview <small style="color:var(--t3);font-weight:400">(detail page — first accordion)</small></label><textarea placeholder="Full background, context, data sources, and approach..." style="min-height:80px"></textarea></div><div class="mfield"><label>The Challenge <small style="color:var(--t3);font-weight:400">(detail page accordion)</small></label><textarea placeholder="What problem did you solve? Why was it hard?"></textarea></div><div class="mfield"><label>The Solution <small style="color:var(--t3);font-weight:400">(detail page accordion)</small></label><textarea placeholder="Architecture, tools, key technical decisions..."></textarea></div><div class="mfield"><label>Key Features <small style="color:var(--t3);font-weight:400">(one per line &rarr; shown as checklist)</small></label><textarea placeholder="89% Prediction Accuracy&#10;48h Advance Warning&#10;12 Communities Protected" style="min-height:80px"></textarea></div><div class="mfield"><label>Technologies / Stack <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" placeholder="Python, LSTM, GIS, RandomForest, Streamlit"></div><div class="mfield"><label>Key Metrics <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" placeholder="89% accuracy, 48h warning, 12 communities"></div><div class="mrow"><div class="mfield"><label>Live Project URL</label><input type="url" placeholder="https://..."></div><div class="mfield"><label>GitHub URL</label><input type="url" placeholder="https://github.com/worthysteven/..."></div></div><div class="mrow"><div class="mfield"><label>Demo URL</label><input type="url" placeholder="https://..."></div><div class="mfield"><label>Case Study / Docs URL</label><input type="url" placeholder="https://..."></div></div><div class="mrow"><div class="mfield"><label>Date / Period</label><input type="text" placeholder="Jan 2025"></div><div class="mfield"><label>Organisation / Context</label><input type="text" placeholder="UNDP Research, Personal Project..."></div></div>`
+    body: ''
   },
   blog: {
     title: 'New Blog Post',
@@ -1002,9 +1004,14 @@ const MODALS = {
   cert: {
     title: 'Add Certificate',
     body: `<div class="mfield"><label>Certificate Name</label><input type="text" id="cert-name" placeholder="e.g. AWS Certified ML Specialty"></div>
-           <div class="mrow"><div class="mfield"><label>Issuer</label><input type="text" id="cert-issuer" placeholder="Amazon Web Services"></div><div class="mfield"><label>Category</label><select id="cert-category"><option>AI</option><option>Machine Learning</option><option>Deep Learning</option><option>Data Science</option><option>Programming</option><option>UX Design</option><option>Financial Engineering</option></select></div></div>
-           <div class="mrow"><div class="mfield"><label>Year Earned</label><input type="number" id="cert-year" placeholder="2024" min="2010" max="2030"></div><div class="mfield"><label>Verification URL</label><input type="url" id="cert-url" placeholder="https://..."></div></div>
-           <div class="mfield"><label>Credential ID</label><input type="text" id="cert-credential" placeholder="Optional credential identifier"></div>`
+           <div class="mrow"><div class="mfield"><label>Issuer</label><input type="text" id="cert-issuer" placeholder="Amazon Web Services"></div><div class="mfield"><label>Category</label><select id="cert-category"><option>AI</option><option>Machine Learning</option><option>Deep Learning / CV</option><option>Computer Vision</option><option>Data Science</option><option>Natural Language Processing</option><option>Large Language Models</option><option>Programming</option><option>UX Design</option><option>Project Management</option><option>Financial Engineering</option></select></div></div>
+           <div class="mrow"><div class="mfield"><label>Month Earned</label><select id="cert-month"><option value="">Month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></div><div class="mfield"><label>Year Earned</label><input type="number" id="cert-year" placeholder="2024" min="2010" max="2030"></div></div>
+           <div class="mfield"><label>Verification URL</label><input type="url" id="cert-url" placeholder="https://..."></div>
+           <div class="mfield"><label>Credential ID</label><input type="text" id="cert-credential" placeholder="Optional credential identifier"></div>
+           <div class="mfield"><label>Provided By <small style="color:var(--t3);font-weight:400">(optional footer label; defaults to issuer)</small></label><input type="text" id="cert-provided-by" placeholder="Credly, Coursera, edX, Issuer name..."></div>
+           <div class="mfield"><label>Certificate Image URL <small style="color:var(--t3);font-weight:400">(optional fallback if no embed code)</small></label><input type="url" id="cert-image-url" placeholder="https://..."></div>
+           <div class="mfield"><label>Upload Certificate Image <small style="color:var(--t3);font-weight:400">PNG, JPG, WebP &middot; displayed like badge area</small></label><div class="admin-img-drop" id="cert-image-file" onclick="adminImgClick('cert-image-file')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'cert-image-file')"><p>Click or drop certificate image</p><small>Uploads when you save</small></div></div>
+           <div class="mfield"><label>Embed Code <small style="color:var(--t3);font-weight:400">(optional iframe or Credly badge embed from issuer)</small></label><textarea id="cert-embed" placeholder="<iframe src=&quot;https://...&quot; ...></iframe>&#10;&#10;or paste Credly badge embed code with data-share-badge-id" style="min-height:110px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>`
   },
   pub: {
     title: 'Add Publication',
@@ -1042,34 +1049,22 @@ const MODALS = {
   }
 };
 function buildProjectModalBody(){
-  var custom=[];try{custom=JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){}
-  var nextId=parseInt(localStorage.getItem('pf_proj_next_id')||'6');
-  var opts='<option value="new">\u2795 New Project \u2014 will be Slot '+nextId+'</option>'
-    +'<option value="1">\u270f Edit Slot 1 \u2014 Flood Prediction System</option>'
-    +'<option value="2">\u270f Edit Slot 2 \u2014 RAG Chatbot</option>'
-    +'<option value="3">\u270f Edit Slot 3 \u2014 Food-101 Classifier</option>'
-    +'<option value="4">\u270f Edit Slot 4 \u2014 Titanic API</option>'
-    +'<option value="5">\u270f Edit Slot 5 \u2014 Finance App</option>';
-  custom.forEach(function(p){opts+='<option value="'+p.id+'">\u270f Edit Slot '+p.id+' \u2014 '+(p.title||'Custom Project')+'</option>';});
   var imgZone=function(n,lbl){
     return '<div><div style="font-size:11px;font-family:var(--fm);color:var(--t3);margin-bottom:5px">'+lbl+'</div>'
       +'<div class="admin-img-drop" id="admin-proj-img-'+n+'" onclick="adminImgClick(\'admin-proj-img-'+n+'\')" ondragover="event.preventDefault();this.classList.add(\'drag-ov\')" ondragleave="this.classList.remove(\'drag-ov\')" ondrop="adminImgDrop(event,\'admin-proj-img-'+n+'\')" style="padding:14px 10px">'
       +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
       +'<p style="font-size:12px;margin:0">Click or drop</p></div></div>';
   };
-  return '<div class="mfield"><label>Add New or Edit Existing?</label>'
-    +'<select id="admin-proj-slot" onchange="adminSlotChange(this.value)">'+opts+'</select>'
-    +'<small id="admin-slot-hint" style="font-size:11px;color:var(--t3);margin-top:5px;display:block">New projects get auto-numbered and appear on your portfolio automatically.</small></div>'
-    +'<div class="mfield"><label>Project Images <small style="color:var(--t3);font-weight:400">Image 1 = card header &middot; Images 2&ndash;4 = detail page carousel</small></label>'
+  return '<div class="mfield"><label>Project Images <small style="color:var(--t3);font-weight:400">Image 1 = card header &middot; Images 2&ndash;4 = detail page carousel</small></label>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
     +imgZone(1,'Image 1 \u2014 Card + Gallery')+imgZone(2,'Image 2 \u2014 Gallery')+imgZone(3,'Image 3 \u2014 Gallery')+imgZone(4,'Image 4 \u2014 Gallery')
     +'</div></div>'
     +'<div class="mfield"><label>Project Title *</label><input type="text" id="proj-title" placeholder="e.g. Flood Prediction for Resilient Communities"></div>'
     +'<div class="mrow"><div class="mfield"><label>Type / Category</label><select id="proj-type"><option>Machine Learning</option><option>AI / LLM</option><option>Computer Vision</option><option>Data Science</option><option>Financial Engineering</option><option>Programming</option><option>Full Stack</option></select></div><div class="mfield"><label>Status</label><select id="proj-status"><option>Published</option><option>Draft</option><option>Archived</option></select></div></div>'
     +'<div class="mfield"><label>Short Description <small style="color:var(--t3);font-weight:400">(card preview)</small></label><textarea id="proj-desc" placeholder="2-3 sentences summarising the project..." style="min-height:60px"></textarea></div>'
-    +'<div class="mfield"><label>Project Overview <small style="color:var(--t3);font-weight:400">(detail page \u2014 first accordion)</small></label><textarea id="proj-overview" placeholder="Full background, context, data sources, and approach..." style="min-height:80px"></textarea></div>'
-    +'<div class="mfield"><label>The Challenge</label><textarea id="proj-challenge" placeholder="What problem did you solve? Why was it hard?"></textarea></div>'
-    +'<div class="mfield"><label>The Solution</label><textarea id="proj-solution" placeholder="Architecture, tools, key technical decisions..."></textarea></div>'
+    +'<div class="mfield"><label>Project Overview <small style="color:var(--t3);font-weight:400">(Markdown supported: ## headings, bullets, numbering, **bold**, links)</small></label><textarea id="proj-overview" placeholder="## Background&#10;&#10;- Data sources used&#10;- Core approach&#10;&#10;1. Step one&#10;2. Step two" style="min-height:120px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>'
+    +'<div class="mfield"><label>The Challenge <small style="color:var(--t3);font-weight:400">(Markdown supported)</small></label><textarea id="proj-challenge" placeholder="- What problem did you solve?&#10;- Why was it hard?&#10;- What constraints mattered?" style="min-height:110px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>'
+    +'<div class="mfield"><label>The Solution <small style="color:var(--t3);font-weight:400">(Markdown supported)</small></label><textarea id="proj-solution" placeholder="1. Architecture choice&#10;2. Tools used&#10;3. Key technical decisions" style="min-height:110px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>'
     +'<div class="mfield"><label>Key Features <small style="color:var(--t3);font-weight:400">(one per line &rarr; checklist on detail page)</small></label><textarea id="proj-features" placeholder="89% Prediction Accuracy&#10;48h Advance Warning&#10;12 Communities Protected" style="min-height:80px"></textarea></div>'
     +'<div class="mfield"><label>Technologies <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-tags" placeholder="Python, LSTM, GIS, RandomForest"></div>'
     +'<div class="mfield"><label>Key Metrics <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-metrics" placeholder="89% accuracy, 48h warning"></div>'
@@ -1090,17 +1085,132 @@ function adminSlotChange(val){
 
 function openModal(type, id) {
   currentModalType = type;
+  currentEditId = id ? Number(id) : null;
   const m = MODALS[type] || MODALS.project;
-  document.getElementById('modal-title').textContent = m.title;
+  document.getElementById('modal-title').textContent = currentEditId ? m.title.replace(/^Add\b|^New\b/, 'Edit') : m.title;
   document.getElementById('modal-body').innerHTML = type === 'project' ? buildProjectModalBody() : m.body;
-  if (type === 'project' && id) adminSlotChange(String(id));
-  if (type === 'project' && id) {
-    const slot = document.getElementById('admin-proj-slot');
-    if (slot) slot.value = String(id);
-  }
+  if (currentEditId) hydrateModal(type, currentEditId);
   document.getElementById('modal-overlay').classList.add('open');
 }
 function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function setFieldValue(id, value) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.value = value == null ? '' : value;
+}
+function setSelectValue(id, value) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var wanted = String(value == null ? '' : value).toLowerCase();
+  var matched = Array.from(el.options).find(function(option){
+    return option.value.toLowerCase() === wanted || option.textContent.toLowerCase() === wanted;
+  });
+  if (matched) el.value = matched.value;
+  else if (value) {
+    var option = new Option(value, value);
+    el.add(option);
+    el.value = value;
+  }
+}
+function listValue(value, separator) {
+  return Array.isArray(value) ? value.join(separator) : (value || '');
+}
+function markExistingImage(dropId, url) {
+  var drop = document.getElementById(dropId);
+  if (!drop || !url) return;
+  drop.classList.add('has-img');
+  drop.dataset.imageSrc = url;
+  drop.style.backgroundImage = 'linear-gradient(rgba(15, 23, 42, .45), rgba(15, 23, 42, .45)), url("' + url + '")';
+  drop.style.backgroundSize = 'cover';
+  drop.style.backgroundPosition = 'center';
+  var p = drop.querySelector('p');
+  if (p) p.textContent = 'Existing image loaded — click to replace';
+}
+function hydrateModal(type, id) {
+  var record = window.PortfolioAdminDB?.getRecordById ? PortfolioAdminDB.getRecordById(type, id) : null;
+  if (!record) return;
+  if (type === 'project') {
+    setFieldValue('proj-title', record.title);
+    setSelectValue('proj-type', record.type);
+    setSelectValue('proj-status', record.status);
+    setFieldValue('proj-desc', record.description);
+    setFieldValue('proj-overview', record.overview);
+    setFieldValue('proj-challenge', record.challenge);
+    setFieldValue('proj-solution', record.solution);
+    setFieldValue('proj-features', listValue(record.features, '\n'));
+    setFieldValue('proj-tags', listValue(record.tags, ', '));
+    setFieldValue('proj-metrics', listValue(record.metrics, ', '));
+    setFieldValue('proj-url', record.live_url);
+    setFieldValue('proj-github', record.github_url);
+    setFieldValue('proj-demo', record.demo_url);
+    setFieldValue('proj-docs', record.docs_url);
+    setFieldValue('proj-paper', record.paper_url);
+    setFieldValue('proj-date', record.date_period);
+    setFieldValue('proj-org', record.organisation);
+    [1,2,3,4].forEach(function(n){ markExistingImage('admin-proj-img-' + n, record['image_' + n + '_url']); });
+  }
+  if (type === 'blog') {
+    setFieldValue('blog-title', record.title);
+    setSelectValue('blog-category', record.category);
+    setFieldValue('blog-tags', listValue(record.tags, ', '));
+    setFieldValue('blog-excerpt', record.excerpt);
+    setFieldValue('blog-content', record.content);
+    setSelectValue('blog-status', record.status);
+    setFieldValue('blog-read-time', record.read_time);
+    markExistingImage('admin-blog-img', record.image_url);
+  }
+  if (type === 'cert') {
+    setFieldValue('cert-name', record.name);
+    setFieldValue('cert-issuer', record.issuer);
+    setSelectValue('cert-category', record.category);
+    setSelectValue('cert-month', record.month_earned);
+    setFieldValue('cert-year', record.year_earned);
+    setFieldValue('cert-url', record.verification_url);
+    setFieldValue('cert-credential', record.credential_id);
+    setFieldValue('cert-provided-by', record.provided_by);
+    setFieldValue('cert-image-url', record.certificate_image_url);
+    markExistingImage('cert-image-file', record.certificate_image_url);
+    setFieldValue('cert-embed', record.embed_code);
+  }
+  if (type === 'pub') {
+    setFieldValue('pub-title', record.title);
+    setSelectValue('pub-type', record.pub_type);
+    setSelectValue('pub-status', record.status);
+    setFieldValue('pub-authors', listValue(record.authors, ', '));
+    setFieldValue('pub-venue', record.venue);
+    setFieldValue('pub-year', record.year);
+    setFieldValue('pub-pdf', record.pdf_url);
+  }
+  if (type === 'experience') {
+    setFieldValue('exp-role', record.role);
+    setFieldValue('exp-org', record.organisation);
+    setFieldValue('exp-date', record.date_period);
+    setFieldValue('exp-start', record.start_date);
+    setFieldValue('exp-end', record.end_date);
+    setFieldValue('exp-desc', record.description);
+    setFieldValue('exp-tags', listValue(record.tags, ', '));
+    setFieldValue('exp-award', record.award);
+    setFieldValue('exp-order', record.display_order);
+  }
+  if (type === 'education') {
+    setFieldValue('edu-degree', record.degree);
+    setFieldValue('edu-institution', record.institution);
+    setFieldValue('edu-date', record.date_period);
+    setFieldValue('edu-desc', record.description);
+    setFieldValue('edu-thesis', record.thesis);
+    setFieldValue('edu-tags', listValue(record.tags, ', '));
+    setFieldValue('edu-award', record.award);
+    setFieldValue('edu-order', record.display_order);
+  }
+  if (type === 'achievement') {
+    setFieldValue('ach-title', record.title);
+    setFieldValue('ach-org', record.organisation);
+    setFieldValue('ach-year', record.year);
+    setFieldValue('ach-desc', record.description);
+    setSelectValue('ach-icon', record.icon);
+    setFieldValue('ach-order', record.display_order);
+  }
+}
 async function uploadAdminPdfToInput(dropId, inputId, folder) {
   var drop = document.getElementById(dropId);
   if (!drop || !drop._adminFile) return true;
@@ -1120,24 +1230,22 @@ async function uploadAdminPdfToInput(dropId, inputId, folder) {
   }
 }
 async function saveModal() {
-  var slotEl=document.getElementById('admin-proj-slot');
-  if(slotEl){
-    var slotVal=slotEl.value,projId;
-    if(slotVal==='new'){projId=parseInt(localStorage.getItem('pf_proj_next_id')||'6');localStorage.setItem('pf_proj_next_id',projId+1);}
-    else{projId=parseInt(slotVal);}
+  if(currentModalType==='project'){
+    var projId=currentEditId || undefined;
+    var localProjId=projId || Date.now();
     var images={};
     for(var i=1;i<=4;i++){
       var imgEl=document.getElementById('admin-proj-img-'+i);
       if(imgEl&&imgEl.classList.contains('has-img')){
         var src=imgEl.dataset.imageSrc||imgEl.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
         images[i]=src;
-        if(src){try{localStorage.setItem('pf_proj_'+projId+'_img_'+i,src);}catch(e){}
-          if(i===1){try{localStorage.setItem('pf_img_pc-img-'+projId,src);}catch(e){}}}
+        if(src){try{localStorage.setItem('pf_proj_'+localProjId+'_img_'+i,src);}catch(e){}
+          if(i===1){try{localStorage.setItem('pf_img_pc-img-'+localProjId,src);}catch(e){}}}
       }
     }
     var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
-    if(!await uploadAdminPdfToInput('proj-docs-file','proj-docs','projects/'+projId+'/documents'))return;
-    if(!await uploadAdminPdfToInput('proj-paper-file','proj-paper','projects/'+projId+'/papers'))return;
+    if(!await uploadAdminPdfToInput('proj-docs-file','proj-docs','projects/'+localProjId+'/documents'))return;
+    if(!await uploadAdminPdfToInput('proj-paper-file','proj-paper','projects/'+localProjId+'/papers'))return;
     var data={id:projId,title:g('proj-title'),type:g('proj-type'),date:g('proj-date'),org:g('proj-org'),
       desc:g('proj-desc'),overview:g('proj-overview'),challenge:g('proj-challenge'),solution:g('proj-solution'),
       features:g('proj-features').split('\n').filter(Boolean),
@@ -1145,10 +1253,13 @@ async function saveModal() {
       metrics:g('proj-metrics').split(',').map(function(t){return t.trim();}).filter(Boolean),
       url:g('proj-url')||'#',github_url:g('proj-github'),demo_url:g('proj-demo'),docs_url:g('proj-docs'),paper_url:g('proj-paper'),
       status:g('proj-status')||'Published'};
-    try{localStorage.setItem('pf_proj_data_'+projId,JSON.stringify(data));}catch(e){}
-    if(slotVal==='new'&&data.title){
+    try{localStorage.setItem('pf_proj_data_'+localProjId,JSON.stringify(data));}catch(e){}
+    if(!window.PortfolioAdminDB?.isConfigured()&&data.title){
       var custom=[];try{custom=JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){}
-      custom.push(data);try{localStorage.setItem('pf_projects_custom',JSON.stringify(custom));}catch(e){}
+      var existingIndex=custom.findIndex(function(project){return Number(project.id)===Number(localProjId);});
+      var localData=Object.assign({},data,{id:localProjId});
+      if(existingIndex>=0)custom[existingIndex]=localData;else custom.push(localData);
+      try{localStorage.setItem('pf_projects_custom',JSON.stringify(custom));}catch(e){}
     }
     if(window.PortfolioAdminDB?.isConfigured()){
       try{await PortfolioAdminDB.saveProject(data,images);}
@@ -1160,10 +1271,11 @@ async function saveModal() {
     var s2=blogImg.dataset.imageSrc||blogImg.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
     if(s2)try{localStorage.setItem('pf_img_bc-img-'+blogSlot.value,s2);}catch(e){}
   }
-  if(!slotEl&&currentModalType==='blog'&&window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='blog'&&window.PortfolioAdminDB?.isConfigured()){
     var blogImage='';
     if(blogImg&&blogImg.classList.contains('has-img')) blogImage=blogImg.dataset.imageSrc||blogImg.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
     try{await PortfolioAdminDB.saveBlogPost({
+      id:currentEditId || undefined,
       title:document.getElementById('blog-title')?.value||'Untitled Post',
       category:document.getElementById('blog-category')?.value||'AI',
       tags:(document.getElementById('blog-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
@@ -1174,21 +1286,43 @@ async function saveModal() {
     },blogImage);}
     catch(error){showToast(error.message||'Blog save failed');return;}
   }
-  if(!slotEl&&currentModalType==='cert'&&window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='cert'&&window.PortfolioAdminDB?.isConfigured()){
+    var certImageUrl=document.getElementById('cert-image-url')?.value||'';
+    var certImageDrop=document.getElementById('cert-image-file');
+    if(certImageDrop&&certImageDrop.classList.contains('has-img')){
+      var certImageSrc=certImageDrop.dataset.imageSrc||certImageDrop.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
+      if(certImageSrc&&certImageSrc.startsWith('data:')){
+        try{
+          var certImageBlob=await fetch(certImageSrc).then(function(response){return response.blob();});
+          certImageBlob.name='certificate-image.png';
+          var certImageResult=await PortfolioAdminDB.uploadFile(certImageBlob,'certifications');
+          certImageUrl=certImageResult.url;
+          setFieldValue('cert-image-url',certImageUrl);
+        }catch(error){showToast(error.message||'Certificate image upload failed');return;}
+      }else if(certImageSrc){
+        certImageUrl=certImageSrc;
+      }
+    }
     try{await PortfolioAdminDB.saveCertification({
+      id:currentEditId || undefined,
       name:document.getElementById('cert-name')?.value||'Untitled Certificate',
       issuer:document.getElementById('cert-issuer')?.value||'',
       category:document.getElementById('cert-category')?.value||'AI',
       verified:true,
+      month_earned:Number(document.getElementById('cert-month')?.value)||null,
       year_earned:Number(document.getElementById('cert-year')?.value)||null,
       verification_url:document.getElementById('cert-url')?.value||'',
-      credential_id:document.getElementById('cert-credential')?.value||''
+      credential_id:document.getElementById('cert-credential')?.value||'',
+      provided_by:document.getElementById('cert-provided-by')?.value||'',
+      certificate_image_url:certImageUrl,
+      embed_code:document.getElementById('cert-embed')?.value||''
     });}
     catch(error){showToast(error.message||'Certificate save failed');return;}
   }
-  if(!slotEl&&currentModalType==='pub'&&window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='pub'&&window.PortfolioAdminDB?.isConfigured()){
     if(!await uploadAdminPdfToInput('pub-pdf-file','pub-pdf','publications'))return;
     try{await PortfolioAdminDB.savePublication({
+      id:currentEditId || undefined,
       title:document.getElementById('pub-title')?.value||'Untitled Publication',
       pub_type:document.getElementById('pub-type')?.value||'Journal',
       status:document.getElementById('pub-status')?.value||'Under Review',
@@ -1199,8 +1333,9 @@ async function saveModal() {
     });}
     catch(error){showToast(error.message||'Publication save failed');return;}
   }
-  if(!slotEl&&currentModalType==='experience'&&window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='experience'&&window.PortfolioAdminDB?.isConfigured()){
     try{await PortfolioAdminDB.saveExperience({
+      id:currentEditId || undefined,
       role:document.getElementById('exp-role')?.value||'Untitled Role',
       organisation:document.getElementById('exp-org')?.value||'',
       date_period:document.getElementById('exp-date')?.value||'',
@@ -1213,11 +1348,12 @@ async function saveModal() {
     });}
     catch(error){showToast(error.message||'Experience save failed');return;}
   }
-  if(!slotEl&&currentModalType==='experience'&&!window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='experience'&&!window.PortfolioAdminDB?.isConfigured()){
     saveLocalAdminRecord('pf_experience_custom',{id:Date.now(),role:document.getElementById('exp-role')?.value||'Untitled Role',organisation:document.getElementById('exp-org')?.value||'',date_period:document.getElementById('exp-date')?.value||'',start_date:document.getElementById('exp-start')?.value||null,end_date:document.getElementById('exp-end')?.value||null,description:document.getElementById('exp-desc')?.value||'',tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('exp-award')?.value||'',display_order:Number(document.getElementById('exp-order')?.value)||0});
   }
-  if(!slotEl&&currentModalType==='education'&&window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='education'&&window.PortfolioAdminDB?.isConfigured()){
     try{await PortfolioAdminDB.saveEducation({
+      id:currentEditId || undefined,
       degree:document.getElementById('edu-degree')?.value||'Untitled Degree',
       institution:document.getElementById('edu-institution')?.value||'',
       date_period:document.getElementById('edu-date')?.value||'',
@@ -1229,11 +1365,12 @@ async function saveModal() {
     });}
     catch(error){showToast(error.message||'Education save failed');return;}
   }
-  if(!slotEl&&currentModalType==='education'&&!window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='education'&&!window.PortfolioAdminDB?.isConfigured()){
     saveLocalAdminRecord('pf_education_custom',{id:Date.now(),degree:document.getElementById('edu-degree')?.value||'Untitled Degree',institution:document.getElementById('edu-institution')?.value||'',date_period:document.getElementById('edu-date')?.value||'',description:document.getElementById('edu-desc')?.value||'',thesis:document.getElementById('edu-thesis')?.value||'',tags:(document.getElementById('edu-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('edu-award')?.value||'',display_order:Number(document.getElementById('edu-order')?.value)||0});
   }
-  if(!slotEl&&currentModalType==='achievement'&&window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='achievement'&&window.PortfolioAdminDB?.isConfigured()){
     try{await PortfolioAdminDB.saveAchievement({
+      id:currentEditId || undefined,
       title:document.getElementById('ach-title')?.value||'Untitled Achievement',
       organisation:document.getElementById('ach-org')?.value||'',
       year:document.getElementById('ach-year')?.value||'',
@@ -1243,7 +1380,7 @@ async function saveModal() {
     });}
     catch(error){showToast(error.message||'Achievement save failed');return;}
   }
-  if(!slotEl&&currentModalType==='achievement'&&!window.PortfolioAdminDB?.isConfigured()){
+  if(currentModalType==='achievement'&&!window.PortfolioAdminDB?.isConfigured()){
     saveLocalAdminRecord('pf_achievements_custom',{id:Date.now(),title:document.getElementById('ach-title')?.value||'Untitled Achievement',organisation:document.getElementById('ach-org')?.value||'',year:document.getElementById('ach-year')?.value||'',description:document.getElementById('ach-desc')?.value||'',icon:document.getElementById('ach-icon')?.value||'award',display_order:Number(document.getElementById('ach-order')?.value)||0});
   }
   closeModal();showToast(window.PortfolioAdminDB?.isConfigured()?'Saved to Supabase':'Saved locally');
@@ -1300,10 +1437,13 @@ function showToast(msg) {
 
 // REPLY MODAL
 var _rd = {};
-function openReply(id, from, subject, preview) {
+function openReply(id, from, subject, preview, email) {
   if (arguments.length === 3) { preview = subject; subject = from; from = id; id = null; }
-  _rd = { id: id, from: from, subject: subject, preview: preview };
+  email = email || '';
+  _rd = { id: id, from: from, subject: subject, preview: preview, email: email };
   document.getElementById('reply-to-name').textContent = from;
+  document.getElementById('reply-email').value = email || 'No email address captured';
+  document.getElementById('reply-email-hint').textContent = email ? 'Your reply email draft will be addressed to this visitor.' : 'This older message cannot be emailed because it has no captured address.';
   document.getElementById('reply-subject').value = subject;
   document.getElementById('reply-from-label').textContent = from + ':';
   document.getElementById('reply-preview-text').textContent = preview;
@@ -1315,12 +1455,26 @@ function closeReply() { document.getElementById('reply-overlay').classList.remov
 async function sendReply() {
   var msg = document.getElementById('reply-msg').value.trim();
   if (!msg) { document.getElementById('reply-msg').focus(); return; }
+  if (!_rd.email) { showToast('No email address captured for this message'); return; }
   if(window.PortfolioAdminDB?.isConfigured()){
-    try{await PortfolioAdminDB.replyToMessage(_rd.id,msg);}
+    try{
+      await PortfolioAdminDB.replyToMessage(_rd.id,msg,{
+        email:_rd.email,
+        name:_rd.from,
+        subject:_rd.subject,
+        originalMessage:_rd.preview
+      });
+    }
     catch(error){showToast(error.message||'Reply save failed');return;}
+    closeReply();
+    showToast('Reply email sent to ' + _rd.email);
+    return;
   }
+  var subject = /^re:/i.test(_rd.subject || '') ? _rd.subject : 'Re: ' + (_rd.subject || 'Portfolio message');
+  var body = msg + '\n\n--- Original message from ' + (_rd.from || 'Visitor') + ' ---\n' + (_rd.preview || '');
+  window.location.href = 'mailto:' + encodeURIComponent(_rd.email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   closeReply();
-  showToast(window.PortfolioAdminDB?.isConfigured()?'Reply saved in Supabase':'Reply sent to ' + _rd.from);
+  showToast(window.PortfolioAdminDB?.isConfigured()?'Reply saved and email draft opened':'Email draft opened for ' + _rd.email);
 }
 document.getElementById('reply-overlay').addEventListener('click', function(e){
   if (e.target.id === 'reply-overlay') closeReply();

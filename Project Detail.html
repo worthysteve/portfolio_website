@@ -87,6 +87,15 @@ h1,h2,h3{font-family:var(--fh);font-weight:600;line-height:1.15;color:var(--t1)}
 .acc-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
 .acc-body.open{max-height:600px}
 .acc-body-inner{padding:4px 18px 18px;font-size:14px;color:var(--t2);line-height:1.75;text-wrap:pretty}
+.acc-body-inner h2,.acc-body-inner h3{margin:14px 0 8px;color:var(--t1);font-size:16px}
+.acc-body-inner h4{margin:12px 0 6px;color:var(--t1);font-size:14px}
+.acc-body-inner p{margin:0 0 10px}
+.acc-body-inner ul,.acc-body-inner ol{margin:8px 0 12px 20px;padding-left:12px}
+.acc-body-inner li{margin:4px 0;padding-left:2px}
+.acc-body-inner strong{color:var(--t1);font-weight:700}
+.acc-body-inner code{font-family:var(--fm);font-size:.92em;color:var(--a2);background:rgba(37,99,235,.08);border:1px solid rgba(37,99,235,.12);border-radius:5px;padding:1px 5px}
+.acc-body-inner a{color:var(--a);text-decoration:underline;text-underline-offset:3px}
+.acc-body-inner a:hover{color:var(--a2)}
 
 /* KEY FEATURES */
 .kf-wrap{margin:22px 0 28px}
@@ -263,16 +272,16 @@ const SUPABASE_CONFIG_KEYS={url:'pf-supabase-url',anonKey:'pf-supabase-anon-key'
 
 // ── MERGE CUSTOM PROJECTS FROM ADMIN ─────────────────────────────
 const customProjects=(function(){try{return JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){return [];}})();
-const ALL_PROJECTS=PROJECTS.concat(customProjects.map(function(p,i){
-  return Object.assign({num:'0'+(PROJECTS.length+i+1),url:'#',urlText:'',
+let ALL_PROJECTS=customProjects.map(function(p,i){
+  return Object.assign({num:String(i+1).padStart(2,'0'),url:'#',urlText:'',
     gradients:DEFAULT_GRADIENTS,
     features:p.features||[],metrics:p.metrics||[],tags:p.tags||[]},p);
-}));
+});
 
 let cur=null,imgIdx=0,curImgs=[];
 
 function normalizeProject(project){
-  var extra=getExtraData(project);
+  var extra=project&&project._source==='supabase'?{}:getExtraData(project);
   var merged=Object.assign({},project,extra);
   merged.desc=merged.desc||merged.description||'';
   merged.date=merged.date||merged.date_period||'';
@@ -291,6 +300,7 @@ function normalizeProject(project){
 function mapSupabaseProject(row){
   if(!row)return null;
   return {
+    _source:'supabase',
     id:row.id,
     title:row.title,
     type:row.type,
@@ -329,7 +339,7 @@ function getProjectImgs(p){
   for(var i=1;i<=4;i++){
     var local=localStorage.getItem('pf_proj_'+p.id+'_img_'+i);
     var remote=p['image_'+i+'_url'];
-    var src=local||remote;
+    var src=p&&p._source==='supabase'?(remote||local):(local||remote);
     if(src)imgs.push({type:'img',src:src});
   }
   if(!imgs.length)return p.gradients.map(function(g){return{type:'gradient',src:g};});
@@ -338,6 +348,50 @@ function getProjectImgs(p){
 }
 function getExtraData(p){try{var d=localStorage.getItem('pf_proj_data_'+p.id);return d?JSON.parse(d):{};}catch(e){return{};}}
 function hasUrl(url){return Boolean(url&&String(url).trim()&&String(url).trim()!=='#');}
+function escapeHtml(value){
+  return String(value || '').replace(/[&<>"']/g,function(char){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char];
+  });
+}
+function renderInlineMarkdown(value){
+  return escapeHtml(value)
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+}
+function renderProjectMarkdown(value){
+  var text=String(value || '')
+    .replace(/\r\n/g,'\n')
+    .replace(/([:.])\s+([-*]\s+)/g,'$1\n\n$2')
+    .replace(/\s+([-*]\s+)(?=[A-Z0-9])/g,'\n$1')
+    .replace(/\s+(\d+[.)]\s+)(?=[A-Z0-9])/g,'\n$1');
+  var lines=text.split('\n');
+  var html='', listType=null, paragraph=[];
+  function flushParagraph(){
+    if(!paragraph.length)return;
+    html+='<p>'+renderInlineMarkdown(paragraph.join(' '))+'</p>';
+    paragraph=[];
+  }
+  function closeList(){
+    if(!listType)return;
+    html+='</'+listType+'>';
+    listType=null;
+  }
+  lines.forEach(function(line){
+    var raw=line.trim();
+    if(!raw){flushParagraph();closeList();return;}
+    var heading=raw.match(/^(#{2,4})\s+(.+)$/);
+    if(heading){flushParagraph();closeList();html+='<h'+heading[1].length+'>'+renderInlineMarkdown(heading[2])+'</h'+heading[1].length+'>';return;}
+    var unordered=raw.match(/^[-*]\s+(.+)$/);
+    if(unordered){flushParagraph();if(listType!=='ul'){closeList();html+='<ul>';listType='ul';}html+='<li>'+renderInlineMarkdown(unordered[1])+'</li>';return;}
+    var ordered=raw.match(/^\d+[.)]\s+(.+)$/);
+    if(ordered){flushParagraph();if(listType!=='ol'){closeList();html+='<ol>';listType='ol';}html+='<li>'+renderInlineMarkdown(ordered[1])+'</li>';return;}
+    if(listType)closeList();
+    paragraph.push(raw);
+  });
+  flushParagraph();closeList();
+  return html || '<p></p>';
+}
 
 function render(p){
   p=normalizeProject(p);
@@ -371,19 +425,19 @@ function render(p){
       <div class="acc-head" onclick="toggleAcc(this)">
         <div class="acc-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Project Overview</div>${chevron(true)}
       </div>
-      <div class="acc-body open"><div class="acc-body-inner">${p.overview}</div></div>
+      <div class="acc-body open"><div class="acc-body-inner">${renderProjectMarkdown(p.overview)}</div></div>
     </div>
     <div class="accordion">
       <div class="acc-head" onclick="toggleAcc(this)">
         <div class="acc-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>The Challenge</div>${chevron(false)}
       </div>
-      <div class="acc-body"><div class="acc-body-inner">${p.challenge}</div></div>
+      <div class="acc-body"><div class="acc-body-inner">${renderProjectMarkdown(p.challenge)}</div></div>
     </div>
     <div class="accordion">
       <div class="acc-head" onclick="toggleAcc(this)">
         <div class="acc-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>The Solution</div>${chevron(false)}
       </div>
-      <div class="acc-body"><div class="acc-body-inner">${p.solution}</div></div>
+      <div class="acc-body"><div class="acc-body-inner">${renderProjectMarkdown(p.solution)}</div></div>
     </div>`;
 
   document.getElementById('kf-wrap').innerHTML=p.features.length?`
@@ -402,13 +456,13 @@ function render(p){
   if(hasUrl(demoUrl))   ctaHtml+=`<a href="${demoUrl}" class="btn-g" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px"><polygon points="5 3 19 12 5 21 5 3"/></svg>Demo</a>`;
   if(hasUrl(docsUrl))   ctaHtml+=`<a href="${docsUrl}" class="btn-g" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Docs</a>`;
   if(hasUrl(paperUrl))  ctaHtml+=`<a href="${paperUrl}" class="btn-g" target="_blank" rel="noopener"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:2px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Paper</a>`;
-  ctaHtml+=`<button class="btn-g" onclick="goNext()">Next Project →</button>`;
+  if(ALL_PROJECTS.length>1)ctaHtml+=`<button class="btn-g" onclick="goNext()">Next Project →</button>`;
   document.getElementById('detail-cta').innerHTML=ctaHtml;
 
   document.getElementById('tech-tags').innerHTML=(p.tags||extra.tags||[]).map(t=>`<span class="tech-tag">${t}</span>`).join('');
 
-  const idx=ALL_PROJECTS.findIndex(x=>x.id===p.id);
-  const prev=ALL_PROJECTS[idx-1],next=ALL_PROJECTS[idx+1];
+  const idx=ALL_PROJECTS.findIndex(x=>Number(x.id)===Number(p.id));
+  const prev=idx>0?ALL_PROJECTS[idx-1]:null,next=idx>=0&&idx<ALL_PROJECTS.length-1?ALL_PROJECTS[idx+1]:null;
   document.getElementById('pnav').innerHTML=`
     ${prev?`<a class="pnav-btn" href="Project Detail.html?id=${prev.id}">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -445,7 +499,9 @@ function toggleAcc(head){
   body.classList.toggle('open',!open);chev.classList.toggle('open',!open);
 }
 function goNext(){
-  const idx=ALL_PROJECTS.findIndex(x=>x.id===cur.id);
+  if(!ALL_PROJECTS.length)return;
+  const idx=ALL_PROJECTS.findIndex(x=>Number(x.id)===Number(cur.id));
+  if(idx<0||ALL_PROJECTS.length<2)return;
   location.href='Project Detail.html?id='+ALL_PROJECTS[(idx+1)%ALL_PROJECTS.length].id;
 }
 
@@ -456,6 +512,10 @@ render(fallbackProject||{id:id,num:String(id).padStart(2,'0'),title:'Project una
 (async function loadSupabaseProject(){
   var client=getSupabaseClient();
   if(!client)return;
+  var listResult=await client.from('projects').select('*').eq('status','published').order('created_at',{ascending:false});
+  if(!listResult.error&&Array.isArray(listResult.data)){
+    ALL_PROJECTS=listResult.data.map(mapSupabaseProject).filter(Boolean);
+  }
   var result=await client.from('projects').select('*').eq('id',id).maybeSingle();
   if(result.error||!result.data)return;
   var mapped=mapSupabaseProject(result.data);

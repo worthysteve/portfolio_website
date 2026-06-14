@@ -14,12 +14,12 @@
   ];
 
   const fallbackMessages = [
-    { id: 1, name: 'Dr. James Osei', subject: 'Research collaboration on climate AI', message: 'Hi, I came across your flood prediction project and would love to discuss a potential collaboration on climate resilience...', status: 'unread', created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString() },
-    { id: 2, name: 'Fatima Al-Hassan', subject: 'ML Engineer opportunity at our AI startup', message: "We're building an AI-powered fintech platform and your background in both ML and financial engineering is exactly what...", status: 'unread', created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() },
-    { id: 3, name: 'Ahmed Koroma', subject: 'Speaking invitation - AI Summit Sierra Leone', message: "We're organising the inaugural AI Summit in Freetown and would be honoured to have you as a keynote speaker...", status: 'unread', created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() },
-    { id: 4, name: 'Marcus Webb', subject: 'Your ICML workshop talk proposal accepted', message: 'Congratulations! Your proposal for the LLMs for Social Good workshop has been accepted...', status: 'unread', created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-    { id: 5, name: 'Priya Sharma', subject: 'Python mentorship enquiry', message: "I'm interested in your Python and data science mentorship programme. Could you share more details...", status: 'read', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
-    { id: 6, name: 'Liu Tao', subject: 'Collaboration on LLM evaluation framework', message: "I'm a researcher at NTU working on LLM evaluation. Your RAG chatbot project caught my attention...", status: 'read', created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() }
+    { id: 1, name: 'Dr. James Osei', email: 'james.osei@example.com', subject: 'Research collaboration on climate AI', message: 'Hi, I came across your flood prediction project and would love to discuss a potential collaboration on climate resilience...', status: 'unread', created_at: new Date(Date.now() - 60 * 60 * 1000).toISOString() },
+    { id: 2, name: 'Fatima Al-Hassan', email: 'fatima.alhassan@example.com', subject: 'ML Engineer opportunity at our AI startup', message: "We're building an AI-powered fintech platform and your background in both ML and financial engineering is exactly what...", status: 'unread', created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString() },
+    { id: 3, name: 'Ahmed Koroma', email: 'ahmed.koroma@example.com', subject: 'Speaking invitation - AI Summit Sierra Leone', message: "We're organising the inaugural AI Summit in Freetown and would be honoured to have you as a keynote speaker...", status: 'unread', created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString() },
+    { id: 4, name: 'Marcus Webb', email: 'marcus.webb@example.com', subject: 'Your ICML workshop talk proposal accepted', message: 'Congratulations! Your proposal for the LLMs for Social Good workshop has been accepted...', status: 'unread', created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
+    { id: 5, name: 'Priya Sharma', email: 'priya.sharma@example.com', subject: 'Python mentorship enquiry', message: "I'm interested in your Python and data science mentorship programme. Could you share more details...", status: 'read', created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+    { id: 6, name: 'Liu Tao', email: 'liu.tao@example.com', subject: 'Collaboration on LLM evaluation framework', message: "I'm a researcher at NTU working on LLM evaluation. Your RAG chatbot project caught my attention...", status: 'read', created_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() }
   ];
   const fallbackPosts = [
     { id: 1, title: 'Building RAG Systems from Scratch: A Production Guide', category: 'AI', read_time: '8 min', status: 'published', created_at: '2025-06-01' },
@@ -27,8 +27,8 @@
     { id: 3, title: 'Computer Vision for Social Good: Detecting Floods', category: 'Data Science', read_time: '7 min', status: 'published', created_at: '2025-04-01' }
   ];
   const fallbackCerts = [
-    { id: 1, name: 'AI Engineering Professional Certificate', issuer: 'IBM / Coursera', category: 'AI', verified: true, year_earned: 2024 },
-    { id: 2, name: 'Deep Learning Specialization', issuer: 'DeepLearning.AI', category: 'Deep Learning', verified: true, year_earned: 2024 }
+    { id: 1, name: 'AI Engineering Professional Certificate', issuer: 'IBM / Coursera', category: 'AI', verified: true, month_earned: 1, year_earned: 2024 },
+    { id: 2, name: 'Deep Learning Specialization', issuer: 'DeepLearning.AI', category: 'Deep Learning', verified: true, month_earned: 1, year_earned: 2024 }
   ];
   const fallbackPublications = [
     { id: 1, title: 'AI-Driven Flood Risk Assessment for Sub-Saharan Communities', pub_type: 'Journal', venue: 'JAAES', status: 'Under Review', year: 2025 },
@@ -47,6 +47,15 @@
   ];
 
   let client = null;
+  const adminData = {
+    projects: [],
+    blog_posts: [],
+    certifications: [],
+    publications: [],
+    experience: [],
+    education: [],
+    achievements: []
+  };
 
   function getConfig() {
     return {
@@ -106,8 +115,22 @@
     if (s === 'under review') return 'review';
     return 'published';
   }
+  function certificationSortValue(cert) {
+    const year = Number(cert.year_earned) || 0;
+    const month = Number(cert.month_earned) || 0;
+    return year * 100 + month;
+  }
+  function formatEarnedDate(cert) {
+    const year = Number(cert.year_earned) || 0;
+    const month = Number(cert.month_earned) || 0;
+    if (!year) return '-';
+    if (!month) return String(year);
+    const date = new Date(year, month - 1, 1);
+    return date.toLocaleDateString(undefined, { month: 'short', year: 'numeric' });
+  }
 
   function renderProjects(projects) {
+    adminData.projects = Array.isArray(projects) ? projects : [];
     const tbody = document.querySelector('#view-projects tbody');
     if (!tbody) return;
     if (!projects.length) {
@@ -145,12 +168,13 @@
         + '<div class="msg-avatar">' + escapeHtml(initials) + '</div>'
         + '<div class="msg-content">'
         + '<p class="msg-from">' + escapeHtml(message.name || 'Visitor') + '</p>'
+        + '<p class="msg-subject">' + (message.email ? '<a href="mailto:' + escapeHtml(message.email) + '">' + escapeHtml(message.email) + '</a>' : 'No email address captured') + '</p>'
         + '<p class="msg-subject">' + escapeHtml(message.subject || 'No subject') + '</p>'
         + '<p class="msg-preview">' + escapeHtml(preview) + '</p>'
         + '</div>'
         + '<div class="msg-meta"><span class="msg-time">' + escapeHtml(relativeTime(message.created_at)) + '</span>'
         + '<span class="badge ' + (unread ? 'unread' : 'read') + '">' + (unread ? 'New' : 'Read') + '</span>'
-        + '<button class="msg-reply-btn" onclick="event.stopPropagation();openReply(' + Number(message.id) + ',\'' + escapeForCall(message.name || 'Visitor') + '\',\'' + escapeForCall(message.subject || 'No subject') + '\',\'' + escapeForCall(preview) + '\')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>'
+        + '<button class="msg-reply-btn" onclick="event.stopPropagation();openReply(' + Number(message.id) + ',\'' + escapeForCall(message.name || 'Visitor') + '\',\'' + escapeForCall(message.subject || 'No subject') + '\',\'' + escapeForCall(preview) + '\',\'' + escapeForCall(message.email || '') + '\')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>'
         + '</div>';
     }).join('');
   }
@@ -178,6 +202,7 @@
   }
 
   function renderBlogPosts(posts) {
+    adminData.blog_posts = Array.isArray(posts) ? posts : [];
     const tbody = document.querySelector('#view-blog tbody');
     if (!tbody) return;
     if (!posts.length) {
@@ -193,32 +218,37 @@
         + '<td><span class="badge ' + statusClass(status) + '">' + escapeHtml(status) + '</span></td>'
         + '<td class="td-mono">' + formatDate(post.created_at) + '</td>'
         + '<td><div class="td-actions">'
-        + '<button class="ia" onclick="openModal(\'blog\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+        + '<button class="ia" title="Edit" onclick="openModal(\'blog\',' + Number(post.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
         + '<button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'blog_posts\',' + Number(post.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
         + '</div></td></tr>';
     }).join('');
   }
 
   function renderCertifications(certs) {
+    adminData.certifications = Array.isArray(certs) ? certs : [];
     const tbody = document.querySelector('#view-certs tbody');
     if (!tbody) return;
     if (!certs.length) {
       tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state">No certifications yet.</div></td></tr>';
       return;
     }
-    tbody.innerHTML = certs.map(function(cert){
+    const sortedCerts = certs.slice().sort(function(a,b){
+      return certificationSortValue(b) - certificationSortValue(a) || new Date(b.created_at || 0) - new Date(a.created_at || 0);
+    });
+    tbody.innerHTML = sortedCerts.map(function(cert){
       return '<tr>'
-        + '<td class="td-title">' + escapeHtml(cert.name) + '</td>'
+        + '<td class="td-title">' + escapeHtml(cert.name) + (cert.embed_code ? ' <span class="badge published">Embed</span>' : '') + '</td>'
         + '<td class="td-mono">' + escapeHtml(cert.issuer || '-') + '</td>'
         + '<td class="td-mono">' + escapeHtml(cert.category || '-') + '</td>'
         + '<td><span class="badge published">' + (cert.verified === false ? 'Unverified' : 'Verified') + '</span></td>'
-        + '<td class="td-mono">' + escapeHtml(cert.year_earned || '-') + '</td>'
-        + '<td><div class="td-actions"><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'certifications\',' + Number(cert.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
+        + '<td class="td-mono">' + escapeHtml(formatEarnedDate(cert)) + '</td>'
+        + '<td><div class="td-actions"><button class="ia" title="Edit" onclick="openModal(\'cert\',' + Number(cert.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'certifications\',' + Number(cert.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
         + '</tr>';
     }).join('');
   }
 
   function renderPublications(publications) {
+    adminData.publications = Array.isArray(publications) ? publications : [];
     const tbody = document.querySelector('#view-publications tbody');
     if (!tbody) return;
     if (!publications.length) {
@@ -234,13 +264,14 @@
         + '<td><span class="badge ' + statusClass(status) + '">' + escapeHtml(status) + '</span></td>'
         + '<td class="td-mono">' + escapeHtml(pub.year || '-') + '</td>'
         + '<td><div class="td-actions">'
-        + '<button class="ia" onclick="openModal(\'pub\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
+        + '<button class="ia" title="Edit" onclick="openModal(\'pub\',' + Number(pub.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>'
         + '<button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'publications\',' + Number(pub.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button>'
         + '</div></td></tr>';
     }).join('');
   }
 
   function renderExperience(experience) {
+    adminData.experience = Array.isArray(experience) ? experience : [];
     const tbody = document.querySelector('#view-experience tbody');
     if (!tbody) return;
     if (!experience.length) {
@@ -253,12 +284,13 @@
         + '<td class="td-mono">' + escapeHtml(item.organisation || '-') + '</td>'
         + '<td class="td-mono">' + escapeHtml(item.date_period || '-') + '</td>'
         + '<td class="td-mono">' + escapeHtml((item.tags || []).slice(0, 3).join(', ')) + '</td>'
-        + '<td><div class="td-actions"><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'experience\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
+        + '<td><div class="td-actions"><button class="ia" title="Edit" onclick="openModal(\'experience\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'experience\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
         + '</tr>';
     }).join('');
   }
 
   function renderEducation(education) {
+    adminData.education = Array.isArray(education) ? education : [];
     const tbody = document.querySelector('#view-education tbody');
     if (!tbody) return;
     if (!education.length) {
@@ -271,12 +303,13 @@
         + '<td class="td-mono">' + escapeHtml(item.institution || '-') + '</td>'
         + '<td class="td-mono">' + escapeHtml(item.date_period || '-') + '</td>'
         + '<td class="td-mono">' + escapeHtml((item.tags || []).slice(0, 3).join(', ')) + '</td>'
-        + '<td><div class="td-actions"><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'education\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
+        + '<td><div class="td-actions"><button class="ia" title="Edit" onclick="openModal(\'education\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'education\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
         + '</tr>';
     }).join('');
   }
 
   function renderAchievements(achievements) {
+    adminData.achievements = Array.isArray(achievements) ? achievements : [];
     const tbody = document.querySelector('#view-achievements tbody');
     if (!tbody) return;
     if (!achievements.length) {
@@ -289,7 +322,7 @@
         + '<td class="td-mono">' + escapeHtml(item.organisation || '-') + '</td>'
         + '<td class="td-mono">' + escapeHtml(item.year || '-') + '</td>'
         + '<td class="td-mono">' + escapeHtml((item.description || '').slice(0, 80)) + '</td>'
-        + '<td><div class="td-actions"><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'achievements\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
+        + '<td><div class="td-actions"><button class="ia" title="Edit" onclick="openModal(\'achievement\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="PortfolioAdminDB.deleteRecord(\'achievements\',' + Number(item.id) + ')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td>'
         + '</tr>';
     }).join('');
   }
@@ -379,7 +412,7 @@
       readTable('projects', client.from('projects').select('*').order('created_at', { ascending: false })),
       readTable('blog_posts', client.from('blog_posts').select('*').order('created_at', { ascending: false })),
       readTable('messages', client.from('messages').select('*').order('created_at', { ascending: false })),
-      readTable('certifications', client.from('certifications').select('*').order('created_at', { ascending: false })),
+      readTable('certifications', client.from('certifications').select('*').order('year_earned', { ascending: false }).order('month_earned', { ascending: false }).order('created_at', { ascending: false })),
       readTable('publications', client.from('publications').select('*').order('created_at', { ascending: false })),
       readTable('experience', client.from('experience').select('*').order('display_order', { ascending: true }).order('created_at', { ascending: false })),
       readTable('education', client.from('education').select('*').order('display_order', { ascending: true }).order('created_at', { ascending: false })),
@@ -420,6 +453,32 @@
   function readLocalCustomProjects() {
     try { return JSON.parse(localStorage.getItem('pf_projects_custom') || '[]'); }
     catch(e) { return []; }
+  }
+  function getProjectById(id) {
+    const projectId = Number(id);
+    if (!Number.isFinite(projectId)) return null;
+    return (adminData.projects || []).find(function(project){
+      return Number(project.id) === projectId;
+    }) || null;
+  }
+  function getProjects() {
+    return (adminData.projects || []).slice();
+  }
+  function getRecordById(type, id) {
+    const recordId = Number(id);
+    const tableByType = {
+      project: 'projects',
+      blog: 'blog_posts',
+      cert: 'certifications',
+      pub: 'publications',
+      experience: 'experience',
+      education: 'education',
+      achievement: 'achievements'
+    };
+    const table = tableByType[type] || type;
+    const rows = adminData[table] || [];
+    if (!Number.isFinite(recordId)) return null;
+    return rows.find(function(row){ return Number(row.id) === recordId; }) || null;
   }
   function readLocalRecords(key) {
     try { return JSON.parse(localStorage.getItem(key) || '[]'); }
@@ -522,8 +581,11 @@
       });
       if (error) throw error;
       image_url = client.storage.from(cfg.bucket).getPublicUrl(path).data.publicUrl;
+    } else if (imageSrc) {
+      image_url = imageSrc;
     }
     const payload = {
+      id: data.id || undefined,
       title: data.title,
       type: 'blog',
       category: data.category,
@@ -531,10 +593,10 @@
       excerpt: data.excerpt,
       content: data.content,
       status: String(data.status || 'Draft').toLowerCase(),
-      read_time: data.read_time,
-      image_url: image_url || null
+      read_time: data.read_time
     };
-    const { error } = await client.from('blog_posts').insert(payload);
+    if (image_url || data.image_url) payload.image_url = image_url || data.image_url;
+    const { error } = await client.from('blog_posts').upsert(payload);
     if (error) throw error;
     await loadDashboard();
     return { connected: true };
@@ -542,7 +604,17 @@
 
   async function saveCertification(data) {
     if (!init()) return { connected: false };
-    const { error } = await client.from('certifications').insert(data);
+    let { error } = await client.from('certifications').upsert(data);
+    if (error && /month_earned|embed_code|certificate_image_url|provided_by|schema cache/i.test(error.message || '')) {
+      const compatibleData = Object.assign({}, data);
+      delete compatibleData.month_earned;
+      delete compatibleData.embed_code;
+      delete compatibleData.certificate_image_url;
+      delete compatibleData.provided_by;
+      const retry = await client.from('certifications').upsert(compatibleData);
+      error = retry.error;
+      if (!error) show('Certification saved. Run the schema update to store month/embed code.');
+    }
     if (error) throw error;
     await loadDashboard();
     return { connected: true };
@@ -550,7 +622,7 @@
 
   async function savePublication(data) {
     if (!init()) return { connected: false };
-    const { error } = await client.from('publications').insert(data);
+    const { error } = await client.from('publications').upsert(data);
     if (error) throw error;
     await loadDashboard();
     return { connected: true };
@@ -558,7 +630,7 @@
 
   async function saveExperience(data) {
     if (!init()) return { connected: false };
-    const { error } = await client.from('experience').insert(data);
+    const { error } = await client.from('experience').upsert(data);
     if (error) throw error;
     await loadDashboard();
     return { connected: true };
@@ -566,7 +638,7 @@
 
   async function saveEducation(data) {
     if (!init()) return { connected: false };
-    const { error } = await client.from('education').insert(data);
+    const { error } = await client.from('education').upsert(data);
     if (error) throw error;
     await loadDashboard();
     return { connected: true };
@@ -574,7 +646,7 @@
 
   async function saveAchievement(data) {
     if (!init()) return { connected: false };
-    const { error } = await client.from('achievements').insert(data);
+    const { error } = await client.from('achievements').upsert(data);
     if (error) throw error;
     await loadDashboard();
     return { connected: true };
@@ -673,15 +745,33 @@
     return data.user || null;
   }
 
-  async function replyToMessage(messageId, replyText) {
+  async function replyToMessage(messageId, replyText, recipient) {
     if (!init() || !messageId) return { connected: false };
-    const { error } = await client
-      .from('messages')
-      .update({ status: 'read', reply_text: replyText, replied_at: new Date().toISOString() })
-      .eq('id', messageId);
-    if (error) throw error;
+    const { data, error } = await client.functions.invoke('send-reply-email', {
+      body: {
+        messageId: messageId,
+        to: recipient?.email || '',
+        name: recipient?.name || 'there',
+        subject: recipient?.subject || 'Portfolio message',
+        replyText: replyText,
+        originalMessage: recipient?.originalMessage || ''
+      }
+    });
+    if (error) {
+      if (error.context && typeof error.context.json === 'function') {
+        try {
+          const body = await error.context.json();
+          const detail = body?.details?.message || body?.details?.error || body?.details?.name || body?.error;
+          if (detail) throw new Error(detail);
+        } catch (parseError) {
+          if (parseError instanceof Error && parseError.message !== 'Body is unusable') throw parseError;
+        }
+      }
+      throw error;
+    }
+    if (data && data.error) throw new Error(data.error);
     await loadDashboard();
-    return { connected: true };
+    return { connected: true, data: data };
   }
 
   async function replyToBlogComment(parentId, postId) {
@@ -741,6 +831,9 @@
     init,
     isConfigured,
     loadDashboard,
+    getProjectById,
+    getProjects,
+    getRecordById,
     saveProject,
     uploadFile,
     saveBlogPost,
