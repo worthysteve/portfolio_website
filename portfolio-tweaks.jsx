@@ -18,7 +18,7 @@ function PortfolioTweaks() {
     r.style.setProperty("--a2",   p.a2);
     r.style.setProperty("--glow", p.glow);
     document.querySelectorAll("[data-tweak-name]").forEach(el => { el.textContent = t.name || "Steven Daniel"; });
-    document.title = (t.name || "Steven Daniel") + " — AI Engineer & Researcher";
+    document.title = (t.name || "Steven Daniel") + " — AI Engineer & Data Scientist";
     if (window.__updateRole) window.__updateRole(t.role || "AI Engineer");
   }, [t]);
   return (

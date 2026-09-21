@@ -77,6 +77,7 @@ create table if not exists experience (
   description text,
   tags text[],
   award text,
+  category text not null default 'work',
   display_order integer default 0,
   created_at timestamptz default now()
 );
@@ -146,6 +147,31 @@ create table if not exists messages (
 
 alter table experience add column if not exists start_date date;
 alter table experience add column if not exists end_date date;
+alter table experience add column if not exists category text not null default 'work';
+
+-- Only the portfolio owner may change content, upload media, or read messages.
+-- Edit the email list if you sign in with a different address.
+create or replace function public.is_portfolio_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from auth.users u
+    where u.id = auth.uid()
+      and u.email_confirmed_at is not null
+      and lower(u.email) in (
+        'danielsteven.ds@gmail.com',
+        'steven@stevendaniel.dev'
+      )
+  );
+$$;
+
+revoke all on function public.is_portfolio_admin() from public;
+grant execute on function public.is_portfolio_admin() to anon, authenticated;
 
 alter table projects enable row level security;
 alter table blog_posts enable row level security;
@@ -236,81 +262,92 @@ create policy "Public can create messages"
   with check (true);
 
 drop policy if exists "Authenticated users manage projects" on projects;
-create policy "Authenticated users manage projects"
+drop policy if exists "Portfolio admin manages projects" on projects;
+create policy "Portfolio admin manages projects"
   on projects for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage blog posts" on blog_posts;
-create policy "Authenticated users manage blog posts"
+drop policy if exists "Portfolio admin manages blog posts" on blog_posts;
+create policy "Portfolio admin manages blog posts"
   on blog_posts for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage certifications" on certifications;
-create policy "Authenticated users manage certifications"
+drop policy if exists "Portfolio admin manages certifications" on certifications;
+create policy "Portfolio admin manages certifications"
   on certifications for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage publications" on publications;
-create policy "Authenticated users manage publications"
+drop policy if exists "Portfolio admin manages publications" on publications;
+create policy "Portfolio admin manages publications"
   on publications for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage experience" on experience;
-create policy "Authenticated users manage experience"
+drop policy if exists "Portfolio admin manages experience" on experience;
+create policy "Portfolio admin manages experience"
   on experience for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage education" on education;
-create policy "Authenticated users manage education"
+drop policy if exists "Portfolio admin manages education" on education;
+create policy "Portfolio admin manages education"
   on education for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage achievements" on achievements;
-create policy "Authenticated users manage achievements"
+drop policy if exists "Portfolio admin manages achievements" on achievements;
+create policy "Portfolio admin manages achievements"
   on achievements for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage site media" on site_media;
-create policy "Authenticated users manage site media"
+drop policy if exists "Portfolio admin manages site media" on site_media;
+create policy "Portfolio admin manages site media"
   on site_media for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage blog comments" on blog_comments;
-create policy "Authenticated users manage blog comments"
+drop policy if exists "Portfolio admin manages blog comments" on blog_comments;
+create policy "Portfolio admin manages blog comments"
   on blog_comments for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage blog likes" on blog_likes;
-create policy "Authenticated users manage blog likes"
+drop policy if exists "Portfolio admin manages blog likes" on blog_likes;
+create policy "Portfolio admin manages blog likes"
   on blog_likes for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 drop policy if exists "Authenticated users manage messages" on messages;
-create policy "Authenticated users manage messages"
+drop policy if exists "Portfolio admin manages messages" on messages;
+create policy "Portfolio admin manages messages"
   on messages for all
   to authenticated
-  using (true)
-  with check (true);
+  using ((select public.is_portfolio_admin()))
+  with check ((select public.is_portfolio_admin()));
 
 insert into storage.buckets (id, name, public)
 values ('portfolio-media', 'portfolio-media', true)
@@ -322,8 +359,9 @@ create policy "Public can read portfolio media"
   using (bucket_id = 'portfolio-media');
 
 drop policy if exists "Authenticated users manage portfolio media" on storage.objects;
-create policy "Authenticated users manage portfolio media"
+drop policy if exists "Portfolio admin manages portfolio media" on storage.objects;
+create policy "Portfolio admin manages portfolio media"
   on storage.objects for all
   to authenticated
-  using (bucket_id = 'portfolio-media')
-  with check (bucket_id = 'portfolio-media');
+  using (bucket_id = 'portfolio-media' and (select public.is_portfolio_admin()))
+  with check (bucket_id = 'portfolio-media' and (select public.is_portfolio_admin()));

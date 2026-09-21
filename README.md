@@ -6,7 +6,7 @@ A responsive, database-driven personal portfolio website. The project is built a
 
 This application includes:
 
-- A polished public portfolio homepage with animated hero section, particle canvas, typing animation, portrait orbit badges, project previews, blog previews, research, experience, education, achievements, certifications, publications, and contact form.
+- A polished public portfolio homepage with animated hero section, particle canvas, typing animation, portrait orbit badges, education, certifications, experience & fellowships, achievements, projects, research interests, blog (shown only once a post is published), contact form, and a scroll-to-top/bottom button.
 - A Supabase-backed admin dashboard for managing front-facing portfolio content.
 - Dedicated listing pages for all projects and all blog posts.
 - Detail pages for projects and blog posts.
@@ -28,8 +28,10 @@ This application includes:
 - `portfolio.css` — main public site styling, responsive layout, design tokens, hero, cards, and mobile rules.
 - `portfolio.js` — public site interactions, Supabase reads, hero animation, dynamic rendering, contact form, and theme behavior.
 - `admin-supabase.js` — Supabase admin data layer, authentication, CRUD operations, media upload, comments, likes, and dashboard loading.
-- `listing.js` — shared loader for the all-projects and all-blog pages.
-- `supabase-schema.sql` — database schema, RLS policies, storage bucket setup, comments, likes, messages, and admin-managed content tables.
+- `listing.js` — shared loader for the all-projects and all-blog pages (the blog page also supports `?q=`, `?tag=` and `?category=` filters).
+- `site-common.js` — shared public-page behaviour: mobile menu, footer year, and the scroll-to-top/bottom button.
+- `supabase-schema.sql` — database schema, RLS policies, storage bucket setup, comments, likes, messages, and admin-managed content tables (fresh installs).
+- `supabase/migrations/` — updates for an existing database (run in order).
 - `favicon.svg` — custom `SD` SVG favicon.
 
 ## Dynamic Content Managed From Admin
@@ -38,9 +40,8 @@ The admin dashboard is designed to manage the main front-facing content:
 
 - Projects
 - Blog posts
-- Publications
 - Certifications
-- Experience
+- Experience (grouped as “Fellowships & Bootcamps” or “Work Experience”)
 - Education
 - Achievements
 - Site media, including hero/about imagery
@@ -75,6 +76,18 @@ It also creates the public storage bucket:
 
 - `portfolio-media`
 
+## Updating an Existing Database
+
+If the database was created from an older `supabase-schema.sql`, run these once in the Supabase SQL Editor:
+
+1. `supabase/migrations/20260921000000_experience_category_and_admin_only_access.sql` — adds the Fellowship/Work category and restricts all content changes, uploads, and message access to the admin email addresses listed in the file.
+
+Then redeploy the reply-email function so only the admin can send replies:
+
+```bash
+supabase functions deploy send-reply-email
+```
+
 ## Authentication Setup
 
 In Supabase:
@@ -95,7 +108,7 @@ http://localhost:3000/*
 http://localhost:3000/Admin%20Dashboard.html
 ```
 
-4. Enable email/password authentication if you want manual admin login.
+4. Enable email/password authentication if you want manual admin login, and turn off "Allow new users to sign up" once your admin account exists. Only the emails listed in `public.is_portfolio_admin()` can change content either way.
 5. Enable Google provider if you want Google login.
 
 For Google OAuth, configure the Google Cloud OAuth client with:
@@ -145,6 +158,7 @@ If using Netlify DNS, point the domain nameservers to the Netlify-provided names
 ## Notes
 
 - The public site reads published content from Supabase and falls back to local/default content if Supabase is unavailable.
-- Admin-only changes require an authenticated Supabase user.
+- Admin-only changes require a signed-in Supabase user whose confirmed email is listed in `public.is_portfolio_admin()`.
+- `index.html` contains placeholder entries for Experience, Education, Achievements, and Projects. Use **Import into admin** (Dashboard banner or Settings → Portfolio Content) to copy them into Supabase exactly as they appear; after that, everything is edited in the admin and new entries are added alongside them. Adding the first entry to an empty section imports that section's placeholders automatically, so nothing disappears from the site.
 - Public users can submit contact messages, add blog comments, reply to comments, and like blog posts based on the configured RLS policies.
 - Browsers cache favicons aggressively; hard refresh or clear browser cache if `favicon.svg` does not update immediately.

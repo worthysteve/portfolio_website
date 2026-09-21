@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+[hidden]{display:none!important}
 :root{
   --bg:#0B1017;--s1:#111827;--s2:#1F2937;--card:#1F2937;
   --b:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);
@@ -231,7 +232,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .mfield textarea{resize:vertical;min-height:80px}
 .mfield select option{background:var(--s2)}
 .mrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.modal-foot{padding:16px 24px;border-top:1px solid var(--b);display:flex;gap:10px;justify-content:flex-end}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--b);display:flex;gap:10px;justify-content:flex-end;align-items:center;position:sticky;bottom:0;background:var(--s1);z-index:1}
 .btn-cancel{padding:8px 18px;border-radius:var(--r);border:1px solid var(--b2);color:var(--t1);background:none;font-size:13px}
 .btn-cancel:hover{background:var(--s2)}
 .btn-save{padding:8px 18px;border-radius:var(--r);background:var(--a);color:#fff;font-size:13px;font-weight:500;border:none;transition:filter .2s}
@@ -242,6 +243,35 @@ tr:hover td{background:rgba(255,255,255,.02)}
 #toast.show{transform:translateY(0);opacity:1}
 #toast.success{border-color:rgba(16,185,129,.3)}
 #toast .toast-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+#toast.error{border-color:rgba(239,68,68,.45)}
+#toast.error .toast-dot{background:var(--red)}
+#toast.info .toast-dot{background:var(--a)}
+#toast{max-width:min(440px,calc(100vw - 40px))}
+.btn-save:disabled{opacity:.75;cursor:progress;filter:none}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:7px;opacity:.9}
+.ia .spin,.msg-reply-btn .spin{margin-right:0;width:11px;height:11px}
+button[data-busy]{cursor:progress;opacity:.8}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal-status{margin-right:auto;align-self:center;font-size:12px;color:var(--t2);font-family:var(--fm);line-height:1.4}
+.modal-foot .btn-save,.modal-foot .btn-cancel{white-space:nowrap;flex-shrink:0}
+.modal-status.error{color:var(--red)}
+.mfield input.invalid,.mfield textarea.invalid{border-color:var(--red)}
+.field-hint{font-size:11px;color:var(--t3);line-height:1.5}
+.msg-actions{display:flex;gap:6px}
+.msg-reply-btn.del:hover{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08)}
+.msg-replied{font-size:11px;color:var(--green);font-family:var(--fm);margin-top:4px}
+.tbl-count{font-size:12px;color:var(--t3);font-family:var(--fm)}
+.row-hidden{display:none!important}
+.setup-banner{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:18px 20px;margin-bottom:16px;border-radius:var(--rl);border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.07)}
+.setup-banner strong{display:block;font-size:14px;margin-bottom:4px}
+.setup-banner span{font-size:13px;color:var(--t2)}
+.setup-banner ol{margin:10px 0 0 18px;font-size:13px;color:var(--t2);line-height:1.7}
+.setup-banner b{color:var(--t1);font-weight:600}
+.setup-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.import-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:16px 20px;margin-bottom:24px;border-radius:var(--rl);border:1px solid rgba(6,182,212,.3);background:linear-gradient(135deg,rgba(37,99,235,.1),rgba(6,182,212,.06))}
+.import-banner strong{display:block;font-size:14px;margin-bottom:3px}
+.import-banner span{font-size:13px;color:var(--t2)}
+.account-email{font-size:13px;color:var(--t2);font-family:var(--fm);padding:10px 12px;background:var(--s2);border:1px solid var(--b);border-radius:var(--r);word-break:break-all}
 
 /* PAGINATION */
 .pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-top:1px solid var(--b)}
@@ -330,6 +360,22 @@ tr:hover td{background:rgba(255,255,255,.02)}
   .sidebar{position:fixed;left:-220px;top:0;bottom:0;z-index:50;transition:left .25s ease}
   .sidebar.open{left:0}
   .tb-search{display:none}
+  .topbar{gap:10px;padding:0 12px}
+  .tb-logo-name{white-space:nowrap}
+  .content{padding:20px 14px}
+  .page-hdr{flex-wrap:wrap;gap:12px}
+  .table-wrap{overflow-x:auto}
+  .table-head{flex-wrap:wrap;gap:10px}
+  .table-acts{flex-wrap:wrap}
+  td,th{padding:10px 12px}
+  .stat-row{grid-template-columns:1fr 1fr;gap:10px}
+  .chart-row,.activity-row,.settings-grid{grid-template-columns:1fr}
+  .qa-grid{grid-template-columns:1fr 1fr}
+  .mrow{grid-template-columns:1fr}
+  .modal{max-height:92vh;border-radius:12px}
+  #modal-overlay,#reply-overlay{padding:10px}
+  .modal-foot{flex-wrap:wrap}
+  .modal-status{flex-basis:100%}
 }
 
 /* ===== GOOGLE SIGN IN ===== */
@@ -346,6 +392,14 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .reply-quote strong{display:block;font-style:normal;color:var(--t1);font-weight:600;margin-bottom:4px}
 .msg-reply-btn{width:26px;height:26px;border-radius:6px;border:1px solid var(--b);background:none;color:var(--t3);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:border-color .2s,color .2s,background .2s;flex-shrink:0}
 .msg-reply-btn:hover{border-color:var(--a);color:var(--a);background:rgba(37,99,235,.08)}
+
+/* ===== ADMIN IMAGE DROP ===== */
+.admin-img-drop{background:var(--s2);border:2px dashed var(--b2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:border-color .2s,background-color .2s;display:flex;flex-direction:column;align-items:center;gap:7px;background-size:cover;background-position:center;min-height:86px;justify-content:center;color:var(--t2)}
+.admin-img-drop:hover,.admin-img-drop.drag-ov{border-color:var(--a);background-color:rgba(37,99,235,.06)}
+.admin-img-drop.has-img{border-color:var(--a2);border-style:solid;min-height:120px}
+.admin-img-drop.has-img p,.admin-img-drop.has-img small{background:rgba(11,16,23,.72);color:#fff;padding:3px 8px;border-radius:6px}
+.admin-img-drop p{font-size:13px;color:var(--t2);line-height:1.4;margin:0}
+.admin-img-drop small{font-size:11px;color:var(--t3);font-family:var(--fm)}
 
 /* ===== ADMIN FILE DROP ===== */
 .admin-file-drop{background:var(--s2);border:2px dashed var(--b2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;display:flex;flex-direction:column;align-items:center;gap:7px}
@@ -366,7 +420,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <h1 class="login-title">Sign in</h1>
     <p class="login-sub">Access your portfolio dashboard to manage content, messages, and analytics.</p>
-    <button class="btn-google" onclick="doGoogleLogin()">
+    <button class="btn-google" onclick="doGoogleLogin(this)">
       <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Continue with Google
     </button>
@@ -374,12 +428,12 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="lfield"><label>Email address</label><input type="email" id="login-email" placeholder="admin@example.com" autocomplete="username"></div>
     <div class="lfield"><label>Password</label><div class="password-wrap"><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"><button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Show password" id="password-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <div class="login-row">
-      <label class="remember-label"><input type="checkbox" id="remember-me"> Remember me</label>
-      <button type="button" class="forgot-btn" onclick="doForgotPassword()">Forgot password?</button>
+      <label class="remember-label" title="Only tick this on your own device. Otherwise you are signed out when you close the tab or browser."><input type="checkbox" id="remember-me"> Keep me signed in on this device</label>
+      <button type="button" class="forgot-btn" onclick="doForgotPassword(this)">Forgot password?</button>
     </div>
-    <button class="btn-login" onclick="doLogin()">Sign In →</button>
-    <button class="btn-login" style="background:transparent;border:1px solid var(--b2);color:var(--t1)" onclick="doCreateAdmin()">Create Admin Account</button>
-    <p class="login-hint">Use Supabase Auth email/password or Google. Create the first admin user here if signups are enabled.</p>
+    <button class="btn-login" id="login-btn" onclick="doLogin()">Sign In →</button>
+    <p class="login-hint">Admin access only. Sign in with your Supabase Auth email/password or Google.</p>
+    <p class="login-hint"><a href="index.html" style="color:var(--a2)">← Back to portfolio</a></p>
   </div>
 </div>
 
@@ -394,7 +448,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="tb-search">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input placeholder="Search content...">
+      <input id="admin-search" placeholder="Search this page..." aria-label="Search the current page" oninput="applyAdminSearch()">
     </div>
     <div class="tb-acts">
       <button class="tb-btn" id="admin-theme-btn" title="Toggle theme"></button>
@@ -428,63 +482,59 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <aside class="sidebar">
       <div style="padding:8px 0">
         <p class="sb-section">Main</p>
-        <div class="sb-item active" onclick="switchView('dashboard',this)">
+        <div class="sb-item active" data-view="dashboard" onclick="switchView('dashboard',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
           Dashboard
         </div>
         <p class="sb-section">Content</p>
-        <div class="sb-item" onclick="switchView('projects',this)">
+        <div class="sb-item" data-view="projects" onclick="switchView('projects',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
           Projects
         </div>
-        <div class="sb-item" onclick="switchView('blog',this)">
+        <div class="sb-item" data-view="blog" onclick="switchView('blog',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
           Blog Posts
         </div>
-        <div class="sb-item" onclick="switchView('publications',this)">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-          Publications
-        </div>
-        <div class="sb-item" onclick="switchView('certs',this)">
+        <div class="sb-item" data-view="certs" onclick="switchView('certs',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
           Certifications
         </div>
         <p class="sb-section">Profile</p>
-        <div class="sb-item" onclick="switchView('experience',this)">
+        <div class="sb-item" data-view="experience" onclick="switchView('experience',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           Experience
         </div>
-        <div class="sb-item" onclick="switchView('education',this)">
+        <div class="sb-item" data-view="education" onclick="switchView('education',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
           Education
         </div>
-        <div class="sb-item" onclick="switchView('achievements',this)">
+        <div class="sb-item" data-view="achievements" onclick="switchView('achievements',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
           Achievements
         </div>
         <p class="sb-section">Inbox</p>
-        <div class="sb-item" onclick="switchView('messages',this)">
+        <div class="sb-item" data-view="messages" onclick="switchView('messages',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Messages
           <span class="sb-badge new" id="messages-sidebar-badge" style="display:none"></span>
         </div>
-        <div class="sb-item" onclick="switchView('comments',this)">
+        <div class="sb-item" data-view="comments" onclick="switchView('comments',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H8l-5 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
           Blog Comments
         </div>
-        <div class="sb-item" onclick="switchView('media',this)">
+        <div class="sb-item" data-view="media" onclick="switchView('media',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
           Media
         </div>
         <p class="sb-section">System</p>
-        <div class="sb-item" onclick="switchView('settings',this)">
+        <div class="sb-item" data-view="settings" onclick="switchView('settings',this)">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           Settings
         </div>
       </div>
       <div class="sb-spacer"></div>
       <div class="sb-footer">
-        <div class="sb-user" onclick="confirmLogout()" title="Sign out">
+        <div class="sb-user" onclick="confirmLogout()" title="Sign out" role="button" tabindex="0">
           <div class="sb-avatar" id="sb-avatar">A</div>
           <div><p class="sb-user-name" id="sb-user-name" data-tweak-name>Admin</p><p class="sb-user-role" id="sb-user-email">admin@example.com</p></div>
         </div>
@@ -503,37 +553,46 @@ tr:hover td{background:rgba(255,255,255,.02)}
             New Project
           </button>
         </div>
+        <div class="setup-banner" id="db-update-banner" hidden>
+          <div>
+            <strong>One-time database update needed</strong>
+            <span>This turns on admin-only access to your data and lets Experience be grouped into Fellowships &amp; Bootcamps. It takes about a minute:</span>
+            <ol>
+              <li>Click <b>Copy update</b>.</li>
+              <li>Click <b>Open SQL Editor</b> — Supabase opens in a new tab (sign in if asked).</li>
+              <li>Paste with <b>⌘V</b> and click <b>Run</b>. If Supabase warns about “destructive operations”, click <b>Run this query</b>.</li>
+              <li>Come back here and reload the page, then click <b>Import into admin</b>.</li>
+            </ol>
+          </div>
+          <div class="setup-actions">
+            <button class="btn-new" onclick="copyDatabaseUpdate(this)">Copy update</button>
+            <a class="btn-sm" id="sql-editor-link" href="https://supabase.com/dashboard" target="_blank" rel="noopener">Open SQL Editor ↗</a>
+          </div>
+        </div>
+        <div class="import-banner" id="import-banner" hidden>
+          <div><strong>Keep your portfolio entries</strong><span><span data-import-text></span> Import them so you can edit them here and new entries are added alongside them.</span></div>
+          <button class="btn-new" onclick="PortfolioAdminDB.importPlaceholders(this)">Import into admin</button>
+        </div>
         <div class="stat-row">
-          <div class="sc"><p class="sc-label">Total Projects <span>⚡</span></p><p class="sc-val">0</p><p class="sc-delta neutral">from Supabase</p></div>
-          <div class="sc"><p class="sc-label">Blog Posts <span>✍️</span></p><p class="sc-val">0</p><p class="sc-delta neutral">from Supabase</p></div>
-          <div class="sc"><p class="sc-label">New Messages <span>💬</span></p><p class="sc-val">0</p><p class="sc-delta neutral">unread</p></div>
-          <div class="sc"><p class="sc-label">Portfolio Views <span>👁</span></p><p class="sc-val">0</p><p class="sc-delta neutral">analytics not connected</p></div>
+          <div class="sc" style="cursor:pointer" onclick="switchView('projects')"><p class="sc-label">Total Projects <span>⚡</span></p><p class="sc-val">0</p><p class="sc-delta neutral">0 published</p></div>
+          <div class="sc" style="cursor:pointer" onclick="switchView('blog')"><p class="sc-label">Blog Posts <span>✍️</span></p><p class="sc-val">0</p><p class="sc-delta neutral">0 published</p></div>
+          <div class="sc" style="cursor:pointer" onclick="switchView('messages')"><p class="sc-label">New Messages <span>💬</span></p><p class="sc-val">0</p><p class="sc-delta neutral">0 total</p></div>
+          <div class="sc" style="cursor:pointer" onclick="switchView('certs')"><p class="sc-label">Certifications <span>🏅</span></p><p class="sc-val">0</p><p class="sc-delta neutral">shown on portfolio</p></div>
         </div>
         <div class="chart-row">
           <div class="chart-card">
-            <p class="chart-title">Portfolio Views — Last 7 Days</p>
-            <p class="chart-sub">Unique visitors from analytics</p>
-            <div class="bar-chart">
-              <div class="bar-row"><span class="bar-label">Mon</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
-              <div class="bar-row"><span class="bar-label">Tue</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
-              <div class="bar-row"><span class="bar-label">Wed</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
-              <div class="bar-row"><span class="bar-label">Thu</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
-              <div class="bar-row"><span class="bar-label">Fri</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
-              <div class="bar-row"><span class="bar-label">Sat</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
-              <div class="bar-row"><span class="bar-label">Sun</span><div class="bar-track"><div class="bar-fill" style="width:0%"></div></div><span class="bar-val">0</span></div>
-            </div>
+            <p class="chart-title">Content Overview</p>
+            <p class="chart-sub">Items stored in Supabase, by section</p>
+            <div class="bar-chart" id="content-bars"></div>
           </div>
           <div class="chart-card">
             <p class="chart-title">Content Breakdown</p>
-            <p class="chart-sub">Published items by type</p>
+            <p class="chart-sub">Items live on your portfolio</p>
             <div class="donut-wrap">
               <div class="donut">
-                <svg width="120" height="120" viewBox="0 0 42 42">
-                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#1F2937" stroke-width="4"/>
-                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#2563EB" stroke-width="4" stroke-dasharray="40 60" stroke-dashoffset="0"/>
-                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#06B6D4" stroke-width="4" stroke-dasharray="25 75" stroke-dashoffset="-40"/>
-                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#8B5CF6" stroke-width="4" stroke-dasharray="20 80" stroke-dashoffset="-65"/>
-                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#10B981" stroke-width="4" stroke-dasharray="15 85" stroke-dashoffset="-85"/>
+                <svg width="120" height="120" viewBox="0 0 42 42" aria-hidden="true">
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--s2)" stroke-width="4"/>
+                  <g id="donut-segments"></g>
                 </svg>
                 <div class="donut-center"><span class="donut-val">0</span><span class="donut-lbl">total</span></div>
               </div>
@@ -541,7 +600,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
                 <div class="dl-item"><div class="dl-dot" style="background:#2563EB"></div>Projects <span>0</span></div>
                 <div class="dl-item"><div class="dl-dot" style="background:#06B6D4"></div>Blog Posts <span>0</span></div>
                 <div class="dl-item"><div class="dl-dot" style="background:#8B5CF6"></div>Certifications <span>0</span></div>
-                <div class="dl-item"><div class="dl-dot" style="background:#10B981"></div>Publications <span>0</span></div>
+                <div class="dl-item"><div class="dl-dot" style="background:#10B981"></div>Experience <span>0</span></div>
               </div>
             </div>
           </div>
@@ -550,13 +609,13 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="qa-grid">
           <div class="qa" onclick="openModal('project')"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><p class="qa-label">New Project</p></div>
           <div class="qa" onclick="openModal('blog')"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><p class="qa-label">New Blog Post</p></div>
-          <div class="qa" onclick="switchView('messages',document.querySelector('[onclick*=messages]'))"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><p class="qa-label">View Messages</p></div>
+          <div class="qa" onclick="switchView('messages')"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div><p class="qa-label">View Messages</p></div>
           <div class="qa" onclick="openModal('cert')"><div class="qa-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--a)" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg></div><p class="qa-label">Add Certificate</p></div>
         </div>
         <div class="activity-row">
           <div class="activity-card">
             <p class="ac-head">Recent Activity</p>
-            <div class="empty-state">No recent activity yet.</div>
+            <div id="recent-activity"><div class="empty-state">No recent activity yet.</div></div>
           </div>
           <div class="activity-card">
             <p class="ac-head">Inbox Preview</p>
@@ -578,109 +637,45 @@ tr:hover td{background:rgba(255,255,255,.02)}
           <div class="table-head">
             <h3>All Projects</h3>
             <div class="table-acts">
-              <div class="tbl-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input placeholder="Search projects..."></div>
-              <button class="btn-sm">Filter</button>
+              <span class="tbl-count" data-table-count>0 projects</span>
+              <div class="tbl-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input placeholder="Search projects..." data-table-search oninput="applyAdminSearch()"></div>
             </div>
           </div>
           <table>
             <thead><tr><th>#</th><th>Title</th><th>Technologies</th><th>Status</th><th>Updated</th><th>Actions</th></tr></thead>
             <tbody>
-              <tr><td class="td-mono">01</td><td class="td-title">Flood Prediction for Resilient Communities</td><td class="td-mono">Python, LSTM, GIS</td><td><span class="badge published">Published</span></td><td class="td-mono">Jun 5, 2025</td><td><div class="td-actions"><button class="ia" title="Edit" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" title="Delete" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
-              <tr><td class="td-mono">02</td><td class="td-title">Enterprise RAG Chatbot</td><td class="td-mono">LangChain, ChromaDB</td><td><span class="badge published">Published</span></td><td class="td-mono">Jun 3, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
-              <tr><td class="td-mono">03</td><td class="td-title">Food-101 Image Classifier</td><td class="td-mono">PyTorch, ResNet50</td><td><span class="badge published">Published</span></td><td class="td-mono">May 28, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
-              <tr><td class="td-mono">04</td><td class="td-title">Titanic Survival Prediction API</td><td class="td-mono">Scikit-learn, FastAPI</td><td><span class="badge published">Published</span></td><td class="td-mono">May 12, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
-              <tr><td class="td-mono">05</td><td class="td-title">Personal Finance Management System</td><td class="td-mono">React, FastAPI, Supabase</td><td><span class="badge draft">Draft</span></td><td class="td-mono">Apr 30, 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('project')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Project deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></button></div></td></tr>
             </tbody>
           </table>
-          <div class="pagination"><p class="pg-info">Showing 5 of 20 projects</p><div class="pg-btns"><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><button class="pg-btn">→</button></div></div>
         </div>
       </div>
 
       <!-- BLOG -->
       <div class="view" id="view-blog">
         <div class="page-hdr">
-          <div><h1>Blog Posts</h1><p>Manage articles, drafts, and publications stored in Supabase.</p></div>
+          <div><h1>Blog Posts</h1><p>Manage articles and drafts. The Blog section appears on your portfolio once a post is published.</p></div>
           <button class="btn-new" onclick="openModal('blog')">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             New Post
           </button>
         </div>
         <div class="table-wrap">
-          <div class="table-head"><h3>All Posts</h3><div class="table-acts"><div class="tbl-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input placeholder="Search posts..."></div><button class="btn-sm">Filter</button></div></div>
+          <div class="table-head"><h3>All Posts</h3><div class="table-acts"><span class="tbl-count" data-table-count>0 posts</span><div class="tbl-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input placeholder="Search posts..." data-table-search oninput="applyAdminSearch()"></div></div></div>
           <table>
             <thead><tr><th>Title</th><th>Category</th><th>Reading Time</th><th>Status</th><th>Published</th><th>Actions</th></tr></thead>
             <tbody>
-              <tr><td class="td-title">Building RAG Systems from Scratch: A Production Guide</td><td class="td-mono">AI</td><td class="td-mono">8 min</td><td><span class="badge published">Published</span></td><td class="td-mono">Jun 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
-              <tr><td class="td-title">Time Series Forecasting with LSTMs for Financial Data</td><td class="td-mono">Finance</td><td class="td-mono">6 min</td><td><span class="badge published">Published</span></td><td class="td-mono">May 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
-              <tr><td class="td-title">Computer Vision for Social Good: Detecting Floods</td><td class="td-mono">Data Science</td><td class="td-mono">7 min</td><td><span class="badge published">Published</span></td><td class="td-mono">Apr 2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
-              <tr><td class="td-title">Intro to Quantitative Risk Modelling with Python</td><td class="td-mono">Finance</td><td class="td-mono">5 min</td><td><span class="badge draft">Draft</span></td><td class="td-mono">—</td><td><div class="td-actions"><button class="ia" onclick="openModal('blog')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Post deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
             </tbody>
           </table>
-          <div class="pagination"><p class="pg-info">Showing 4 of 12 posts</p><div class="pg-btns"><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">→</button></div></div>
         </div>
       </div>
 
       <!-- MESSAGES -->
       <div class="view" id="view-messages">
         <div class="page-hdr">
-          <div><h1>Messages</h1><p>Contact form submissions stored in Supabase — reply or archive.</p></div>
-          <button class="btn-new" onclick="showToast('Marked all as read')">Mark All Read</button>
+          <div><h1>Messages</h1><p>Contact form submissions. Click a message to read it in full and reply.</p></div>
+          <button class="btn-new" onclick="PortfolioAdminDB.markAllMessagesRead(this)">Mark All Read</button>
         </div>
         <div class="msg-list">
-          <div class="msg-item unread">
-            <div class="msg-avatar">JO</div>
-            <div class="msg-content">
-              <p class="msg-from">Dr. James Osei</p>
-              <p class="msg-subject">Research collaboration on climate AI</p>
-              <p class="msg-preview">Hi, I came across your flood prediction project and would love to discuss a potential collaboration on climate resilience...</p>
-            </div>
-            <div class="msg-meta"><span class="msg-time">1h ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Dr. James Osei','Research collaboration on climate AI','Hi, I came across your flood prediction project and would love to discuss a potential collaboration...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
-          </div>
-          <div class="msg-item unread">
-            <div class="msg-avatar">FA</div>
-            <div class="msg-content">
-              <p class="msg-from">Fatima Al-Hassan</p>
-              <p class="msg-subject">ML Engineer opportunity at our AI startup</p>
-              <p class="msg-preview">We're building an AI-powered fintech platform and your background in both ML and financial engineering is exactly what...</p>
-            </div>
-            <div class="msg-meta"><span class="msg-time">4h ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Fatima Al-Hassan','ML Engineer opportunity at our AI startup','We&apos;re building an AI-powered fintech platform and your background in both ML and financial engineering...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
-          </div>
-          <div class="msg-item unread">
-            <div class="msg-avatar">AK</div>
-            <div class="msg-content">
-              <p class="msg-from">Ahmed Koroma</p>
-              <p class="msg-subject">Speaking invitation — AI Summit Sierra Leone</p>
-              <p class="msg-preview">We're organising the inaugural AI Summit in Freetown and would be honoured to have you as a keynote speaker...</p>
-            </div>
-            <div class="msg-meta"><span class="msg-time">8h ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Ahmed Koroma','Speaking invitation — AI Summit Sierra Leone','We&apos;re organising the inaugural AI Summit in Freetown and would be honoured to have you as a keynote speaker...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
-          </div>
-          <div class="msg-item unread">
-            <div class="msg-avatar">MW</div>
-            <div class="msg-content">
-              <p class="msg-from">Marcus Webb</p>
-              <p class="msg-subject">Your ICML workshop talk proposal accepted</p>
-              <p class="msg-preview">Congratulations! Your proposal for the LLMs for Social Good workshop has been accepted. We look forward to your presentation...</p>
-            </div>
-            <div class="msg-meta"><span class="msg-time">1d ago</span><span class="badge unread">New</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Marcus Webb','Your ICML workshop talk proposal accepted','Congratulations! Your proposal for the LLMs for Social Good workshop has been accepted...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
-          </div>
-          <div class="msg-item">
-            <div class="msg-avatar">PS</div>
-            <div class="msg-content">
-              <p class="msg-from">Priya Sharma</p>
-              <p class="msg-subject">Python mentorship enquiry</p>
-              <p class="msg-preview">I'm interested in your Python and data science mentorship programme. Could you share more details about the curriculum...</p>
-            </div>
-            <div class="msg-meta"><span class="msg-time">2d ago</span><span class="badge read">Read</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Priya Sharma','Python mentorship enquiry','I&apos;m interested in your Python and data science mentorship programme. Could you share more details...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
-          </div>
-          <div class="msg-item">
-            <div class="msg-avatar">LT</div>
-            <div class="msg-content">
-              <p class="msg-from">Liu Tao</p>
-              <p class="msg-subject">Collaboration on LLM evaluation framework</p>
-              <p class="msg-preview">I'm a researcher at NTU working on LLM evaluation. Your RAG chatbot project caught my attention and I'd love to explore...</p>
-            </div>
-            <div class="msg-meta"><span class="msg-time">3d ago</span><span class="badge read">Read</span><button class="msg-reply-btn" onclick="event.stopPropagation();openReply('Liu Tao','Collaboration on LLM evaluation framework','I&apos;m a researcher at NTU working on LLM evaluation. Your RAG chatbot project caught my attention...')" title="Reply"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button></div>
-          </div>
+          <div class="empty-state">Loading messages…</div>
         </div>
       </div>
 
@@ -694,34 +689,20 @@ tr:hover td{background:rgba(255,255,255,.02)}
         <div class="page-hdr"><div><h1>Settings</h1><p>Manage your portfolio configuration and account preferences.</p></div></div>
         <div class="settings-grid">
           <div class="settings-card">
-            <h3>Profile Information</h3>
-            <p>Update your public-facing details used across the portfolio.</p>
-            <div class="mfield"><label>Display Name</label><input type="text" value="Steven Daniel"></div>
-            <div class="mfield"><label>Email</label><input type="email" value="danielsteven.ds@gmail.com"></div>
-            <div class="mfield"><label>Tagline / Role</label><input type="text" value="AI Engineer, Data Scientist, Researcher"></div>
-            <div class="mfield"><label>LinkedIn URL</label><input type="url" placeholder="https://linkedin.com/in/..."></div>
-            <div class="mfield"><label>GitHub URL</label><input type="url" placeholder="https://github.com/..."></div>
-            <button class="btn-new" style="margin-top:4px" onclick="showToast('Profile saved')">Save Changes</button>
+            <h3>Admin Account</h3>
+            <p>The account you are signed in with. The display name appears in the dashboard header.</p>
+            <div class="mfield"><label>Signed in as</label><div class="account-email" id="account-email">—</div></div>
+            <div class="mfield"><label for="account-name">Display Name</label><input type="text" id="account-name" placeholder="Steven Daniel"></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+              <button class="btn-new" id="account-save-btn" onclick="saveAccountName()">Save Name</button>
+              <button class="btn-sm" onclick="sendAccountPasswordReset(this)">Email me a password reset link</button>
+            </div>
           </div>
           <div class="settings-card">
-            <h3>Notifications &amp; Privacy</h3>
-            <p>Control how you're notified when visitors interact with your portfolio.</p>
-            <div class="toggle-row">
-              <div><label>Email on new message</label><p>Get notified when contact form is submitted</p></div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="toggle-row">
-              <div><label>Weekly analytics digest</label><p>Portfolio views and traffic summary</p></div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="toggle-row">
-              <div><label>Public profile visible</label><p>Allow search engines to index your portfolio</p></div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
-            <div class="toggle-row">
-              <div><label>Open to opportunities</label><p>Show "Open to Opportunities" badge</p></div>
-              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
-            </div>
+            <h3>Portfolio Content</h3>
+            <p>Copies the Experience, Fellowships &amp; Bootcamps, Education, Achievements, and Projects shown on your portfolio into the admin, exactly as they appear. Entries already here are skipped, so it is safe to run again.</p>
+            <p class="field-hint" id="import-status" style="margin-bottom:14px">Checking…</p>
+            <button class="btn-new" onclick="PortfolioAdminDB.importPlaceholders(this)">Import into admin</button>
           </div>
           <div class="settings-card">
             <h3>Supabase Integration</h3>
@@ -731,38 +712,28 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <div class="mfield"><label>Storage Bucket</label><input type="text" id="supabase-bucket" value="portfolio-media"></div>
             <div style="display:flex;gap:8px;margin-top:4px">
               <button class="btn-new" onclick="PortfolioAdminDB.saveConfigFromSettings()">Save Settings</button>
-              <button class="btn-sm" onclick="PortfolioAdminDB.testConnection()">Test Connection</button>
+              <button class="btn-sm" onclick="PortfolioAdminDB.testConnection(this)">Test Connection</button>
             </div>
           </div>
           <div class="settings-card">
             <h3>Danger Zone</h3>
-            <p>Irreversible actions. Proceed with caution — these are permanent operations.</p>
+            <p>Deleting messages is permanent. Clearing cached media only removes old image copies stored in this browser — nothing in Supabase changes.</p>
             <div style="display:flex;flex-direction:column;gap:10px;margin-top:8px">
-              <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);color:#EF4444;background:rgba(239,68,68,.06);font-size:13px;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background='rgba(239,68,68,.06)'" onclick="showToast('All messages cleared')">Clear All Messages</button>
-              <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);color:#EF4444;background:rgba(239,68,68,.06);font-size:13px;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background='rgba(239,68,68,.06)'" onclick="showToast('Cache cleared')">Clear Media Cache</button>
+              <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);color:#EF4444;background:rgba(239,68,68,.06);font-size:13px;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background='rgba(239,68,68,.06)'" onclick="PortfolioAdminDB.clearAllMessages(this)">Delete All Messages</button>
+              <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.3);color:#EF4444;background:rgba(239,68,68,.06);font-size:13px;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.12)'" onmouseout="this.style.background='rgba(239,68,68,.06)'" onclick="clearMediaCache()">Clear Cached Media in This Browser</button>
               <button style="padding:10px;border-radius:8px;border:1px solid rgba(239,68,68,.4);color:#EF4444;background:rgba(239,68,68,.08);font-size:13px;font-weight:600;width:100%;transition:background .2s" onmouseover="this.style.background='rgba(239,68,68,.15)'" onmouseout="this.style.background='rgba(239,68,68,.08)'" onclick="if(confirm('Sign out?'))doLogout()">Sign Out</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- PLACEHOLDER VIEWS -->
-      <div class="view" id="view-publications">
-        <div class="page-hdr"><div><h1>Publications</h1><p>Manage journal papers, conference submissions, and research notes.</p></div><button class="btn-new" onclick="openModal('pub')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Publication</button></div>
-        <div class="table-wrap"><div class="table-head"><h3>All Publications</h3></div>
-        <table><thead><tr><th>Title</th><th>Type</th><th>Venue</th><th>Status</th><th>Year</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr><td class="td-title">AI-Driven Flood Risk Assessment for Sub-Saharan Communities</td><td class="td-mono">Journal</td><td class="td-mono">JAAES</td><td><span class="badge review">Under Review</span></td><td class="td-mono">2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('pub')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Publication deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
-          <tr><td class="td-title">RAG Architectures for Domain-Specific Knowledge Management</td><td class="td-mono">Conference</td><td class="td-mono">ICML 2025</td><td><span class="badge published">Accepted</span></td><td class="td-mono">2025</td><td><div class="td-actions"><button class="ia" onclick="openModal('pub')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button><button class="ia del" onclick="showToast('Publication deleted')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></div></td></tr>
-        </tbody></table></div>
-      </div>
-
-      <div class="view" id="view-certs"><div class="page-hdr"><div><h1>Certifications</h1><p>Add, categorise, and manage your credentials.</p></div><button class="btn-new" onclick="openModal('cert')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Certificate</button></div><div class="table-wrap"><div class="table-head"><h3>All Certifications</h3></div><table><thead><tr><th>Certificate</th><th>Issuer</th><th>Category</th><th>Verified</th><th>Earned</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
-      <div class="view" id="view-experience"><div class="page-hdr"><div><h1>Experience</h1><p>Manage your career timeline and work history.</p></div><button class="btn-new" onclick="openModal('experience')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Experience</button></div><div class="table-wrap"><div class="table-head"><h3>All Experience</h3></div><table><thead><tr><th>Role</th><th>Organisation</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
-      <div class="view" id="view-education"><div class="page-hdr"><div><h1>Education</h1><p>Manage academic history, degrees, and awards.</p></div><button class="btn-new" onclick="openModal('education')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Education</button></div><div class="table-wrap"><div class="table-head"><h3>All Education</h3></div><table><thead><tr><th>Degree</th><th>Institution</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
-      <div class="view" id="view-achievements"><div class="page-hdr"><div><h1>Achievements</h1><p>Manage fellowships, awards, and recognition.</p></div><button class="btn-new" onclick="openModal('achievement')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Achievement</button></div><div class="table-wrap"><div class="table-head"><h3>All Achievements</h3></div><table><thead><tr><th>Title</th><th>Organisation</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+      <!-- CONTENT VIEWS -->
+      <div class="view" id="view-certs"><div class="page-hdr"><div><h1>Certifications</h1><p>Add, categorise, and manage your credentials.</p></div><button class="btn-new" onclick="openModal('cert')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Certificate</button></div><div class="table-wrap"><div class="table-head"><h3>All Certifications</h3><div class="table-acts"><span class="tbl-count" data-table-count>0 certifications</span><div class="tbl-search"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input placeholder="Search certifications..." data-table-search oninput="applyAdminSearch()"></div></div></div><table><thead><tr><th>Certificate</th><th>Issuer</th><th>Category</th><th>Verified</th><th>Earned</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="view" id="view-experience"><div class="page-hdr"><div><h1>Experience</h1><p>Manage fellowships, bootcamps, and work history. Each entry is shown under “Fellowships &amp; Bootcamps” or “Work Experience” on your portfolio.</p></div><button class="btn-new" onclick="openModal('experience')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Experience</button></div><div class="table-wrap"><div class="table-head"><h3>All Experience</h3><div class="table-acts"><span class="tbl-count" data-table-count>0 entries</span></div></div><table><thead><tr><th>Role</th><th>Organisation</th><th>Section</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="view" id="view-education"><div class="page-hdr"><div><h1>Education</h1><p>Manage academic history, degrees, and awards.</p></div><button class="btn-new" onclick="openModal('education')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Education</button></div><div class="table-wrap"><div class="table-head"><h3>All Education</h3><div class="table-acts"><span class="tbl-count" data-table-count>0 entries</span></div></div><table><thead><tr><th>Degree</th><th>Institution</th><th>Period</th><th>Tags</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="view" id="view-achievements"><div class="page-hdr"><div><h1>Achievements</h1><p>Manage fellowships, awards, and recognition.</p></div><button class="btn-new" onclick="openModal('achievement')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add Achievement</button></div><div class="table-wrap"><div class="table-head"><h3>All Achievements</h3><div class="table-acts"><span class="tbl-count" data-table-count>0 achievements</span></div></div><table><thead><tr><th>Title</th><th>Organisation</th><th>Year</th><th>Description</th><th>Actions</th></tr></thead><tbody></tbody></table></div></div>
       <div class="view" id="view-media">
-        <div class="page-hdr"><div><h1>Media</h1><p>Manage public portfolio images and resume PDF from the admin dashboard.</p></div><button class="btn-new" onclick="savePublicMedia()">Save Public Media</button></div>
+        <div class="page-hdr"><div><h1>Media</h1><p>Choose new images or a resume PDF, then click “Save Public Media”. Changes go live on your portfolio immediately.</p></div><button class="btn-new" id="media-save-btn" onclick="savePublicMedia()">Save Public Media</button></div>
         <div class="settings-grid">
           <div class="settings-card">
             <h3>Hero Portrait</h3>
@@ -778,6 +749,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
             <h3>Resume PDF</h3>
             <p>Used by the Download Resume button on the public portfolio.</p>
             <div class="admin-file-drop" id="admin-resume-pdf" onclick="adminFileClick('admin-resume-pdf','application/pdf')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminFileDrop(event,'admin-resume-pdf','application/pdf')"><p>Click or drag &amp; drop resume PDF</p><small>PDF only &middot; Saved to Supabase Storage</small></div>
+            <a id="current-resume-link" class="btn-sm" href="#" target="_blank" rel="noopener" style="display:inline-block;margin-top:12px" hidden>Open current resume ↗</a>
           </div>
         </div>
       </div>
@@ -804,7 +776,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="modal-foot">
       <button class="btn-cancel" onclick="closeReply()">Cancel</button>
-      <button class="btn-save" onclick="sendReply()">Send Reply</button>
+      <button class="btn-save" id="reply-send-btn" onclick="sendReply()">Send Reply</button>
     </div>
   </div>
 </div>
@@ -818,8 +790,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
     </div>
     <div class="modal-body" id="modal-body"></div>
     <div class="modal-foot">
+      <span class="modal-status" id="modal-status" role="status" aria-live="polite"></span>
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" onclick="saveModal()">Save to Supabase</button>
+      <button class="btn-save" id="modal-save-btn" onclick="saveModal()">Save to Supabase</button>
     </div>
   </div>
 </div>
@@ -833,14 +806,19 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <script>
 // LOGIN
 const LOGIN_MEMORY_KEY = 'pf-admin-remembered-email';
+// Unless "Keep me signed in on this device" is ticked, the session ends when the tab or browser
+// closes, so each new visit asks for your email and password again.
 function hydrateRememberedLogin(){
-  const remembered = localStorage.getItem(LOGIN_MEMORY_KEY) || '';
+  const keep = Boolean(window.PortfolioAdminDB?.keepSignedIn());
+  const remembered = keep ? (localStorage.getItem(LOGIN_MEMORY_KEY) || '') : '';
   const emailInput = document.getElementById('login-email');
   const rememberInput = document.getElementById('remember-me');
-  if(remembered && emailInput && rememberInput){
-    emailInput.value = remembered;
-    rememberInput.checked = true;
-  }
+  if (rememberInput) rememberInput.checked = keep;
+  if (remembered && emailInput) emailInput.value = remembered;
+  if (!keep) localStorage.removeItem(LOGIN_MEMORY_KEY);
+}
+function applyKeepSignedInChoice(){
+  PortfolioAdminDB.setKeepSignedIn(Boolean(document.getElementById('remember-me')?.checked));
 }
 function persistRememberedLogin(email){
   const remember = document.getElementById('remember-me')?.checked;
@@ -858,40 +836,51 @@ function togglePasswordVisibility(){
     ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
     : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 19c-7 0-10-7-10-7a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A10.8 10.8 0 0 1 12 4c7 0 10 8 10 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12A3 3 0 0 1 9.88 9.88"/><path d="M1 1l22 22"/></svg>';
 }
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) { showToast('Enter email and password'); return; }
-  if (!window.PortfolioAdminDB?.isConfigured()) {
-    showToast('Supabase must be configured before admin login');
-    return;
-  }
-  try { await PortfolioAdminDB.signInWithPassword(email, pass); }
-  catch (error) { showToast(error.message || 'Invalid email or password'); return; }
-  persistRememberedLogin(email);
-  await updateAdminProfile(email);
+function showApp(){
   const overlay = document.getElementById('login-overlay');
   overlay.style.opacity = '0'; overlay.style.transition = 'opacity .4s';
   setTimeout(() => { overlay.style.display = 'none'; document.getElementById('app').classList.add('visible'); }, 400);
-  showToast('Signed in via Supabase Auth');
 }
-async function doForgotPassword(){
+let signingIn = false;
+async function doLogin() {
+  if (signingIn) return;
   const email = document.getElementById('login-email').value.trim();
-  if(!email){ showToast('Enter your email address first'); return; }
-  if(!window.PortfolioAdminDB?.isConfigured()){ showToast('Supabase must be configured first'); return; }
+  const pass  = document.getElementById('login-pass').value;
+  if (!email || !pass) { showToast('Enter email and password', 'error'); return; }
+  if (!window.PortfolioAdminDB?.isConfigured()) {
+    showToast('Supabase must be configured before admin login', 'error');
+    return;
+  }
+  signingIn = true;
+  applyKeepSignedInChoice();
+  const restore = PortfolioAdminDB.busy(document.getElementById('login-btn'), 'Signing in…');
+  try { await PortfolioAdminDB.signInWithPassword(email, pass); }
+  catch (error) { showToast('✕ Sign-in failed — ' + (error.message || 'invalid email or password'), 'error'); return; }
+  finally { signingIn = false; restore(); }
+  persistRememberedLogin(email);
+  await updateAdminProfile(email);
+  showApp();
+  showToast('✓ Signed in', 'success');
+}
+async function doForgotPassword(btn){
+  const email = document.getElementById('login-email').value.trim();
+  if(!email){ showToast('Enter your email address first', 'error'); return; }
+  if(!window.PortfolioAdminDB?.isConfigured()){ showToast('Supabase must be configured first', 'error'); return; }
+  const restore = PortfolioAdminDB.busy(btn, 'Sending…');
   try{
     await PortfolioAdminDB.resetPassword(email);
-    showToast('Password reset email sent');
+    showToast('✓ Password reset email sent to ' + email, 'success');
   }catch(error){
-    showToast(error.message || 'Password reset failed');
-  }
+    showToast('✕ Reset email not sent — ' + (error.message || 'unknown error'), 'error');
+  }finally{ restore(); }
 }
 async function doLogout() {
   if (window.PortfolioAdminDB?.isConfigured()) await PortfolioAdminDB.signOut();
+  document.getElementById('login-pass').value = '';
   document.getElementById('app').classList.remove('visible');
   const overlay = document.getElementById('login-overlay');
   overlay.style.opacity = '1'; overlay.style.display = 'flex';
-  showToast('Signed out');
+  showToast('✓ Signed out', 'success');
 }
 function confirmLogout(){
   closeProfileMenu();
@@ -915,7 +904,7 @@ function closeNotifications(){
 }
 function goProfileSettings(){
   closeProfileMenu();
-  switchView('settings',document.querySelector('[onclick*=settings]'));
+  switchView('settings');
 }
 document.addEventListener('click',function(event){
   if(!event.target.closest('.profile-menu-wrap'))closeProfileMenu();
@@ -926,6 +915,16 @@ function userInitials(nameOrEmail){
   var namePart=source.includes('@')?source.split('@')[0]:source;
   var parts=namePart.split(/[\s._-]+/).filter(Boolean);
   return (parts.length>1?parts[0][0]+parts[1][0]:namePart.slice(0,2)).toUpperCase();
+}
+function applyProfile(name, email){
+  var initials=userInitials(name||email);
+  var set=function(id,value){var el=document.getElementById(id);if(el)el.textContent=value;};
+  set('tb-avatar',initials);set('sb-avatar',initials);
+  set('sb-user-name',name);set('sb-user-email',email);
+  set('profile-menu-name',name);set('profile-menu-email',email);
+  set('account-email',email||'—');
+  var nameInput=document.getElementById('account-name');
+  if(nameInput&&document.activeElement!==nameInput)nameInput.value=name||'';
 }
 async function updateAdminProfile(fallbackEmail){
   var email=fallbackEmail||document.getElementById('login-email')?.value||'admin@example.com';
@@ -939,31 +938,29 @@ async function updateAdminProfile(fallbackEmail){
   }else if(email){
     name=email.split('@')[0];
   }
-  var initials=userInitials(name||email);
-  var tb=document.getElementById('tb-avatar');
-  var sb=document.getElementById('sb-avatar');
-  var n=document.getElementById('sb-user-name');
-  var e=document.getElementById('sb-user-email');
-  var pmn=document.getElementById('profile-menu-name');
-  var pme=document.getElementById('profile-menu-email');
-  if(tb)tb.textContent=initials;
-  if(sb)sb.textContent=initials;
-  if(n)n.textContent=name;
-  if(e)e.textContent=email;
-  if(pmn)pmn.textContent=name;
-  if(pme)pme.textContent=email;
+  applyProfile(name,email);
 }
-async function doCreateAdmin() {
-  const email = document.getElementById('login-email').value;
-  const pass  = document.getElementById('login-pass').value;
-  if (!email || !pass) { showToast('Enter email and password first'); return; }
-  if (!window.PortfolioAdminDB?.isConfigured()) { showToast('Save Supabase settings first'); return; }
-  try {
-    await PortfolioAdminDB.signUpWithPassword(email, pass);
-    showToast('Admin account created. Check email if confirmation is enabled.');
-  } catch (error) {
-    showToast(error.message || 'Admin account creation failed');
-  }
+async function saveAccountName(){
+  var input=document.getElementById('account-name');
+  var btn=document.getElementById('account-save-btn');
+  var name=(input?.value||'').trim();
+  if(!name){showToast('Enter a display name','error');input?.focus();return;}
+  var restore=PortfolioAdminDB.busy(btn,'Saving…');
+  try{
+    var user=await PortfolioAdminDB.updateDisplayName(name);
+    applyProfile(name,user?.email||document.getElementById('account-email').textContent);
+    showToast('✓ Display name updated','success');
+  }catch(error){showToast('✕ Name not saved — '+(error.message||'unknown error'),'error');}
+  finally{restore();}
+}
+async function sendAccountPasswordReset(btn){
+  var email=document.getElementById('account-email')?.textContent||'';
+  if(!email||email==='—'){showToast('Sign in first','error');return;}
+  if(!confirm('Send a password reset link to '+email+'?'))return;
+  var restore=PortfolioAdminDB.busy(btn,'Sending…');
+  try{await PortfolioAdminDB.resetPassword(email);showToast('✓ Password reset link sent to '+email,'success');}
+  catch(error){showToast('✕ Reset link not sent — '+(error.message||'unknown error'),'error');}
+  finally{restore();}
 }
 document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 document.getElementById('login-email').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
@@ -975,7 +972,7 @@ window.addEventListener('load', async function(){
       await updateAdminProfile(user.email);
       document.getElementById('login-overlay').style.display='none';
       document.getElementById('app').classList.add('visible');
-      if(PortfolioAdminDB.loadDashboard)PortfolioAdminDB.loadDashboard();
+      PortfolioAdminDB.loadDashboard();
     }
   }
 });
@@ -986,66 +983,85 @@ function switchView(id, el) {
   document.querySelectorAll('.sb-item').forEach(s => s.classList.remove('active'));
   const target = document.getElementById('view-'+id);
   if (target) target.classList.add('active');
-  if (el) el.classList.add('active');
+  const item = el || document.querySelector('.sb-item[data-view="'+id+'"]');
+  if (item) item.classList.add('active');
+  const content = document.querySelector('.content');
+  if (content) content.scrollTop = 0;
+  applyAdminSearch();
 }
+
+// SEARCH — the top bar searches whatever page is open; table search boxes narrow their own table
+function applyAdminSearch(){
+  const view = document.querySelector('.view.active');
+  if (!view) return;
+  const global = (document.getElementById('admin-search')?.value || '').trim().toLowerCase();
+  const local = (view.querySelector('[data-table-search]')?.value || '').trim().toLowerCase();
+  const terms = [global, local].filter(Boolean);
+  view.querySelectorAll('tbody tr, .msg-list .msg-item').forEach(row => {
+    if (row.querySelector('.empty-state')) return;
+    const text = row.textContent.toLowerCase();
+    row.classList.toggle('row-hidden', terms.some(t => !text.includes(t)));
+  });
+}
+window.applyAdminSearch = applyAdminSearch;
 
 // MODAL
 let currentModalType = null;
 let currentEditId = null;
+let modalSaving = false;
+const OPTIONAL = '<small style="color:var(--t3);font-weight:400">';
 const MODALS = {
   project: {
-    title: 'Add / Edit Project',
+    title: 'Add Project',
+    noun: 'Project',
     body: ''
   },
   blog: {
     title: 'New Blog Post',
-    body: `<div class="mfield"><label>Cover Image <small style="color:var(--t3);font-weight:400">(featured image at top of blog post)</small></label><div class="mfield" style="margin-bottom:0"><label style="font-size:11px">Which blog card slot does this update?</label><select id="admin-blog-slot"><option value="">-- Select slot to update --</option><option value="1">Slot 1 — RAG Systems Guide</option><option value="2">Slot 2 — Time Series &amp; LSTMs</option><option value="3">Slot 3 — CV for Social Good</option><option value="new">New post (won't update existing card)</option></select></div><div class="admin-img-drop" id="admin-blog-img" onclick="adminImgClick('admin-blog-img')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-blog-img')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Click or drag &amp; drop to upload cover image</p><small>PNG, JPG, WebP &middot; Appears at top of the blog detail page</small></div></div><div class="mfield"><label>Title</label><input type="text" id="blog-title" placeholder="Post title..."></div><div class="mrow"><div class="mfield"><label>Category</label><select id="blog-category"><option>AI</option><option>Data Science</option><option>Financial Engineering</option><option>Machine Learning</option><option>Computer Vision</option><option>Research</option></select></div><div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="blog-tags" placeholder="RAG, LLMs, Python"></div></div><div class="mfield"><label>Excerpt <small style="color:var(--t3);font-weight:400">(card preview — 1-2 sentences)</small></label><textarea id="blog-excerpt" placeholder="Brief description shown on blog card..." style="min-height:60px"></textarea></div><div class="mfield"><label>Blog Media <small style="color:var(--t3);font-weight:400">upload image, video, PDF, or file and insert into Markdown</small></label><div class="admin-file-drop" id="blog-media-file" onclick="adminFileClick('blog-media-file','image/*,video/*,application/pdf')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminFileDrop(event,'blog-media-file','image/*,video/*,application/pdf')"><p>Click or drop media for this post</p><small>Images, videos, PDFs &middot; Inserted into content</small></div><button type="button" class="btn-sm" style="margin-top:10px" onclick="uploadBlogMediaAndInsert()">Upload &amp; Insert in Content</button></div><div class="mfield"><label>Full Content <small style="color:var(--t3);font-weight:400">(Markdown — use ## headings, **bold**, \`code\`)</small></label><textarea id="blog-content" style="min-height:200px;font-family:var(--fm);font-size:12px;line-height:1.6" placeholder="## Introduction&#10;&#10;Write your post here in Markdown...&#10;&#10;## Section 2&#10;&#10;More content..."></textarea></div><div class="mrow"><div class="mfield"><label>Status</label><select id="blog-status"><option>Draft</option><option>Published</option></select></div><div class="mfield"><label>Read Time</label><input type="text" id="blog-read-time" placeholder="8 min read"></div></div>`
+    noun: 'Blog post',
+    body: `<div class="mfield"><label>Cover Image ${OPTIONAL}(featured image at top of blog post)</small></label><div class="admin-img-drop" id="admin-blog-img" onclick="adminImgClick('admin-blog-img')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'admin-blog-img')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><p>Click or drag &amp; drop to upload cover image</p><small>PNG, JPG, WebP &middot; Appears on the blog card and at the top of the post</small></div></div><div class="mfield"><label>Title *</label><input type="text" id="blog-title" placeholder="Post title..." data-required="Post title"></div><div class="mrow"><div class="mfield"><label>Category</label><select id="blog-category"><option>AI</option><option>Data Science</option><option>Financial Engineering</option><option>Machine Learning</option><option>Computer Vision</option><option>NLP / LLM</option><option>Research</option></select></div><div class="mfield"><label>Tags ${OPTIONAL}(comma-separated)</small></label><input type="text" id="blog-tags" placeholder="RAG, LLMs, Python"></div></div><div class="mfield"><label>Excerpt ${OPTIONAL}(card preview — 1-2 sentences)</small></label><textarea id="blog-excerpt" placeholder="Brief description shown on blog card..." style="min-height:60px"></textarea></div><div class="mfield"><label>Blog Media ${OPTIONAL}upload image, video, PDF, or file and insert into Markdown</small></label><div class="admin-file-drop" id="blog-media-file" onclick="adminFileClick('blog-media-file','image/*,video/*,application/pdf')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminFileDrop(event,'blog-media-file','image/*,video/*,application/pdf')"><p>Click or drop media for this post</p><small>Images, videos, PDFs &middot; Inserted into content</small></div><button type="button" class="btn-sm" id="blog-media-btn" style="margin-top:10px" onclick="uploadBlogMediaAndInsert()">Upload &amp; Insert in Content</button></div><div class="mfield"><label>Full Content ${OPTIONAL}(Markdown — use ## headings, **bold**, \`code\`)</small></label><textarea id="blog-content" style="min-height:200px;font-family:var(--fm);font-size:12px;line-height:1.6" placeholder="## Introduction&#10;&#10;Write your post here in Markdown...&#10;&#10;## Section 2&#10;&#10;More content..."></textarea></div><div class="mrow"><div class="mfield"><label>Status</label><select id="blog-status"><option>Draft</option><option>Published</option></select><span class="field-hint">Only Published posts appear on the portfolio.</span></div><div class="mfield"><label>Read Time</label><input type="text" id="blog-read-time" placeholder="8 min read"></div></div>`
   },
   cert: {
     title: 'Add Certificate',
-    body: `<div class="mfield"><label>Certificate Name</label><input type="text" id="cert-name" placeholder="e.g. AWS Certified ML Specialty"></div>
+    noun: 'Certificate',
+    body: `<div class="mfield"><label>Certificate Name *</label><input type="text" id="cert-name" placeholder="e.g. AWS Certified ML Specialty" data-required="Certificate name"></div>
            <div class="mrow"><div class="mfield"><label>Issuer</label><input type="text" id="cert-issuer" placeholder="Amazon Web Services"></div><div class="mfield"><label>Category</label><select id="cert-category"><option>AI</option><option>Machine Learning</option><option>Deep Learning / CV</option><option>Computer Vision</option><option>Data Science</option><option>Natural Language Processing</option><option>Large Language Models</option><option>Programming</option><option>UX Design</option><option>Project Management</option><option>Financial Engineering</option></select></div></div>
-           <div class="mrow"><div class="mfield"><label>Month Earned</label><select id="cert-month"><option value="">Month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></div><div class="mfield"><label>Year Earned</label><input type="number" id="cert-year" placeholder="2024" min="2010" max="2030"></div></div>
+           <div class="mrow"><div class="mfield"><label>Month Earned</label><select id="cert-month"><option value="">Month</option><option value="1">January</option><option value="2">February</option><option value="3">March</option><option value="4">April</option><option value="5">May</option><option value="6">June</option><option value="7">July</option><option value="8">August</option><option value="9">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option></select></div><div class="mfield"><label>Year Earned</label><input type="number" id="cert-year" placeholder="2024" min="2010" max="2100"></div></div>
            <div class="mfield"><label>Verification URL</label><input type="url" id="cert-url" placeholder="https://..."></div>
            <div class="mfield"><label>Credential ID</label><input type="text" id="cert-credential" placeholder="Optional credential identifier"></div>
-           <div class="mfield"><label>Provided By <small style="color:var(--t3);font-weight:400">(optional footer label; defaults to issuer)</small></label><input type="text" id="cert-provided-by" placeholder="Credly, Coursera, edX, Issuer name..."></div>
-           <div class="mfield"><label>Certificate Image URL <small style="color:var(--t3);font-weight:400">(optional fallback if no embed code)</small></label><input type="url" id="cert-image-url" placeholder="https://..."></div>
-           <div class="mfield"><label>Upload Certificate Image <small style="color:var(--t3);font-weight:400">PNG, JPG, WebP &middot; displayed like badge area</small></label><div class="admin-img-drop" id="cert-image-file" onclick="adminImgClick('cert-image-file')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'cert-image-file')"><p>Click or drop certificate image</p><small>Uploads when you save</small></div></div>
-           <div class="mfield"><label>Embed Code <small style="color:var(--t3);font-weight:400">(optional iframe or Credly badge embed from issuer)</small></label><textarea id="cert-embed" placeholder="<iframe src=&quot;https://...&quot; ...></iframe>&#10;&#10;or paste Credly badge embed code with data-share-badge-id" style="min-height:110px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>`
-  },
-  pub: {
-    title: 'Add Publication',
-    body: `<div class="mfield"><label>Title</label><input type="text" id="pub-title" placeholder="Publication title..."></div>
-           <div class="mrow"><div class="mfield"><label>Type</label><select id="pub-type"><option>Journal</option><option>Conference</option><option>Thesis</option><option>Research Note</option><option>White Paper</option></select></div><div class="mfield"><label>Status</label><select id="pub-status"><option>Under Review</option><option>Accepted</option><option>Published</option><option>In Progress</option></select></div></div>
-           <div class="mfield"><label>Authors</label><input type="text" id="pub-authors" placeholder="Steven Daniel, Co-Author Name"></div>
-           <div class="mfield"><label>Venue / Journal</label><input type="text" id="pub-venue" placeholder="Journal name or conference"></div>
-           <div class="mrow"><div class="mfield"><label>Year</label><input type="number" id="pub-year" placeholder="2025"></div><div class="mfield"><label>PDF URL</label><input type="url" id="pub-pdf" placeholder="https://..."></div></div>
-           <div class="mfield"><label>Upload Article / Paper PDF <small style="color:var(--t3);font-weight:400">fills the PDF URL automatically</small></label><div class="admin-file-drop" id="pub-pdf-file" onclick="adminFileClick('pub-pdf-file','application/pdf')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminFileDrop(event,'pub-pdf-file','application/pdf')"><p>Click or drop publication PDF</p><small>PDF only &middot; optional</small></div></div>`
+           <div class="mfield"><label>Provided By ${OPTIONAL}(optional footer label; defaults to issuer)</small></label><input type="text" id="cert-provided-by" placeholder="Credly, Coursera, edX, Issuer name..."></div>
+           <div class="mfield"><label>Certificate Image URL ${OPTIONAL}(optional fallback if no embed code)</small></label><input type="url" id="cert-image-url" placeholder="https://..."></div>
+           <div class="mfield"><label>Upload Certificate Image ${OPTIONAL}PNG, JPG, WebP &middot; displayed like badge area</small></label><div class="admin-img-drop" id="cert-image-file" onclick="adminImgClick('cert-image-file')" ondragover="event.preventDefault();this.classList.add('drag-ov')" ondragleave="this.classList.remove('drag-ov')" ondrop="adminImgDrop(event,'cert-image-file')"><p>Click or drop certificate image</p><small>Uploads when you save</small></div></div>
+           <div class="mfield"><label>Embed Code ${OPTIONAL}(optional iframe or Credly badge embed from issuer)</small></label><textarea id="cert-embed" placeholder="<iframe src=&quot;https://...&quot; ...></iframe>&#10;&#10;or paste Credly badge embed code with data-share-badge-id" style="min-height:110px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>`
   },
   experience: {
     title: 'Add Experience',
-    body: `<div class="mfield"><label>Role / Title</label><input type="text" id="exp-role" placeholder="e.g. Digital Innovation Volunteer"></div>
-           <div class="mrow"><div class="mfield"><label>Organisation</label><input type="text" id="exp-org" placeholder="UNDP-IICPSD"></div><div class="mfield"><label>Date / Period</label><input type="text" id="exp-date" placeholder="2023 — Present"></div></div>
-           <div class="mrow"><div class="mfield"><label>Start Date</label><input type="date" id="exp-start"></div><div class="mfield"><label>End Date <small style="color:var(--t3);font-weight:400">(leave blank for present)</small></label><input type="date" id="exp-end"></div></div>
-           <div class="mfield"><label>Description</label><textarea id="exp-desc" placeholder="Describe responsibilities, impact, and outcomes..."></textarea></div>
-           <div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="exp-tags" placeholder="AI for Good, SDGs, Digital Literacy"></div>
-           <div class="mrow"><div class="mfield"><label>Award / Highlight</label><input type="text" id="exp-award" placeholder="Optional highlight shown below entry"></div><div class="mfield"><label>Display Order</label><input type="number" id="exp-order" value="0"></div></div>`
+    noun: 'Experience',
+    body: `<div class="mrow"><div class="mfield"><label>Role / Title *</label><input type="text" id="exp-role" placeholder="e.g. AI/ML Fellow" data-required="Role / title"></div><div class="mfield"><label>Section on portfolio</label><select id="exp-category"><option value="work">Work Experience</option><option value="fellowship">Fellowships &amp; Bootcamps</option></select></div></div>
+           <div class="mrow"><div class="mfield"><label>Organisation &amp; Location</label><input type="text" id="exp-org" placeholder="UNDP IICPSD · Istanbul, Türkiye (Remote)"></div><div class="mfield"><label>Date / Period ${OPTIONAL}(shown on portfolio)</small></label><input type="text" id="exp-date" placeholder="Aug 2024 — Jan 2025"></div></div>
+           <div class="mrow"><div class="mfield"><label>Start Date</label><input type="date" id="exp-start"></div><div class="mfield"><label>End Date ${OPTIONAL}(leave blank for present)</small></label><input type="date" id="exp-end"></div></div>
+           <span class="field-hint" style="margin-top:-6px">Start and end dates are used to calculate “Years of Experience” on the portfolio.</span>
+           <div class="mfield"><label>Description ${OPTIONAL}(start lines with “- ” to show bullet points)</small></label><textarea id="exp-desc" style="min-height:120px" placeholder="- Led end-to-end management of ICT projects...&#10;- Designed and implemented software systems...&#10;- Facilitated stakeholder workshops..."></textarea></div>
+           <div class="mfield"><label>Tags ${OPTIONAL}(comma-separated)</small></label><input type="text" id="exp-tags" placeholder="Machine Learning, Python, Community Building"></div>
+           <div class="mrow"><div class="mfield"><label>Award / Highlight</label><input type="text" id="exp-award" placeholder="Optional highlight shown below entry"></div><div class="mfield"><label>Display Order ${OPTIONAL}(lower shows first)</small></label><input type="number" id="exp-order" value="0"></div></div>`
   },
   education: {
     title: 'Add Education',
-    body: `<div class="mfield"><label>Degree / Programme</label><input type="text" id="edu-degree" placeholder="e.g. MSc Financial Engineering"></div>
-           <div class="mrow"><div class="mfield"><label>Institution</label><input type="text" id="edu-institution" placeholder="WorldQuant University"></div><div class="mfield"><label>Date / Period</label><input type="text" id="edu-date" placeholder="2025 — Present"></div></div>
-           <div class="mfield"><label>Description</label><textarea id="edu-desc" placeholder="Programme focus, GPA, research focus..."></textarea></div>
+    noun: 'Education',
+    body: `<div class="mfield"><label>Degree / Programme *</label><input type="text" id="edu-degree" placeholder="e.g. M.Sc. Financial Engineering" data-required="Degree / programme"></div>
+           <div class="mrow"><div class="mfield"><label>Institution &amp; Location</label><input type="text" id="edu-institution" placeholder="WorldQuant University — Washington, USA (Online)"></div><div class="mfield"><label>Date / Period</label><input type="text" id="edu-date" placeholder="Oct 2025 — Present"></div></div>
+           <div class="mfield"><label>Description ${OPTIONAL}(start lines with “- ” to show bullet points)</small></label><textarea id="edu-desc" placeholder="Programme focus, GPA, research focus..."></textarea></div>
            <div class="mfield"><label>Thesis / Dissertation</label><input type="text" id="edu-thesis" placeholder="Optional thesis title"></div>
-           <div class="mfield"><label>Tags <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="edu-tags" placeholder="Quantitative Finance, Risk Modelling, In Progress"></div>
-           <div class="mrow"><div class="mfield"><label>Award / Highlight</label><input type="text" id="edu-award" placeholder="Optional award shown below entry"></div><div class="mfield"><label>Display Order</label><input type="number" id="edu-order" value="0"></div></div>`
+           <div class="mfield"><label>Tags ${OPTIONAL}(comma-separated)</small></label><input type="text" id="edu-tags" placeholder="Quantitative Finance, Risk Modelling, In Progress"></div>
+           <div class="mrow"><div class="mfield"><label>Award / Highlight</label><input type="text" id="edu-award" placeholder="Optional award shown below entry"></div><div class="mfield"><label>Display Order ${OPTIONAL}(lower shows first)</small></label><input type="number" id="edu-order" value="0"></div></div>`
   },
   achievement: {
     title: 'Add Achievement',
-    body: `<div class="mfield"><label>Achievement Title</label><input type="text" id="ach-title" placeholder="e.g. Best Graduating Student"></div>
-           <div class="mrow"><div class="mfield"><label>Organisation</label><input type="text" id="ach-org" placeholder="University of Sierra Leone"></div><div class="mfield"><label>Year</label><input type="text" id="ach-year" placeholder="2022"></div></div>
+    noun: 'Achievement',
+    body: `<div class="mfield"><label>Achievement Title *</label><input type="text" id="ach-title" placeholder="e.g. Best Graduating Student" data-required="Achievement title"></div>
+           <div class="mrow"><div class="mfield"><label>Organisation</label><input type="text" id="ach-org" placeholder="University of Sierra Leone"></div><div class="mfield"><label>Year</label><input type="text" id="ach-year" placeholder="2023"></div></div>
            <div class="mfield"><label>Description</label><textarea id="ach-desc" placeholder="Describe the recognition and impact..."></textarea></div>
-           <div class="mrow"><div class="mfield"><label>Icon</label><select id="ach-icon"><option value="award">Award</option><option value="globe">Globe</option><option value="brain">AI / Brain</option></select></div><div class="mfield"><label>Display Order</label><input type="number" id="ach-order" value="0"></div></div>`
+           <div class="mrow"><div class="mfield"><label>Icon</label><select id="ach-icon"><option value="award">Award (trophy)</option><option value="medal">Medal</option><option value="globe">Globe</option><option value="brain">AI / Brain</option></select></div><div class="mfield"><label>Display Order ${OPTIONAL}(lower shows first)</small></label><input type="number" id="ach-order" value="0"></div></div>`
   }
 };
 function buildProjectModalBody(){
@@ -1055,20 +1071,20 @@ function buildProjectModalBody(){
       +'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
       +'<p style="font-size:12px;margin:0">Click or drop</p></div></div>';
   };
-  return '<div class="mfield"><label>Project Images <small style="color:var(--t3);font-weight:400">Image 1 = card header &middot; Images 2&ndash;4 = detail page carousel</small></label>'
+  return '<div class="mfield"><label>Project Images <small style="color:var(--t3);font-weight:400">Image 1 = card header &middot; Images 2&ndash;4 = detail page carousel &middot; large photos are resized automatically</small></label>'
     +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">'
-    +imgZone(1,'Image 1 \u2014 Card + Gallery')+imgZone(2,'Image 2 \u2014 Gallery')+imgZone(3,'Image 3 \u2014 Gallery')+imgZone(4,'Image 4 \u2014 Gallery')
+    +imgZone(1,'Image 1 — Card + Gallery')+imgZone(2,'Image 2 — Gallery')+imgZone(3,'Image 3 — Gallery')+imgZone(4,'Image 4 — Gallery')
     +'</div></div>'
-    +'<div class="mfield"><label>Project Title *</label><input type="text" id="proj-title" placeholder="e.g. Flood Prediction for Resilient Communities"></div>'
+    +'<div class="mfield"><label>Project Title *</label><input type="text" id="proj-title" placeholder="e.g. Flood Prediction for Resilient Communities" data-required="Project title"></div>'
     +'<div class="mrow"><div class="mfield"><label>Type / Category</label><select id="proj-type"><option>Machine Learning</option><option>AI / LLM</option><option>Computer Vision</option><option>Data Science</option><option>Financial Engineering</option><option>Programming</option><option>Full Stack</option></select></div><div class="mfield"><label>Status</label><select id="proj-status"><option>Published</option><option>Draft</option><option>Archived</option></select></div></div>'
     +'<div class="mfield"><label>Short Description <small style="color:var(--t3);font-weight:400">(card preview)</small></label><textarea id="proj-desc" placeholder="2-3 sentences summarising the project..." style="min-height:60px"></textarea></div>'
     +'<div class="mfield"><label>Project Overview <small style="color:var(--t3);font-weight:400">(Markdown supported: ## headings, bullets, numbering, **bold**, links)</small></label><textarea id="proj-overview" placeholder="## Background&#10;&#10;- Data sources used&#10;- Core approach&#10;&#10;1. Step one&#10;2. Step two" style="min-height:120px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>'
     +'<div class="mfield"><label>The Challenge <small style="color:var(--t3);font-weight:400">(Markdown supported)</small></label><textarea id="proj-challenge" placeholder="- What problem did you solve?&#10;- Why was it hard?&#10;- What constraints mattered?" style="min-height:110px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>'
     +'<div class="mfield"><label>The Solution <small style="color:var(--t3);font-weight:400">(Markdown supported)</small></label><textarea id="proj-solution" placeholder="1. Architecture choice&#10;2. Tools used&#10;3. Key technical decisions" style="min-height:110px;font-family:var(--fm);font-size:12px;line-height:1.6"></textarea></div>'
-    +'<div class="mfield"><label>Key Features <small style="color:var(--t3);font-weight:400">(one per line &rarr; checklist on detail page)</small></label><textarea id="proj-features" placeholder="89% Prediction Accuracy&#10;48h Advance Warning&#10;12 Communities Protected" style="min-height:80px"></textarea></div>'
-    +'<div class="mfield"><label>Technologies <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-tags" placeholder="Python, LSTM, GIS, RandomForest"></div>'
+    +'<div class="mfield"><label>Key Features <small style="color:var(--t3);font-weight:400">(one per line &rarr; checklist on detail page)</small></label><textarea id="proj-features" placeholder="Compared 6 sentiment models&#10;Interactive Streamlit dashboard" style="min-height:80px"></textarea></div>'
+    +'<div class="mfield"><label>Technologies <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-tags" placeholder="Python, NLP, BERTweet, Streamlit"></div>'
     +'<div class="mfield"><label>Key Metrics <small style="color:var(--t3);font-weight:400">(comma-separated)</small></label><input type="text" id="proj-metrics" placeholder="89% accuracy, 48h warning"></div>'
-    +'<div class="mrow"><div class="mfield"><label>Live Project URL</label><input type="url" id="proj-url" placeholder="https://..."></div><div class="mfield"><label>GitHub URL <small style="color:var(--t3)">shows button on detail page</small></label><input type="url" id="proj-github" placeholder="https://github.com/worthysteven/..."></div></div>'
+    +'<div class="mrow"><div class="mfield"><label>Live Project URL</label><input type="url" id="proj-url" placeholder="https://..."></div><div class="mfield"><label>GitHub URL <small style="color:var(--t3)">shows button on detail page</small></label><input type="url" id="proj-github" placeholder="https://github.com/worthysteve/..."></div></div>'
     +'<div class="mrow"><div class="mfield"><label>Demo URL <small style="color:var(--t3)">shows Demo button</small></label><input type="url" id="proj-demo" placeholder="https://..."></div><div class="mfield"><label>Docs / Case Study URL <small style="color:var(--t3)">shows Docs button</small></label><input type="url" id="proj-docs" placeholder="https://..."></div></div>'
     +'<div class="mfield"><label>Upload Case Study PDF <small style="color:var(--t3);font-weight:400">fills the Docs / Case Study URL automatically</small></label><div class="admin-file-drop" id="proj-docs-file" onclick="adminFileClick(\'proj-docs-file\',\'application/pdf\')" ondragover="event.preventDefault();this.classList.add(\'drag-ov\')" ondragleave="this.classList.remove(\'drag-ov\')" ondrop="adminFileDrop(event,\'proj-docs-file\',\'application/pdf\')"><p>Click or drop case study PDF</p><small>PDF only &middot; optional</small></div></div>'
     +'<div class="mfield"><label>Paper / Publication URL <small style="color:var(--t3);font-weight:400">shows Paper button on detail page</small></label><input type="url" id="proj-paper" placeholder="https://arxiv.org/..."></div>'
@@ -1076,23 +1092,42 @@ function buildProjectModalBody(){
     +'<div class="mrow"><div class="mfield"><label>Date / Period</label><input type="text" id="proj-date" placeholder="Jan 2025"></div><div class="mfield"><label>Organisation / Context</label><input type="text" id="proj-org" placeholder="UNDP Research, Personal Project..."></div></div>';
 }
 
-function adminSlotChange(val){
-  var hint=document.getElementById('admin-slot-hint');
-  if(!hint)return;
-  if(val==='new'){var n=parseInt(localStorage.getItem('pf_proj_next_id')||'6');hint.textContent='Will be saved as Slot '+n+'. Appears at the bottom of your portfolio projects section.';}
-  else{hint.textContent='Editing Slot '+val+'. Images and data will update on your portfolio immediately.';}
+function setModalStatus(text, isError){
+  var el=document.getElementById('modal-status');
+  if(!el)return;
+  el.textContent=text||'';
+  el.classList.toggle('error',Boolean(isError));
 }
-
+function setSaveButton(state){
+  var btn=document.getElementById('modal-save-btn');
+  if(!btn)return;
+  if(state==='saving'){
+    btn.disabled=true;
+    btn.dataset.busy='1';
+    btn.innerHTML='<span class="spin" aria-hidden="true"></span>Saving…';
+  }else{
+    btn.disabled=false;
+    delete btn.dataset.busy;
+    btn.textContent=window.PortfolioAdminDB?.isConfigured()?(currentEditId?'Save Changes':'Save to Supabase'):'Save Locally';
+  }
+}
 function openModal(type, id) {
+  if (modalSaving) { showToast('Please wait — the previous save is still in progress', 'info'); return; }
   currentModalType = type;
   currentEditId = id ? Number(id) : null;
   const m = MODALS[type] || MODALS.project;
-  document.getElementById('modal-title').textContent = currentEditId ? m.title.replace(/^Add\b|^New\b/, 'Edit') : m.title;
+  document.getElementById('modal-title').textContent = currentEditId ? 'Edit ' + m.noun : m.title;
   document.getElementById('modal-body').innerHTML = type === 'project' ? buildProjectModalBody() : m.body;
   if (currentEditId) hydrateModal(type, currentEditId);
+  setModalStatus('');
+  setSaveButton('idle');
   document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(function(){ document.querySelector('#modal-body [data-required]')?.focus(); }, 60);
 }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); }
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  if (modalSaving) showToast('Still saving in the background — you will see a confirmation shortly', 'info');
+}
 function setFieldValue(id, value) {
   var el = document.getElementById(id);
   if (!el) return;
@@ -1124,7 +1159,7 @@ function markExistingImage(dropId, url) {
   drop.style.backgroundSize = 'cover';
   drop.style.backgroundPosition = 'center';
   var p = drop.querySelector('p');
-  if (p) p.textContent = 'Existing image loaded — click to replace';
+  if (p) p.textContent = 'Current image — click to replace';
 }
 function hydrateModal(type, id) {
   var record = window.PortfolioAdminDB?.getRecordById ? PortfolioAdminDB.getRecordById(type, id) : null;
@@ -1140,7 +1175,7 @@ function hydrateModal(type, id) {
     setFieldValue('proj-features', listValue(record.features, '\n'));
     setFieldValue('proj-tags', listValue(record.tags, ', '));
     setFieldValue('proj-metrics', listValue(record.metrics, ', '));
-    setFieldValue('proj-url', record.live_url);
+    setFieldValue('proj-url', record.live_url === '#' ? '' : record.live_url);
     setFieldValue('proj-github', record.github_url);
     setFieldValue('proj-demo', record.demo_url);
     setFieldValue('proj-docs', record.docs_url);
@@ -1172,17 +1207,9 @@ function hydrateModal(type, id) {
     markExistingImage('cert-image-file', record.certificate_image_url);
     setFieldValue('cert-embed', record.embed_code);
   }
-  if (type === 'pub') {
-    setFieldValue('pub-title', record.title);
-    setSelectValue('pub-type', record.pub_type);
-    setSelectValue('pub-status', record.status);
-    setFieldValue('pub-authors', listValue(record.authors, ', '));
-    setFieldValue('pub-venue', record.venue);
-    setFieldValue('pub-year', record.year);
-    setFieldValue('pub-pdf', record.pdf_url);
-  }
   if (type === 'experience') {
     setFieldValue('exp-role', record.role);
+    setSelectValue('exp-category', /fellow/i.test(record.category || '') ? 'fellowship' : 'work');
     setFieldValue('exp-org', record.organisation);
     setFieldValue('exp-date', record.date_period);
     setFieldValue('exp-start', record.start_date);
@@ -1213,193 +1240,247 @@ function hydrateModal(type, id) {
 }
 async function uploadAdminPdfToInput(dropId, inputId, folder) {
   var drop = document.getElementById(dropId);
-  if (!drop || !drop._adminFile) return true;
-  if (!window.PortfolioAdminDB?.isConfigured()) {
-    showToast('Connect Supabase before uploading PDFs');
-    return false;
-  }
-  try {
-    var result = await PortfolioAdminDB.uploadFile(drop._adminFile, folder);
-    var input = document.getElementById(inputId);
-    if (input) input.value = result.url;
-    drop.dataset.fileUrl = result.url;
-    return true;
-  } catch (error) {
-    showToast(error.message || 'PDF upload failed');
-    return false;
-  }
+  if (!drop || !drop._adminFile) return;
+  if (!window.PortfolioAdminDB?.isConfigured()) throw new Error('Connect Supabase before uploading PDFs');
+  var result = await PortfolioAdminDB.uploadFile(drop._adminFile, folder);
+  var input = document.getElementById(inputId);
+  if (input) input.value = result.url;
+  drop.dataset.fileUrl = result.url;
+  drop._adminFile = null;
 }
-async function saveModal() {
+function fieldValue(id){ var el=document.getElementById(id); return el ? el.value.trim() : ''; }
+function listFromField(id){ return fieldValue(id).split(',').map(function(t){return t.trim();}).filter(Boolean); }
+function droppedImage(id){
+  var el=document.getElementById(id);
+  if(!el||!el.classList.contains('has-img'))return '';
+  return el.dataset.imageSrc||'';
+}
+// Returns the name of the first empty required field (and highlights it), or '' when valid.
+function validateModal(){
+  var missing='';
+  document.querySelectorAll('#modal-body [data-required]').forEach(function(input){
+    var empty=!input.value.trim();
+    input.classList.toggle('invalid',empty);
+    if(empty&&!missing){missing=input.dataset.required;input.focus();}
+  });
+  return missing;
+}
+
+// Builds the record for the open form and saves it. Returns a success message; throws on failure.
+async function saveCurrentModal(){
+  var db=window.PortfolioAdminDB;
+  var connected=db?.isConfigured();
+  var id=currentEditId||undefined;
+  var result;
   if(currentModalType==='project'){
-    var projId=currentEditId || undefined;
-    var localProjId=projId || Date.now();
     var images={};
-    for(var i=1;i<=4;i++){
-      var imgEl=document.getElementById('admin-proj-img-'+i);
-      if(imgEl&&imgEl.classList.contains('has-img')){
-        var src=imgEl.dataset.imageSrc||imgEl.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
-        images[i]=src;
-        if(src){try{localStorage.setItem('pf_proj_'+localProjId+'_img_'+i,src);}catch(e){}
-          if(i===1){try{localStorage.setItem('pf_img_pc-img-'+localProjId,src);}catch(e){}}}
-      }
+    for(var i=1;i<=4;i++){var src=droppedImage('admin-proj-img-'+i);if(src)images[i]=src;}
+    var data={id:id,title:fieldValue('proj-title'),type:fieldValue('proj-type'),date:fieldValue('proj-date'),org:fieldValue('proj-org'),
+      desc:fieldValue('proj-desc'),overview:fieldValue('proj-overview'),challenge:fieldValue('proj-challenge'),solution:fieldValue('proj-solution'),
+      features:fieldValue('proj-features').split('\n').map(function(t){return t.trim();}).filter(Boolean),
+      tags:listFromField('proj-tags'),metrics:listFromField('proj-metrics'),
+      url:fieldValue('proj-url')||'#',github_url:fieldValue('proj-github'),demo_url:fieldValue('proj-demo'),docs_url:fieldValue('proj-docs'),paper_url:fieldValue('proj-paper'),
+      status:fieldValue('proj-status')||'Published'};
+    if(!connected){
+      saveLocalAdminRecord('pf_projects_custom',Object.assign({},data,{id:id||Date.now()}));
+      return 'Project saved in this browser only (Supabase not connected)';
     }
-    var g=function(id){var el=document.getElementById(id);return el?el.value:'';};
-    if(!await uploadAdminPdfToInput('proj-docs-file','proj-docs','projects/'+localProjId+'/documents'))return;
-    if(!await uploadAdminPdfToInput('proj-paper-file','proj-paper','projects/'+localProjId+'/papers'))return;
-    var data={id:projId,title:g('proj-title'),type:g('proj-type'),date:g('proj-date'),org:g('proj-org'),
-      desc:g('proj-desc'),overview:g('proj-overview'),challenge:g('proj-challenge'),solution:g('proj-solution'),
-      features:g('proj-features').split('\n').filter(Boolean),
-      tags:g('proj-tags').split(',').map(function(t){return t.trim();}).filter(Boolean),
-      metrics:g('proj-metrics').split(',').map(function(t){return t.trim();}).filter(Boolean),
-      url:g('proj-url')||'#',github_url:g('proj-github'),demo_url:g('proj-demo'),docs_url:g('proj-docs'),paper_url:g('proj-paper'),
-      status:g('proj-status')||'Published'};
-    try{localStorage.setItem('pf_proj_data_'+localProjId,JSON.stringify(data));}catch(e){}
-    if(!window.PortfolioAdminDB?.isConfigured()&&data.title){
-      var custom=[];try{custom=JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){}
-      var existingIndex=custom.findIndex(function(project){return Number(project.id)===Number(localProjId);});
-      var localData=Object.assign({},data,{id:localProjId});
-      if(existingIndex>=0)custom[existingIndex]=localData;else custom.push(localData);
-      try{localStorage.setItem('pf_projects_custom',JSON.stringify(custom));}catch(e){}
+    setModalStatus(Object.keys(images).some(function(k){return images[k].startsWith('data:');})?'Uploading images…':'Saving…');
+    await uploadAdminPdfToInput('proj-docs-file','proj-docs','projects/'+(id||'new')+'/documents');
+    await uploadAdminPdfToInput('proj-paper-file','proj-paper','projects/'+(id||'new')+'/papers');
+    data.docs_url=fieldValue('proj-docs');data.paper_url=fieldValue('proj-paper');
+    setModalStatus('Saving…');
+    result=await db.saveProject(data,images);
+    return {record:result.data,message:(id?'Project updated':'Project added')+' — “'+data.title+'”'+(String(data.status).toLowerCase()==='published'?' is live on your portfolio':' saved as '+String(data.status).toLowerCase())};
+  }
+  if(!connected&&['blog','cert'].includes(currentModalType)) throw new Error('Connect Supabase in Settings before saving '+(currentModalType==='blog'?'blog posts':'certificates'));
+  if(currentModalType==='blog'){
+    setModalStatus(droppedImage('admin-blog-img').startsWith('data:')?'Uploading cover image…':'Saving…');
+    var post={id:id,title:fieldValue('blog-title'),category:fieldValue('blog-category')||'AI',tags:listFromField('blog-tags'),
+      excerpt:fieldValue('blog-excerpt'),content:document.getElementById('blog-content')?.value||'',
+      status:fieldValue('blog-status')||'Draft',read_time:fieldValue('blog-read-time')};
+    result=await db.saveBlogPost(post,droppedImage('admin-blog-img'));
+    return {record:result.data,message:(id?'Post updated':'Post created')+' — “'+post.title+'”'+(String(post.status).toLowerCase()==='published'?' is live on your portfolio':' saved as a draft')};
+  }
+  if(currentModalType==='cert'){
+    var certImageUrl=fieldValue('cert-image-url');
+    var certImageSrc=droppedImage('cert-image-file');
+    if(certImageSrc&&certImageSrc.startsWith('data:')){
+      setModalStatus('Uploading image…');
+      var certImageBlob=await fetch(certImageSrc).then(function(response){return response.blob();});
+      certImageBlob.name='certificate-image.'+((certImageBlob.type.split('/')[1]||'png').replace('jpeg','jpg'));
+      certImageUrl=(await db.uploadFile(certImageBlob,'certifications')).url;
+      setFieldValue('cert-image-url',certImageUrl);
+      markExistingImage('cert-image-file',certImageUrl);
+    }else if(certImageSrc){
+      certImageUrl=certImageSrc;
     }
-    if(window.PortfolioAdminDB?.isConfigured()){
-      try{await PortfolioAdminDB.saveProject(data,images);}
-      catch(error){showToast(error.message||'Supabase save failed');return;}
-    }
+    setModalStatus('Saving…');
+    result=await db.saveCertification({
+      id:id,name:fieldValue('cert-name'),issuer:fieldValue('cert-issuer'),category:fieldValue('cert-category')||'AI',verified:true,
+      month_earned:Number(fieldValue('cert-month'))||null,year_earned:Number(fieldValue('cert-year'))||null,
+      verification_url:fieldValue('cert-url'),credential_id:fieldValue('cert-credential'),provided_by:fieldValue('cert-provided-by'),
+      certificate_image_url:certImageUrl,embed_code:document.getElementById('cert-embed')?.value||''
+    });
+    return {record:result.data,message:result.warning||(id?'Certificate updated':'Certificate added')+' — “'+fieldValue('cert-name')+'”'};
   }
-  var blogImg=document.getElementById('admin-blog-img'),blogSlot=document.getElementById('admin-blog-slot');
-  if(blogImg&&blogImg.classList.contains('has-img')&&blogSlot&&blogSlot.value&&blogSlot.value!=='new'){
-    var s2=blogImg.dataset.imageSrc||blogImg.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
-    if(s2)try{localStorage.setItem('pf_img_bc-img-'+blogSlot.value,s2);}catch(e){}
+  if(currentModalType==='experience'){
+    var exp={id:id,role:fieldValue('exp-role'),category:fieldValue('exp-category')||'work',organisation:fieldValue('exp-org'),date_period:fieldValue('exp-date'),
+      start_date:fieldValue('exp-start')||null,end_date:fieldValue('exp-end')||null,description:document.getElementById('exp-desc')?.value.trim()||'',
+      tags:listFromField('exp-tags'),award:fieldValue('exp-award'),display_order:Number(fieldValue('exp-order'))||0};
+    if(!connected){saveLocalAdminRecord('pf_experience_custom',Object.assign({},exp,{id:id||Date.now()}));return 'Experience saved in this browser only (Supabase not connected)';}
+    setModalStatus('Saving…');
+    result=await db.saveExperience(exp);
+    return {record:result.data,message:result.warning||(id?'Experience updated':'Experience added')+' — “'+exp.role+'”'};
   }
-  if(currentModalType==='blog'&&window.PortfolioAdminDB?.isConfigured()){
-    var blogImage='';
-    if(blogImg&&blogImg.classList.contains('has-img')) blogImage=blogImg.dataset.imageSrc||blogImg.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
-    try{await PortfolioAdminDB.saveBlogPost({
-      id:currentEditId || undefined,
-      title:document.getElementById('blog-title')?.value||'Untitled Post',
-      category:document.getElementById('blog-category')?.value||'AI',
-      tags:(document.getElementById('blog-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
-      excerpt:document.getElementById('blog-excerpt')?.value||'',
-      content:document.getElementById('blog-content')?.value||'',
-      status:document.getElementById('blog-status')?.value||'Draft',
-      read_time:document.getElementById('blog-read-time')?.value||''
-    },blogImage);}
-    catch(error){showToast(error.message||'Blog save failed');return;}
+  if(currentModalType==='education'){
+    var edu={id:id,degree:fieldValue('edu-degree'),institution:fieldValue('edu-institution'),date_period:fieldValue('edu-date'),
+      description:document.getElementById('edu-desc')?.value.trim()||'',thesis:fieldValue('edu-thesis'),tags:listFromField('edu-tags'),
+      award:fieldValue('edu-award'),display_order:Number(fieldValue('edu-order'))||0};
+    if(!connected){saveLocalAdminRecord('pf_education_custom',Object.assign({},edu,{id:id||Date.now()}));return 'Education saved in this browser only (Supabase not connected)';}
+    setModalStatus('Saving…');
+    result=await db.saveEducation(edu);
+    return {record:result.data,message:(id?'Education updated':'Education added')+' — “'+edu.degree+'”'};
   }
-  if(currentModalType==='cert'&&window.PortfolioAdminDB?.isConfigured()){
-    var certImageUrl=document.getElementById('cert-image-url')?.value||'';
-    var certImageDrop=document.getElementById('cert-image-file');
-    if(certImageDrop&&certImageDrop.classList.contains('has-img')){
-      var certImageSrc=certImageDrop.dataset.imageSrc||certImageDrop.style.backgroundImage.replace(/^url\(["']?|["']?\)$/g,'');
-      if(certImageSrc&&certImageSrc.startsWith('data:')){
-        try{
-          var certImageBlob=await fetch(certImageSrc).then(function(response){return response.blob();});
-          certImageBlob.name='certificate-image.png';
-          var certImageResult=await PortfolioAdminDB.uploadFile(certImageBlob,'certifications');
-          certImageUrl=certImageResult.url;
-          setFieldValue('cert-image-url',certImageUrl);
-        }catch(error){showToast(error.message||'Certificate image upload failed');return;}
-      }else if(certImageSrc){
-        certImageUrl=certImageSrc;
-      }
-    }
-    try{await PortfolioAdminDB.saveCertification({
-      id:currentEditId || undefined,
-      name:document.getElementById('cert-name')?.value||'Untitled Certificate',
-      issuer:document.getElementById('cert-issuer')?.value||'',
-      category:document.getElementById('cert-category')?.value||'AI',
-      verified:true,
-      month_earned:Number(document.getElementById('cert-month')?.value)||null,
-      year_earned:Number(document.getElementById('cert-year')?.value)||null,
-      verification_url:document.getElementById('cert-url')?.value||'',
-      credential_id:document.getElementById('cert-credential')?.value||'',
-      provided_by:document.getElementById('cert-provided-by')?.value||'',
-      certificate_image_url:certImageUrl,
-      embed_code:document.getElementById('cert-embed')?.value||''
-    });}
-    catch(error){showToast(error.message||'Certificate save failed');return;}
+  if(currentModalType==='achievement'){
+    var ach={id:id,title:fieldValue('ach-title'),organisation:fieldValue('ach-org'),year:fieldValue('ach-year'),
+      description:document.getElementById('ach-desc')?.value.trim()||'',icon:fieldValue('ach-icon')||'award',display_order:Number(fieldValue('ach-order'))||0};
+    if(!connected){saveLocalAdminRecord('pf_achievements_custom',Object.assign({},ach,{id:id||Date.now()}));return 'Achievement saved in this browser only (Supabase not connected)';}
+    setModalStatus('Saving…');
+    result=await db.saveAchievement(ach);
+    return {record:result.data,message:(id?'Achievement updated':'Achievement added')+' — “'+ach.title+'”'};
   }
-  if(currentModalType==='pub'&&window.PortfolioAdminDB?.isConfigured()){
-    if(!await uploadAdminPdfToInput('pub-pdf-file','pub-pdf','publications'))return;
-    try{await PortfolioAdminDB.savePublication({
-      id:currentEditId || undefined,
-      title:document.getElementById('pub-title')?.value||'Untitled Publication',
-      pub_type:document.getElementById('pub-type')?.value||'Journal',
-      status:document.getElementById('pub-status')?.value||'Under Review',
-      authors:(document.getElementById('pub-authors')?.value||'').split(',').map(function(a){return a.trim();}).filter(Boolean),
-      venue:document.getElementById('pub-venue')?.value||'',
-      year:Number(document.getElementById('pub-year')?.value)||null,
-      pdf_url:document.getElementById('pub-pdf')?.value||''
-    });}
-    catch(error){showToast(error.message||'Publication save failed');return;}
-  }
-  if(currentModalType==='experience'&&window.PortfolioAdminDB?.isConfigured()){
-    try{await PortfolioAdminDB.saveExperience({
-      id:currentEditId || undefined,
-      role:document.getElementById('exp-role')?.value||'Untitled Role',
-      organisation:document.getElementById('exp-org')?.value||'',
-      date_period:document.getElementById('exp-date')?.value||'',
-      start_date:document.getElementById('exp-start')?.value||null,
-      end_date:document.getElementById('exp-end')?.value||null,
-      description:document.getElementById('exp-desc')?.value||'',
-      tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
-      award:document.getElementById('exp-award')?.value||'',
-      display_order:Number(document.getElementById('exp-order')?.value)||0
-    });}
-    catch(error){showToast(error.message||'Experience save failed');return;}
-  }
-  if(currentModalType==='experience'&&!window.PortfolioAdminDB?.isConfigured()){
-    saveLocalAdminRecord('pf_experience_custom',{id:Date.now(),role:document.getElementById('exp-role')?.value||'Untitled Role',organisation:document.getElementById('exp-org')?.value||'',date_period:document.getElementById('exp-date')?.value||'',start_date:document.getElementById('exp-start')?.value||null,end_date:document.getElementById('exp-end')?.value||null,description:document.getElementById('exp-desc')?.value||'',tags:(document.getElementById('exp-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('exp-award')?.value||'',display_order:Number(document.getElementById('exp-order')?.value)||0});
-  }
-  if(currentModalType==='education'&&window.PortfolioAdminDB?.isConfigured()){
-    try{await PortfolioAdminDB.saveEducation({
-      id:currentEditId || undefined,
-      degree:document.getElementById('edu-degree')?.value||'Untitled Degree',
-      institution:document.getElementById('edu-institution')?.value||'',
-      date_period:document.getElementById('edu-date')?.value||'',
-      description:document.getElementById('edu-desc')?.value||'',
-      thesis:document.getElementById('edu-thesis')?.value||'',
-      tags:(document.getElementById('edu-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),
-      award:document.getElementById('edu-award')?.value||'',
-      display_order:Number(document.getElementById('edu-order')?.value)||0
-    });}
-    catch(error){showToast(error.message||'Education save failed');return;}
-  }
-  if(currentModalType==='education'&&!window.PortfolioAdminDB?.isConfigured()){
-    saveLocalAdminRecord('pf_education_custom',{id:Date.now(),degree:document.getElementById('edu-degree')?.value||'Untitled Degree',institution:document.getElementById('edu-institution')?.value||'',date_period:document.getElementById('edu-date')?.value||'',description:document.getElementById('edu-desc')?.value||'',thesis:document.getElementById('edu-thesis')?.value||'',tags:(document.getElementById('edu-tags')?.value||'').split(',').map(function(t){return t.trim();}).filter(Boolean),award:document.getElementById('edu-award')?.value||'',display_order:Number(document.getElementById('edu-order')?.value)||0});
-  }
-  if(currentModalType==='achievement'&&window.PortfolioAdminDB?.isConfigured()){
-    try{await PortfolioAdminDB.saveAchievement({
-      id:currentEditId || undefined,
-      title:document.getElementById('ach-title')?.value||'Untitled Achievement',
-      organisation:document.getElementById('ach-org')?.value||'',
-      year:document.getElementById('ach-year')?.value||'',
-      description:document.getElementById('ach-desc')?.value||'',
-      icon:document.getElementById('ach-icon')?.value||'award',
-      display_order:Number(document.getElementById('ach-order')?.value)||0
-    });}
-    catch(error){showToast(error.message||'Achievement save failed');return;}
-  }
-  if(currentModalType==='achievement'&&!window.PortfolioAdminDB?.isConfigured()){
-    saveLocalAdminRecord('pf_achievements_custom',{id:Date.now(),title:document.getElementById('ach-title')?.value||'Untitled Achievement',organisation:document.getElementById('ach-org')?.value||'',year:document.getElementById('ach-year')?.value||'',description:document.getElementById('ach-desc')?.value||'',icon:document.getElementById('ach-icon')?.value||'award',display_order:Number(document.getElementById('ach-order')?.value)||0});
-  }
-  closeModal();showToast(window.PortfolioAdminDB?.isConfigured()?'Saved to Supabase':'Saved locally');
-  if(window.PortfolioAdminDB?.loadDashboard)PortfolioAdminDB.loadDashboard();
+  throw new Error('Unknown form');
 }
+
+// One click = one save. The button is locked while saving, and you always get a
+// success or failure message, so there is no reason to click twice.
+async function saveModal() {
+  if (modalSaving) return;
+  var missing = validateModal();
+  if (missing) {
+    setModalStatus(missing + ' is required', true);
+    showToast(missing + ' is required', 'error');
+    return;
+  }
+  modalSaving = true;
+  setSaveButton('saving');
+  var type = currentModalType;
+  try {
+    var kept = await keepPortfolioPlaceholders(type);
+    var outcome = await saveCurrentModal();
+    var message = typeof outcome === 'string' ? outcome : outcome.message;
+    if (kept) message += ' — your ' + kept + ' already on the portfolio ' + (/^1 /.test(kept) ? 'was' : 'were') + ' added to the admin too';
+    // A retry after this point must update the same row, never insert a duplicate.
+    if (outcome && outcome.record && outcome.record.id != null) currentEditId = Number(outcome.record.id);
+    modalSaving = false;
+    document.getElementById('modal-overlay').classList.remove('open');
+    showToast('✓ ' + message, 'success');
+    if (window.PortfolioAdminDB?.loadDashboard) PortfolioAdminDB.loadDashboard();
+  } catch (error) {
+    modalSaving = false;
+    var reason = error && (error.message || error.error_description || error.error) || 'Unknown error';
+    setModalStatus('Not saved: ' + reason, true);
+    showToast('✕ ' + (MODALS[type]?.noun || 'Item') + ' was not saved — ' + reason, 'error');
+    console.error('Save failed', error);
+  } finally {
+    setSaveButton('idle');
+  }
+}
+// Adding the first entry to an empty section would replace that section's placeholders on the
+// portfolio, so those placeholders are imported first and nothing disappears from the site.
+const SECTION_BY_TYPE = { project: 'projects', experience: 'experience', education: 'education', achievement: 'achievements' };
+const SECTION_NOUNS = { projects: ['project','projects'], experience: ['experience entry','experience entries'], education: ['education entry','education entries'], achievements: ['achievement','achievements'] };
+async function keepPortfolioPlaceholders(type){
+  var section = SECTION_BY_TYPE[type];
+  var db = window.PortfolioAdminDB;
+  if (currentEditId || !section || !db?.isConfigured() || db.getRows(section).length) return '';
+  setModalStatus('Keeping your existing portfolio entries…');
+  var summary = await db.importPlaceholders(null, [section], { quiet: true });
+  if (summary.failed[section] || summary.failed.all) {
+    throw new Error('your existing portfolio entries could not be copied first (' + (summary.failed[section] || summary.failed.all) + '). Nothing was saved, so your portfolio is unchanged');
+  }
+  var n = summary.added[section] || 0;
+  return n ? n + ' ' + SECTION_NOUNS[section][n === 1 ? 0 : 1] : '';
+}
+// ONE-TIME DATABASE UPDATE — copies supabase/migrations/…sql so it can be pasted into the SQL Editor
+const DATABASE_UPDATE_FILE = 'supabase/migrations/20260921000000_experience_category_and_admin_only_access.sql';
+async function copyDatabaseUpdate(btn){
+  var restore = PortfolioAdminDB.busy(btn, 'Copying…');
+  var sql = '';
+  try {
+    var response = await fetch(DATABASE_UPDATE_FILE, { cache: 'no-store' });
+    if (!response.ok) throw new Error('open ' + DATABASE_UPDATE_FILE + ' in your project and copy it instead');
+    sql = await response.text();
+    if (!(await copyText(sql))) { showSqlForManualCopy(sql); return; }
+    showToast('✓ Database update copied — now click “Open SQL Editor”, paste and Run', 'success');
+  } catch (error) {
+    if (sql) showSqlForManualCopy(sql);
+    else showToast('✕ Could not copy — ' + (error.message || 'copy the file manually'), 'error');
+  } finally { restore(); }
+}
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {}
+  var area = document.createElement('textarea');
+  area.value = text; area.setAttribute('readonly', ''); area.style.position = 'fixed'; area.style.opacity = '0';
+  document.body.appendChild(area); area.select();
+  var ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+  area.remove();
+  return ok;
+}
+// Last resort when the browser blocks copying: show the text, already selected, to copy by hand.
+function showSqlForManualCopy(sql){
+  var overlay = document.getElementById('sql-copy-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'sql-copy-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML = '<div class="modal" style="max-width:720px"><div class="modal-head"><h3>Copy the database update</h3><button class="modal-close" aria-label="Close">✕</button></div>'
+      + '<div class="modal-body"><p style="font-size:13px;color:var(--t2)">Your browser blocked automatic copying. The text below is selected — press <b>⌘C</b> (or Ctrl+C) to copy it, then paste it into the Supabase SQL Editor and click Run.</p>'
+      + '<textarea readonly style="min-height:320px;font-family:var(--fm);font-size:11px;background:var(--s2);color:var(--t1);border:1px solid var(--b);border-radius:8px;padding:10px;width:100%"></textarea></div></div>';
+    overlay.addEventListener('click', function(e){ if (e.target === overlay || e.target.closest('.modal-close')) overlay.remove(); });
+    document.body.appendChild(overlay);
+  }
+  var area = overlay.querySelector('textarea');
+  area.value = sql;
+  area.focus(); area.select();
+  showToast('Copying was blocked — press ⌘C to copy the selected text', 'info');
+}
+window.renderDatabaseUpdateNotice = function(needed){
+  var banner = document.getElementById('db-update-banner');
+  if (banner) banner.hidden = !needed;
+  var link = document.getElementById('sql-editor-link');
+  var url = window.PORTFOLIO_SUPABASE_URL || localStorage.getItem('pf-supabase-url') || '';
+  var ref = (url.match(/^https:\/\/([a-z0-9]+)\.supabase\.co/i) || [])[1];
+  if (link && ref) link.href = 'https://supabase.com/dashboard/project/' + ref + '/sql/new';
+};
 function saveLocalAdminRecord(key, record){
   var rows=[];try{rows=JSON.parse(localStorage.getItem(key)||'[]');}catch(e){}
-  rows.push(record);localStorage.setItem(key,JSON.stringify(rows));
+  var index=rows.findIndex(function(row){return Number(row.id)===Number(record.id);});
+  if(index>=0)rows[index]=record;else rows.push(record);
+  localStorage.setItem(key,JSON.stringify(rows));
 }
 document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target.id==='modal-overlay') closeModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (document.getElementById('reply-overlay').classList.contains('open')) closeReply();
+  else if (document.getElementById('modal-overlay').classList.contains('open')) closeModal();
+});
+document.getElementById('modal-body').addEventListener('input', e => {
+  if (e.target.classList.contains('invalid') && e.target.value.trim()) { e.target.classList.remove('invalid'); setModalStatus(''); }
+});
 
-// TOAST
+// TOAST — type: 'success' (green), 'error' (red, stays longer) or 'info'
 let toastTimer;
-function showToast(msg) {
+function showToast(msg, type) {
   const t = document.getElementById('toast');
+  const kind = type || (/fail|error|could not|not saved|required|invalid/i.test(msg) ? 'error' : 'success');
   document.getElementById('toast-msg').textContent = msg;
-  t.classList.add('show','success');
+  t.classList.remove('success','error','info');
+  t.classList.add('show', kind);
+  t.setAttribute('role', kind === 'error' ? 'alert' : 'status');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => t.classList.remove('show','success'), 2800);
+  toastTimer = setTimeout(() => t.classList.remove('show'), kind === 'error' ? 6000 : 3500);
 }
 
 // THEME TOGGLE
@@ -1435,15 +1516,20 @@ function showToast(msg) {
   );
 })();
 
-// REPLY MODAL
+// MESSAGES — clicking a message opens it in full with a reply box and marks it as read
+function openMessage(id){
+  var message=window.PortfolioAdminDB?.getRecordById('message',id);
+  if(!message){switchView('messages');return;}
+  openReply(message.id,message.name||'Visitor',message.subject||'No subject',message.message||'',message.email||'');
+  PortfolioAdminDB.markMessageRead(message.id);
+}
 var _rd = {};
 function openReply(id, from, subject, preview, email) {
-  if (arguments.length === 3) { preview = subject; subject = from; from = id; id = null; }
   email = email || '';
   _rd = { id: id, from: from, subject: subject, preview: preview, email: email };
   document.getElementById('reply-to-name').textContent = from;
   document.getElementById('reply-email').value = email || 'No email address captured';
-  document.getElementById('reply-email-hint').textContent = email ? 'Your reply email draft will be addressed to this visitor.' : 'This older message cannot be emailed because it has no captured address.';
+  document.getElementById('reply-email-hint').textContent = email ? 'Your reply is emailed to this visitor.' : 'This older message cannot be emailed because it has no captured address.';
   document.getElementById('reply-subject').value = subject;
   document.getElementById('reply-from-label').textContent = from + ':';
   document.getElementById('reply-preview-text').textContent = preview;
@@ -1452,11 +1538,15 @@ function openReply(id, from, subject, preview, email) {
   setTimeout(function(){ document.getElementById('reply-msg').focus(); }, 120);
 }
 function closeReply() { document.getElementById('reply-overlay').classList.remove('open'); }
+let replySending = false;
 async function sendReply() {
+  if (replySending) return;
   var msg = document.getElementById('reply-msg').value.trim();
-  if (!msg) { document.getElementById('reply-msg').focus(); return; }
-  if (!_rd.email) { showToast('No email address captured for this message'); return; }
+  if (!msg) { showToast('Write a reply first', 'error'); document.getElementById('reply-msg').focus(); return; }
+  if (!_rd.email) { showToast('No email address captured for this message', 'error'); return; }
   if(window.PortfolioAdminDB?.isConfigured()){
+    replySending=true;
+    var restoreReply=PortfolioAdminDB.busy(document.getElementById('reply-send-btn'),'Sending…');
     try{
       await PortfolioAdminDB.replyToMessage(_rd.id,msg,{
         email:_rd.email,
@@ -1465,68 +1555,103 @@ async function sendReply() {
         originalMessage:_rd.preview
       });
     }
-    catch(error){showToast(error.message||'Reply save failed');return;}
+    catch(error){showToast('✕ Reply not sent — ' + (error.message||'unknown error'), 'error');return;}
+    finally{replySending=false;restoreReply();}
     closeReply();
-    showToast('Reply email sent to ' + _rd.email);
+    showToast('✓ Reply email sent to ' + _rd.email, 'success');
     return;
   }
   var subject = /^re:/i.test(_rd.subject || '') ? _rd.subject : 'Re: ' + (_rd.subject || 'Portfolio message');
   var body = msg + '\n\n--- Original message from ' + (_rd.from || 'Visitor') + ' ---\n' + (_rd.preview || '');
   window.location.href = 'mailto:' + encodeURIComponent(_rd.email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
   closeReply();
-  showToast(window.PortfolioAdminDB?.isConfigured()?'Reply saved and email draft opened':'Email draft opened for ' + _rd.email);
+  showToast('Email draft opened for ' + _rd.email, 'success');
 }
 document.getElementById('reply-overlay').addEventListener('click', function(e){
   if (e.target.id === 'reply-overlay') closeReply();
 });
 
+// MEDIA
+window.renderAdminSiteMedia = function(rows){
+  (rows||[]).forEach(function(item){
+    if(!item.image_url)return;
+    if(item.id==='hero_portrait'){var h=document.getElementById('admin-hero-portrait');if(h&&!h.dataset.imageSrc?.startsWith('data:'))markExistingImage('admin-hero-portrait',item.image_url);}
+    if(item.id==='about_image'){var a=document.getElementById('admin-about-image');if(a&&!a.dataset.imageSrc?.startsWith('data:'))markExistingImage('admin-about-image',item.image_url);}
+    if(item.id==='resume_pdf'){
+      var link=document.getElementById('current-resume-link');
+      if(link){link.href=item.image_url;link.hidden=false;}
+    }
+  });
+};
+let mediaSaving = false;
 async function savePublicMedia() {
+  if (mediaSaving) return;
   var hero = document.getElementById('admin-hero-portrait');
   var about = document.getElementById('admin-about-image');
   var resume = document.getElementById('admin-resume-pdf');
-  if (hero && hero.dataset.imageSrc) localStorage.setItem('pf-portrait', hero.dataset.imageSrc);
-  if (about && about.dataset.imageSrc) localStorage.setItem('pf-about-photo', about.dataset.imageSrc);
-  if (resume && resume._adminFile && !window.PortfolioAdminDB?.isConfigured()) {
-    showToast('Connect Supabase before uploading PDFs');
-    return;
+  var heroSrc = hero && hero.dataset.imageSrc && hero.dataset.imageSrc.startsWith('data:') ? hero.dataset.imageSrc : '';
+  var aboutSrc = about && about.dataset.imageSrc && about.dataset.imageSrc.startsWith('data:') ? about.dataset.imageSrc : '';
+  var resumeFile = resume && resume._adminFile;
+  if (!heroSrc && !aboutSrc && !resumeFile) { showToast('Choose a new image or resume PDF first', 'info'); return; }
+  if (!window.PortfolioAdminDB?.isConfigured()) { showToast('Connect Supabase before uploading media', 'error'); return; }
+  mediaSaving = true;
+  var restoreMedia = PortfolioAdminDB.busy(document.getElementById('media-save-btn'), 'Uploading…');
+  var saved = [];
+  try{
+    if(heroSrc){
+      var heroRes=await PortfolioAdminDB.saveSiteMedia('hero_portrait',heroSrc,'Steven Daniel portrait');
+      localStorage.setItem('pf-portrait',heroRes.image_url);
+      markExistingImage('admin-hero-portrait',heroRes.image_url);
+      saved.push('hero portrait');
+    }
+    if(aboutSrc){
+      var aboutRes=await PortfolioAdminDB.saveSiteMedia('about_image',aboutSrc,'About Steven Daniel');
+      localStorage.setItem('pf-about-photo',aboutRes.image_url);
+      markExistingImage('admin-about-image',aboutRes.image_url);
+      saved.push('about image');
+    }
+    if(resumeFile){
+      var fileRes=await PortfolioAdminDB.uploadFile(resumeFile,'resume');
+      await PortfolioAdminDB.saveSiteMedia('resume_pdf',fileRes.url,'Steven Daniel resume PDF');
+      localStorage.setItem('pf-resume-url',fileRes.url);
+      resume._adminFile=null;
+      resume.classList.remove('has-file');
+      resume.querySelector('p').textContent='Click or drag & drop resume PDF';
+      window.renderAdminSiteMedia([{id:'resume_pdf',image_url:fileRes.url}]);
+      saved.push('resume');
+    }
+    showToast('✓ Saved ' + saved.join(', ') + ' — live on your portfolio', 'success');
+  }catch(error){
+    showToast('✕ Media not saved' + (saved.length ? ' (saved: ' + saved.join(', ') + ')' : '') + ' — ' + (error.message||'upload failed'), 'error');
+  }finally{
+    mediaSaving=false; restoreMedia();
   }
-  if(window.PortfolioAdminDB?.isConfigured()){
-    try{
-      if(hero&&hero.dataset.imageSrc){
-        var heroRes=await PortfolioAdminDB.saveSiteMedia('hero_portrait',hero.dataset.imageSrc,'Steven Daniel portrait');
-        if(heroRes.image_url)localStorage.setItem('pf-portrait',heroRes.image_url);
-      }
-      if(about&&about.dataset.imageSrc){
-        var aboutRes=await PortfolioAdminDB.saveSiteMedia('about_image',about.dataset.imageSrc,'About Steven Daniel');
-        if(aboutRes.image_url)localStorage.setItem('pf-about-photo',aboutRes.image_url);
-      }
-      if(resume&&resume._adminFile){
-        var fileRes=await PortfolioAdminDB.uploadFile(resume._adminFile,'resume');
-        localStorage.setItem('pf-resume-url',fileRes.url);
-        await PortfolioAdminDB.saveSiteMedia('resume_pdf',fileRes.url,'Steven Daniel resume PDF');
-      }
-    }catch(error){showToast(error.message||'Media save failed');return;}
+}
+function clearMediaCache(){
+  var keys=[];
+  for(var i=0;i<localStorage.length;i++){
+    var key=localStorage.key(i);
+    if(/^pf_img_|^pf_proj_|^pf-portrait$|^pf-about-photo$|^pf-resume-url$/.test(key))keys.push(key);
   }
-  showToast('Public media saved');
+  if(!keys.length){showToast('No cached media in this browser','info');return;}
+  if(!confirm('Remove '+keys.length+' cached media item'+(keys.length===1?'':'s')+' from this browser? Your Supabase content is not affected.'))return;
+  keys.forEach(function(key){localStorage.removeItem(key);});
+  showToast('Cleared '+keys.length+' cached media item'+(keys.length===1?'':'s'),'success');
 }
 
-// GOOGLE LOGIN (demo)
-function doGoogleLogin() {
-  if(window.PortfolioAdminDB?.isConfigured()){
-    PortfolioAdminDB.signInWithGoogle().catch(function(error){showToast(error.message||'Google sign-in failed');});
+// GOOGLE LOGIN
+function doGoogleLogin(btn) {
+  if(!window.PortfolioAdminDB?.isConfigured()){
+    showToast('Supabase must be configured before admin login', 'error');
     return;
   }
-  var overlay = document.getElementById('login-overlay');
-  overlay.style.opacity = '0';
-  overlay.style.transition = 'opacity .4s';
-  setTimeout(function(){
-    overlay.style.display = 'none';
-    document.getElementById('app').classList.add('visible');
-    showToast('Signed in with Google');
-  }, 400);
+  applyKeepSignedInChoice();
+  var restore=PortfolioAdminDB.busy(btn,'Redirecting to Google…');
+  PortfolioAdminDB.signInWithGoogle().catch(function(error){restore();showToast('✕ Google sign-in failed — '+(error.message||'unknown error'), 'error');});
 }
 
-// ADMIN IMAGE UPLOAD (for project & blog modals)
+// ADMIN IMAGE UPLOAD (for project, blog, certificate and media forms)
+const MAX_IMAGE_EDGE = 2000;
 function adminImgClick(id) {
   var inp = document.createElement('input');
   inp.type = 'file'; inp.accept = 'image/*';
@@ -1542,23 +1667,53 @@ function adminImgDrop(e, id) {
   if (el) el.classList.remove('drag-ov');
   var f = e.dataTransfer.files[0];
   if (f && f.type.startsWith('image/')) adminApplyImg(id, f);
+  else if (f) showToast('Please drop an image file', 'error');
 }
-function adminApplyImg(id, file) {
+function readAsDataUrl(file) {
+  return new Promise(function(resolve, reject){
+    var reader = new FileReader();
+    reader.onload = function(ev){ resolve(ev.target.result); };
+    reader.onerror = function(){ reject(reader.error || new Error('Could not read image')); };
+    reader.readAsDataURL(file);
+  });
+}
+// Large photos (phone cameras are often 5–10 MB) are scaled down before upload so saving stays fast.
+async function optimiseImage(file) {
+  var dataUrl = await readAsDataUrl(file);
+  if (/gif|svg/.test(file.type) || file.size < 900 * 1024) return dataUrl;
+  var img = await new Promise(function(resolve, reject){
+    var el = new Image();
+    el.onload = function(){ resolve(el); };
+    el.onerror = function(){ reject(new Error('Could not read image')); };
+    el.src = dataUrl;
+  });
+  var scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(img.naturalWidth, img.naturalHeight));
+  var canvas = document.createElement('canvas');
+  canvas.width = Math.round(img.naturalWidth * scale);
+  canvas.height = Math.round(img.naturalHeight * scale);
+  canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+  var out = file.type === 'image/jpeg' ? canvas.toDataURL('image/jpeg', 0.86) : canvas.toDataURL('image/webp', 0.88);
+  return out.length < dataUrl.length ? out : dataUrl;
+}
+async function adminApplyImg(id, file) {
   var el = document.getElementById(id);
   if (!el) return;
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    el.style.backgroundImage = 'url(' + ev.target.result + ')';
+  var p = el.querySelector('p');
+  if (p) p.textContent = 'Preparing ' + file.name + '…';
+  try {
+    var src = await optimiseImage(file);
+    el.style.backgroundImage = 'url(' + src + ')';
     el.style.backgroundSize = 'cover';
     el.style.backgroundPosition = 'center';
-    el.dataset.imageSrc = ev.target.result;
+    el.dataset.imageSrc = src;
     el.classList.add('has-img');
-    var p = el.querySelector('p');
-    if (p) p.textContent = '\u2713 ' + file.name + ' ready';
+    if (p) p.textContent = '✓ ' + file.name + ' ready';
     var sm = el.querySelector('small');
-    if (sm) sm.textContent = 'Click to change';
-  };
-  reader.readAsDataURL(file);
+    if (sm) sm.textContent = 'Uploads when you save · click to change';
+  } catch (error) {
+    if (p) p.textContent = 'Click or drop an image';
+    showToast(error.message || 'Could not read image', 'error');
+  }
 }
 function adminFileClick(id, accept) {
   var inp = document.createElement('input');
@@ -1583,19 +1738,19 @@ function adminApplyFile(id, file, accept) {
   var wantsPdf = String(accept || '').indexOf('pdf') > -1;
   var mixedMedia = String(accept || '').indexOf('image/*') > -1 || String(accept || '').indexOf('video/*') > -1;
   if (mixedMedia && !(file.type.startsWith('image/') || file.type.startsWith('video/') || file.type === 'application/pdf')) {
-    showToast('Please choose an image, video, or PDF file');
+    showToast('Please choose an image, video, or PDF file', 'error');
     return;
   }
   if (!mixedMedia && wantsPdf && file.type !== 'application/pdf' && !/\.pdf$/i.test(file.name)) {
-    showToast('Please choose a PDF file');
+    showToast('Please choose a PDF file', 'error');
     return;
   }
   el._adminFile = file;
   el.classList.add('has-file');
   var p = el.querySelector('p');
-  if (p) p.textContent = '\u2713 ' + file.name + ' ready';
+  if (p) p.textContent = '✓ ' + file.name + ' ready';
   var sm = el.querySelector('small');
-  if (sm) sm.textContent = 'Uploads when you save';
+  if (sm) sm.textContent = mixedMedia ? 'Click “Upload & Insert in Content”' : 'Uploads when you save';
 }
 function insertIntoTextarea(textarea, text) {
   if (!textarea) return;
@@ -1610,11 +1765,15 @@ function insertIntoTextarea(textarea, text) {
   textarea.focus();
   textarea.setSelectionRange(next, next);
 }
+let blogMediaUploading = false;
 async function uploadBlogMediaAndInsert() {
+  if (blogMediaUploading) return;
   var drop = document.getElementById('blog-media-file');
   var content = document.getElementById('blog-content');
-  if (!drop || !drop._adminFile) { showToast('Choose a blog media file first'); return; }
-  if (!window.PortfolioAdminDB?.isConfigured()) { showToast('Connect Supabase before uploading media'); return; }
+  if (!drop || !drop._adminFile) { showToast('Choose a blog media file first', 'error'); return; }
+  if (!window.PortfolioAdminDB?.isConfigured()) { showToast('Connect Supabase before uploading media', 'error'); return; }
+  blogMediaUploading = true;
+  var restoreUpload = PortfolioAdminDB.busy(document.getElementById('blog-media-btn'), 'Uploading…');
   try {
     var file = drop._adminFile;
     var result = await PortfolioAdminDB.uploadFile(file, 'blog-media');
@@ -1629,11 +1788,14 @@ async function uploadBlogMediaAndInsert() {
     }
     insertIntoTextarea(content, embed);
     drop.dataset.fileUrl = result.url;
+    drop._adminFile = null;
     var sm = drop.querySelector('small');
     if (sm) sm.textContent = 'Uploaded and inserted into content';
-    showToast('Blog media inserted');
+    showToast('✓ Blog media inserted', 'success');
   } catch (error) {
-    showToast(error.message || 'Blog media upload failed');
+    showToast('✕ Blog media not uploaded — ' + (error.message || 'unknown error'), 'error');
+  } finally {
+    blogMediaUploading = false; restoreUpload();
   }
 }
 </script>

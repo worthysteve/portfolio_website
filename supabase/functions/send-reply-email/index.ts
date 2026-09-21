@@ -38,12 +38,38 @@ Deno.serve(async (req) => {
     return jsonResponse({ error: "Email function is not configured" }, 500);
   }
 
+  // Only the portfolio owner may send replies. Without this check, any signed-in account
+  // could use this function to send email from your domain to any address.
+  const adminEmails = (Deno.env.get("ADMIN_EMAILS") || "danielsteven.ds@gmail.com,steven@stevendaniel.dev")
+    .split(",").map((email) => email.trim().toLowerCase()).filter(Boolean);
+  const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: { Authorization: req.headers.get("Authorization") || "", apikey: serviceRoleKey },
+  });
+  const caller = userResponse.ok ? await userResponse.json().catch(() => null) : null;
+  if (!caller?.email || !caller.email_confirmed_at || !adminEmails.includes(String(caller.email).toLowerCase())) {
+    return jsonResponse({ error: "Only the portfolio admin can send replies" }, 403);
+  }
+
   let payload: ReplyRequest;
   try {
     payload = await req.json();
   } catch {
     return jsonResponse({ error: "Invalid JSON body" }, 400);
   }
+
+  // Reply only to the address the visitor submitted with their message.
+  const messageResponse = await fetch(
+    `${supabaseUrl}/rest/v1/messages?id=eq.${encodeURIComponent(String(payload.messageId || ""))}&select=email,name,subject,message`,
+    { headers: { apikey: serviceRoleKey, Authorization: `Bearer ${serviceRoleKey}` } },
+  );
+  const storedMessage = messageResponse.ok ? (await messageResponse.json().catch(() => []))[0] : null;
+  if (!storedMessage) {
+    return jsonResponse({ error: "Message not found" }, 404);
+  }
+  payload.to = storedMessage.email || "";
+  payload.name = payload.name || storedMessage.name;
+  payload.subject = payload.subject || storedMessage.subject;
+  payload.originalMessage = payload.originalMessage || storedMessage.message;
 
   const to = String(payload.to || "").trim();
   const replyText = String(payload.replyText || "").trim();

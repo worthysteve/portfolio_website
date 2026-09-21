@@ -68,7 +68,7 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY
 
 // TYPING ANIMATION
 (function(){
-  const roles = ["AI Engineer","Data Scientist","ML Researcher","LLM Systems Builder","FinTech Innovator","Computer Vision Engineer"];
+  const roles = ["AI Engineer","Data Scientist","Machine Learning Engineer","LLM Systems Builder","FinTech Innovator","Computer Vision Engineer"];
   const el = document.getElementById('typed');
   if (!el) return;
   let ri=0, ci=0, del=false, curRole=null;
@@ -131,13 +131,17 @@ document.querySelectorAll('a[data-resume-link]').forEach(function(link){
   }
 });
 
-// SCROLL REVEAL
-(function(){
-  const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); obs.unobserve(e.target); } });
-  }, { threshold: .08 });
-  document.querySelectorAll('.reveal,.rstagger').forEach(el => obs.observe(el));
-})();
+// SCROLL REVEAL — also used for content rendered later from Supabase
+const revealObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('v'); revealObserver.unobserve(e.target); } });
+}, { threshold: .08 }) : null;
+function observeReveals(root) {
+  const scope = root || document;
+  const targets = Array.from(scope.querySelectorAll('.reveal:not(.v),.rstagger:not(.v)'));
+  if (scope.matches && scope.matches('.reveal:not(.v),.rstagger:not(.v)')) targets.push(scope);
+  targets.forEach(el => { if (revealObserver) revealObserver.observe(el); else el.classList.add('v'); });
+}
+observeReveals(document);
 
 // PROJECT CARD LINKS — links navigate independently from clickable cards
 (function(){
@@ -179,19 +183,24 @@ document.querySelectorAll('a[data-resume-link]').forEach(function(link){
   const results = document.getElementById('cmd-results');
   if (!overlay) return;
 
+  const blogVisible = () => { const b = document.getElementById('blog'); return Boolean(b && !b.hidden); };
   const cmds = [
-    {label:'About',          cat:'Navigate', icon:'◉', href:'#about'},
-    {label:'Research',       cat:'Navigate', icon:'⊕', href:'#research'},
-    {label:'Projects',       cat:'Navigate', icon:'▷', href:'#projects'},
-    {label:'Experience',     cat:'Navigate', icon:'◈', href:'#experience'},
-    {label:'Education',      cat:'Navigate', icon:'◆', href:'#education'},
-    {label:'Certifications', cat:'Navigate', icon:'✦', href:'#certifications'},
-    {label:'Publications',   cat:'Navigate', icon:'▣', href:'#publications'},
-    {label:'Blog',           cat:'Navigate', icon:'◧', href:'#blog'},
-    {label:'Achievements',   cat:'Navigate', icon:'★', href:'#achievements'},
-    {label:'Contact',        cat:'Navigate', icon:'◎', href:'#contact'},
+    {label:'Home',                 cat:'Navigate', icon:'⌂', href:'#hero'},
+    {label:'About',                cat:'Navigate', icon:'◉', href:'#about'},
+    {label:'Education',            cat:'Navigate', icon:'◆', href:'#education'},
+    {label:'Certifications',       cat:'Navigate', icon:'✦', href:'#certifications'},
+    {label:'Experience & Fellowships', cat:'Navigate', icon:'◈', href:'#experience'},
+    {label:'Achievements',         cat:'Navigate', icon:'★', href:'#achievements'},
+    {label:'Projects',             cat:'Navigate', icon:'▷', href:'#projects'},
+    {label:'Research Interests',   cat:'Navigate', icon:'⊕', href:'#research'},
+    {label:'Blog',                 cat:'Navigate', icon:'◧', href:'#blog', when: blogVisible},
+    {label:'Contact',              cat:'Navigate', icon:'◎', href:'#contact'},
     {label:'Toggle Theme',   cat:'Action',   icon:'◑', href:null, fn:()=>{ document.getElementById('theme-btn').click(); close(); }},
-    {label:'View / Download Resume',cat:'Action',   icon:'↓', href:null, fn:()=>{ window.open(getResumeUrl(), '_blank', 'noopener'); close(); }},
+    {label:'View / Download Resume',cat:'Action',   icon:'↓', href:null, fn:()=>{
+      close();
+      const url = getResumeUrl();
+      if (url) window.open(url, '_blank', 'noopener'); else alert('Resume is not available yet.');
+    }},
   ];
 
   let sel = 0;
@@ -200,7 +209,8 @@ document.querySelectorAll('a[data-resume-link]').forEach(function(link){
   const close = () => overlay.classList.remove('open');
 
   function render(q) {
-    const list = q ? cmds.filter(c => c.label.toLowerCase().includes(q.toLowerCase())) : cmds;
+    const available = cmds.filter(c => !c.when || c.when());
+    const list = q ? available.filter(c => c.label.toLowerCase().includes(q.toLowerCase())) : available;
     results.innerHTML = list.map((c,i) => `
       <div class="cmd-it${i===sel?' sel':''}" data-i="${cmds.indexOf(c)}">
         <div class="cmd-it-ic">${c.icon}</div>
@@ -248,77 +258,53 @@ async function handleContact(e) {
   e.preventDefault();
   const btn = e.target.querySelector('.btn-send');
   const form=e.target;
+  if (btn.disabled) return;
   const firstName=form.querySelector('[name="first_name"]')?.value||'';
   const lastName=form.querySelector('[name="last_name"]')?.value||'';
   const name=(firstName+' '+lastName).trim();
   const email=form.querySelector('[name="email"]')?.value.trim()||'';
   const subject=form.querySelector('[name="subject"]')?.value||'Portfolio message';
   const message=form.querySelector('[name="message"]')?.value||'';
+  btn.disabled = true;
   btn.textContent = 'Sending...';
   const client=supabaseClient();
   if(client){
-    const result=await client.from('messages').insert({name:name,email:email,subject:subject,message:message,status:'unread'});
-    if(result.error){
-      btn.textContent='Send Failed';
-      setTimeout(() => { btn.textContent='Send Message →'; }, 2500);
+    let failed=false;
+    try{
+      const result=await client.from('messages').insert({name:name,email:email,subject:subject,message:message,status:'unread'});
+      failed=Boolean(result.error);
+    }catch(error){ failed=true; }
+    if(failed){
+      btn.textContent='Send failed — please try again';
+      setTimeout(() => { btn.textContent='Send Message →'; btn.disabled=false; }, 2500);
       return;
     }
   }
   btn.textContent = 'Message Sent ✓';
   btn.style.background = 'linear-gradient(135deg,#10B981,#06B6D4)';
-  setTimeout(() => { btn.textContent='Send Message →'; btn.style.background=''; e.target.reset(); }, 3500);
+  form.reset();
+  setTimeout(() => { btn.textContent='Send Message →'; btn.style.background=''; btn.disabled=false; }, 3500);
 }
 
-// HAMBURGER MENU
-(function(){
-  const ham = document.getElementById('nav-ham');
-  const mob = document.getElementById('mob-nav');
-  if (!ham || !mob) return;
-  ham.addEventListener('click', () => {
-    mob.classList.toggle('open');
-    ham.classList.toggle('open');
-    document.body.style.overflow = mob.classList.contains('open') ? 'hidden' : '';
-  });
-  mob.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-    mob.classList.remove('open');
-    ham.classList.remove('open');
-    document.body.style.overflow = '';
-  }));
-})();
-
 // PROJECT CATEGORY TABS
-(function(){
-  document.querySelectorAll('.prj-tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.prj-tab').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const cat = btn.dataset.cat;
-      document.querySelectorAll('.prj-g .pc').forEach(c => {
-        const show = cat === 'all' || c.dataset.cat === cat;
-        c.classList.toggle('hidden', !show);
-        if (c.classList.contains('feat')) {
-          c.style.gridColumn = (cat === 'all' && show) ? 'span 2' : (show ? 'span 1' : '');
-        }
-      });
-    });
-  });
-})();
-
-// CARD IMAGE DISPLAY — read-only on portfolio; images are set from Admin Dashboard
-(function(){
-  var SLOTS = ['pc-img-1','pc-img-2','pc-img-3','pc-img-4','pc-img-5','bc-img-1','bc-img-2','bc-img-3'];
-  SLOTS.forEach(function(id) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    var saved = localStorage.getItem('pf_img_' + id);
-    if (saved) {
-      el.style.backgroundImage = 'url(' + saved + ')';
-      el.style.backgroundSize = 'cover';
-      el.style.backgroundPosition = 'center';
-      el.classList.add('has-img');
+function applyProjectFilter() {
+  const active = document.querySelector('.prj-tab.active');
+  const cat = active ? active.dataset.cat : 'all';
+  document.querySelectorAll('.prj-g .pc').forEach(c => {
+    const show = cat === 'all' || c.dataset.cat === cat;
+    c.classList.toggle('hidden', !show);
+    if (c.classList.contains('feat')) {
+      c.style.gridColumn = (cat === 'all' && show) ? 'span 2' : (show ? 'span 1' : '');
     }
   });
-})();
+}
+document.querySelectorAll('.prj-tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.prj-tab').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyProjectFilter();
+  });
+});
 
 function escapeHtml(value) {
   return String(value || '').replace(/[&<>"']/g, function(char){
@@ -326,11 +312,14 @@ function escapeHtml(value) {
   });
 }
 function hasUrl(url) { return Boolean(url && String(url).trim() && String(url).trim() !== '#'); }
+var sharedSupabaseClient = null;
 function supabaseClient() {
+  if (sharedSupabaseClient) return sharedSupabaseClient;
   var url = localStorage.getItem('pf-supabase-url') || window.PORTFOLIO_SUPABASE_URL || '';
   var key = localStorage.getItem('pf-supabase-anon-key') || window.PORTFOLIO_SUPABASE_KEY || '';
   if (!url || !key || !window.supabase) return null;
-  return window.supabase.createClient(url, key);
+  sharedSupabaseClient = window.supabase.createClient(url, key);
+  return sharedSupabaseClient;
 }
 function projectSearchText(project) {
   return [
@@ -350,13 +339,13 @@ function isWebProject(project) {
   var text=projectSearchText(project);
   return /\b(web|website|web app|application|full stack|frontend|front-end|backend|back-end|html|css|javascript|react|next|vue|angular|django|flask|fastapi|dash|streamlit|node|express|dashboard|portfolio|supabase)\b/.test(text);
 }
-function isResearchProject(project) {
+function isDataScienceProject(project) {
   var text=projectSearchText(project);
-  return /\b(research|paper|publication|journal|conference|thesis|study|review|experiment|workshop)\b/.test(text);
+  return /\b(data science|data analysis|analytics|analysis|eda|exploratory|visuali[sz]ations?|pandas|statistics|statistical|clustering|segmentation|forecast|forecasting|time series|regression|power bi|tableau|business intelligence|feature engineering|data cleaning)\b/.test(text);
 }
-function isDataFinanceProject(project) {
+function isNlpLlmProject(project) {
   var text=projectSearchText(project);
-  return /\b(data science|analytics|analysis|eda|business intelligence|bi|finance|financial|financial engineering|quant|quantitative|portfolio|risk|pricing|derivative|monte carlo|trading|backtest|backtesting|econometric|time series)\b/.test(text);
+  return /\b(nlp|natural language|llms?|large language models?|language models?|rag|retrieval[- ]augmented|chatbots?|sentiment|bert|bertweet|gpt|transformers?|langchain|embeddings?|text classification|vader|textblob|tokeni[sz]ation)\b/.test(text);
 }
 function parseExperienceDate(value, fallbackMonth, fallbackDay) {
   if (!value) return null;
@@ -403,15 +392,14 @@ function countExperienceYears(experience) {
 function updatePortfolioStats(data) {
   data=data||{};
   var projects=Array.isArray(data.projects)?data.projects:[];
-  var publications=Array.isArray(data.publications)?data.publications:[];
   var certifications=Array.isArray(data.certifications)?data.certifications:[];
   var experience=Array.isArray(data.experience)?data.experience:[];
   var values={
     'total-projects':projects.length,
     'ai-projects':projects.filter(isAiProject).length,
     'web-projects':projects.filter(isWebProject).length,
-    'data-finance-projects':projects.filter(isDataFinanceProject).length,
-    'research-projects':projects.filter(isResearchProject).length+publications.length,
+    'data-science-projects':projects.filter(isDataScienceProject).length,
+    'nlp-llm-projects':projects.filter(isNlpLlmProject).length,
     'certifications':certifications.length,
     'experience-years':countExperienceYears(experience)
   };
@@ -423,15 +411,42 @@ function updatePortfolioStats(data) {
     else el.textContent=String(values[key])+(el.dataset.suffix||'');
   });
 }
-function updateStatDirect(key,value) {
-  var el=document.querySelector('[data-stat="'+key+'"]');
-  if(!el)return;
-  el.dataset.count=String(value);
-  el.textContent=String(value)+(el.dataset.suffix||'');
+// Stats read from the placeholder content while Supabase has no rows for a section
+function placeholderProjects() {
+  return Array.from(document.querySelectorAll('.prj-g .pc')).map(function(card){
+    var text=function(sel){var el=card.querySelector(sel);return el?el.textContent.trim():'';};
+    return {
+      title:text('.pc-title'),
+      type:card.dataset.type||'',
+      description:text('.pc-desc'),
+      tags:Array.from(card.querySelectorAll('.ptag')).map(function(t){return t.textContent.trim();})
+    };
+  });
 }
-function clearDynamicSection(selector) {
-  var el=document.querySelector(selector);
-  if(el)el.innerHTML='';
+function placeholderCertifications() {
+  return Array.from(document.querySelectorAll('.certs-g .cert'));
+}
+function placeholderExperience() {
+  return Array.from(document.querySelectorAll('#experience .tl-it[data-start]')).map(function(el){
+    var end=el.dataset.end;
+    return {
+      start_date:el.dataset.start+'-01',
+      end_date:(!end||end==='present')?null:end+'-28',
+      date_period:end==='present'?'Present':''
+    };
+  });
+}
+
+// Project card buttons — look clickable (icon + border), and don't trigger the card's own click
+var PROJECT_LINK_ICONS={
+  github:'<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>',
+  live:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14 21 3"/></svg>',
+  demo:'<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12-7.5a1 1 0 0 0 0-1.72l-12-7.5A1 1 0 0 0 7 4.5z"/></svg>',
+  details:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>'
+};
+function projectLinkHtml(kind,url,label){
+  var external=kind!=='details';
+  return '<a href="'+escapeHtml(url)+'" class="plink'+(external?'':' plink-primary')+'"'+(external?' target="_blank" rel="noopener"':'')+' onclick="event.stopPropagation()">'+PROJECT_LINK_ICONS[kind]+escapeHtml(label)+'</a>';
 }
 
 function renderProjectCard(project, options) {
@@ -440,32 +455,11 @@ function renderProjectCard(project, options) {
   var catMap={'Machine Learning':'ml','AI / LLM':'ai','Computer Vision':'cv','Data Science':'ds','Financial Engineering':'fe','Programming':'prog','Full Stack':'prog','Web Application':'prog','Website':'prog'};
   var type=project.type||'Machine Learning';
   var cat=catMap[type]||'ml';
-  var image=localStorage.getItem('pf_proj_'+project.id+'_img_1')||localStorage.getItem('pf_img_pc-img-'+project.id)||project.image_1_url||'';
+  var image=project.image_1_url||localStorage.getItem('pf_proj_'+project.id+'_img_1')||'';
   var url=project.url||project.live_url||'#';
   var desc=project.desc||project.description||'';
   var tags=project.tags||[];
   var metrics=project.metrics||[];
-  var existingImg=document.getElementById('pc-img-'+project.id);
-  var existingCard=document.getElementById('project-card-'+project.id)||(existingImg&&existingImg.closest('.pc'));
-  if(existingCard){
-    existingCard.id='project-card-'+project.id;
-    existingCard.dataset.cat=cat;
-    existingCard.onclick=function(){location.href='Project Detail.html?id='+project.id;};
-    existingCard.innerHTML='<div class="pc-img" id="pc-img-'+project.id+'" style="'+(image?'background-image:url('+image+');background-size:cover;background-position:center':'')+'">'
-      +(image?'':'<span class="pc-img-lbl">'+escapeHtml(project.title)+'</span>')+'</div>'
-      +'<div class="pc-body">'
-      +'<p class="pnum">'+escapeHtml(options&&options.label?options.label:String(project.id).padStart(2,'0'))+'</p>'
-      +'<div class="pc-tags">'+tags.slice(0,5).map(function(t){return'<span class="ptag">'+escapeHtml(t)+'</span>';}).join('')+'</div>'
-      +'<h3 class="pc-title">'+escapeHtml(project.title)+'</h3>'
-      +'<p class="pc-desc">'+escapeHtml(desc)+'</p>'
-      +'<div class="pc-metrics">'+metrics.map(function(m){return'<span class="pmet">'+escapeHtml(m)+'</span>';}).join('')+'</div>'
-      +'<div class="pc-links">'
-      +(hasUrl(project.github_url)?'<a href="'+project.github_url+'" class="plink" target="_blank" rel="noopener" onclick="event.stopPropagation()">GitHub ↗</a>':'')
-      +(hasUrl(url)?'<a href="'+url+'" class="plink" target="_blank" rel="noopener" onclick="event.stopPropagation()">Live ↗</a>':'')
-      +(hasUrl(project.demo_url)?'<a href="'+project.demo_url+'" class="plink" target="_blank" rel="noopener" onclick="event.stopPropagation()">Demo ↗</a>':'')
-      +'</div></div>';
-    return;
-  }
   var card=document.createElement('div');
   card.className='pc reveal';
   card.id='project-card-'+project.id;
@@ -480,9 +474,10 @@ function renderProjectCard(project, options) {
     +'<p class="pc-desc">'+escapeHtml(desc)+'</p>'
     +'<div class="pc-metrics">'+metrics.map(function(m){return'<span class="pmet">'+escapeHtml(m)+'</span>';}).join('')+'</div>'
     +'<div class="pc-links">'
-    +(hasUrl(project.github_url)?'<a href="'+project.github_url+'" class="plink" target="_blank" rel="noopener" onclick="event.stopPropagation()">GitHub ↗</a>':'')
-    +(hasUrl(url)?'<a href="'+url+'" class="plink" target="_blank" rel="noopener" onclick="event.stopPropagation()">Live ↗</a>':'')
-    +(hasUrl(project.demo_url)?'<a href="'+project.demo_url+'" class="plink" target="_blank" rel="noopener" onclick="event.stopPropagation()">Demo ↗</a>':'')
+    +projectLinkHtml('details','Project Detail.html?id='+project.id,'View Details')
+    +(hasUrl(project.github_url)?projectLinkHtml('github',project.github_url,'GitHub'):'')
+    +(hasUrl(url)?projectLinkHtml('live',url,'Live Site'):'')
+    +(hasUrl(project.demo_url)?projectLinkHtml('demo',project.demo_url,'Demo'):'')
     +'</div></div>';
   grid.appendChild(card);
 }
@@ -621,56 +616,52 @@ function renderCertificationGrid(certs) {
   hydrateCertificateEmbeds();
 }
 
-function renderPublicationList(publications) {
-  var list=document.querySelector('.pub-list');
-  if(!list || !publications || !publications.length) return;
-  function typeClass(type){
-    var value=String(type||'note').toLowerCase();
-    if(value.indexOf('journal')>-1) return 'j';
-    if(value.indexOf('conference')>-1) return 'c';
-    if(value.indexOf('thesis')>-1) return 't';
-    return 'n';
-  }
-  function statusClass(status){
-    var value=String(status||'').toLowerCase();
-    if(value.indexOf('review')>-1) return 'review';
-    if(value.indexOf('publish')>-1) return 'pub';
-    return 'upcoming';
-  }
-  list.innerHTML=publications.map(function(pub){
-    var authors=Array.isArray(pub.authors)?pub.authors.join(', '):'Steven Daniel';
-    var venue=[pub.venue,pub.year].filter(Boolean).join(', ');
-    return '<div class="pub" onclick="location.href=\'Blog Detail.html?type=pub&id='+Number(pub.id)+'\'">'
-      +'<div class="pub-type pt-'+typeClass(pub.pub_type)+'">'+escapeHtml(pub.pub_type||'Note')+'</div>'
-      +'<div class="pub-content">'
-      +'<p class="pub-title">'+escapeHtml(pub.title)+'</p>'
-      +'<p class="pub-authors">'+escapeHtml(authors)+'</p>'
-      +'<p class="pub-venue">'+escapeHtml(venue||'Research publication')+'</p>'
-      +'<div class="pub-status ps-'+statusClass(pub.status)+'">'+escapeHtml(pub.status||'Under Review')+'</div>'
-      +'</div></div>';
-  }).join('');
+// Descriptions: one point per line; lines starting with "-", "*" or "•" become a bullet list
+function renderTimelineDescription(text) {
+  var lines=String(text||'').replace(/\r\n/g,'\n').split('\n').map(function(l){return l.trim();}).filter(Boolean);
+  if(!lines.length)return '';
+  var inline=function(value){return escapeHtml(value).replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');};
+  var bullets=lines.filter(function(l){return /^[-*•]\s+/.test(l);});
+  if(!bullets.length)return '<p class="tl-desc">'+inline(lines.join(' '))+'</p>';
+  var intro=lines.filter(function(l){return !/^[-*•]\s+/.test(l);});
+  return (intro.length?'<p class="tl-desc">'+inline(intro.join(' '))+'</p>':'')
+    +'<ul class="tl-desc">'+bullets.map(function(l){return '<li>'+inline(l.replace(/^[-*•]\s+/,''))+'</li>';}).join('')+'</ul>';
 }
-
+function experienceGroup(item) {
+  return /fellow/i.test(String(item.category||''))?'fellowship':'work';
+}
+function timelineItemHtml(item, mode) {
+  var title=mode==='education'?item.degree:item.role;
+  var org=mode==='education'?item.institution:item.organisation;
+  var thesis=mode==='education'&&item.thesis?'<p class="tl-thesis">'+escapeHtml(item.thesis)+'</p>':'';
+  var award=item.award?'<span class="tl-award">↑ '+escapeHtml(item.award)+'</span>':'';
+  return '<div class="tl-it reveal">'
+    +'<div class="tl-dot"></div>'
+    +'<p class="tl-date">'+escapeHtml(item.date_period||'')+'</p>'
+    +'<h3 class="tl-role">'+escapeHtml(title||'Untitled')+'</h3>'
+    +(org?'<p class="tl-org">'+escapeHtml(org)+'</p>':'')
+    +renderTimelineDescription(item.description)
+    +thesis
+    +'<div class="tl-metas">'+(item.tags||[]).map(function(tag){return'<span class="tmeta">'+escapeHtml(tag)+'</span>';}).join('')+'</div>'
+    +award
+    +'</div>';
+}
 function renderTimeline(sectionId, items, mode) {
   var section=document.getElementById(sectionId);
-  var timeline=section&&section.querySelector('.tl');
-  if(!timeline || !items || !items.length) return;
-  timeline.innerHTML=items.map(function(item){
-    var title=mode==='education'?item.degree:item.role;
-    var org=mode==='education'?item.institution:item.organisation;
-    var thesis=mode==='education'&&item.thesis?'<p class="tl-thesis">'+escapeHtml(item.thesis)+'</p>':'';
-    var award=item.award?'<span class="tl-award">↑ '+escapeHtml(item.award)+'</span>':'';
-    return '<div class="tl-it reveal">'
-      +'<div class="tl-dot"></div>'
-      +'<p class="tl-date">'+escapeHtml(item.date_period||'')+'</p>'
-      +'<h3 class="tl-role">'+escapeHtml(title||'Untitled')+'</h3>'
-      +'<p class="tl-org">'+escapeHtml(org||'')+'</p>'
-      +'<p class="tl-desc">'+escapeHtml(item.description||'')+'</p>'
-      +thesis
-      +'<div class="tl-metas">'+(item.tags||[]).map(function(tag){return'<span class="tmeta">'+escapeHtml(tag)+'</span>';}).join('')+'</div>'
-      +award
-      +'</div>';
-  }).join('');
+  if(!section || !items || !items.length) return;
+  if(mode==='experience'){
+    ['fellowship','work'].forEach(function(group){
+      var wrap=section.querySelector('[data-exp-group="'+group+'"]');
+      if(!wrap)return;
+      var rows=items.filter(function(item){return experienceGroup(item)===group;});
+      wrap.querySelector('.tl').innerHTML=rows.map(function(item){return timelineItemHtml(item,mode);}).join('');
+      wrap.hidden=!rows.length;
+    });
+  }else{
+    var timeline=section.querySelector('.tl');
+    if(timeline)timeline.innerHTML=items.map(function(item){return timelineItemHtml(item,mode);}).join('');
+  }
+  observeReveals(section);
 }
 
 function renderAchievementGrid(items) {
@@ -678,6 +669,7 @@ function renderAchievementGrid(items) {
   if(!grid || !items || !items.length) return;
   var icons={
     award:'<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+    medal:'<circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>',
     globe:'<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
     brain:'<path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/>'
   };
@@ -705,77 +697,79 @@ function applySiteMedia(media) {
   });
 }
 
+// BLOG VISIBILITY — the section and its menu links only appear once a post is published
+function setBlogVisible(visible) {
+  var section=document.getElementById('blog');
+  if(section)section.hidden=!visible;
+  document.querySelectorAll('[data-blog-link]').forEach(function(el){el.hidden=!visible;});
+  if(visible&&section)observeReveals(section);
+}
+
 // ADMIN-MANAGED PUBLIC CONTENT
+// Each section keeps its placeholder content until Supabase returns at least one row for it.
 (function(){
-  var statsData={projects:[],publications:[],certifications:[],experience:[]};
+  var statsData={projects:placeholderProjects(),certifications:placeholderCertifications(),experience:placeholderExperience()};
   function setStats(key,value){
     statsData[key]=Array.isArray(value)?value:[];
     updatePortfolioStats(statsData);
   }
-  var localProjects=[];
-  for(var slot=1;slot<=5;slot++){
-    try{
-      var saved=JSON.parse(localStorage.getItem('pf_proj_data_'+slot)||'null');
-      if(saved){localProjects.push(saved);renderProjectCard(saved,{label:String(slot).padStart(2,'0')});}
-    }catch(e){}
-  }
-  var custom=[];try{custom=JSON.parse(localStorage.getItem('pf_projects_custom')||'[]');}catch(e){}
-  custom.forEach(function(project,index){ localProjects.push(project);renderProjectCard(project,{label:String(index+6).padStart(2,'0')}); });
-  if(localProjects.length)setStats('projects',localProjects);
-  else {
-    updateStatDirect('total-projects',document.querySelectorAll('.prj-g .pc').length);
-    updateStatDirect('research-projects',document.querySelectorAll('.research-g .rc,.pub-list .pub').length);
-    updateStatDirect('certifications',document.querySelectorAll('.certs-g .cert').length);
-  }
+  updatePortfolioStats(statsData);
 
   var client=supabaseClient();
   if(!client)return;
-  client.from('projects').select('*').eq('status','published').order('created_at',{ascending:false}).then(function(result){
-    if(result.error||!result.data)return;
-    if(result.data.length)clearDynamicSection('.prj-g');
-    result.data.forEach(function(row){
+  function load(query, onRows){
+    query.then(function(result){
+      if(result.error){console.warn('Supabase read failed',result.error);return;}
+      onRows(result.data||[]);
+    }, function(error){console.warn('Supabase read failed',error);});
+  }
+  load(client.from('projects').select('*').eq('status','published').order('created_at',{ascending:false}), function(rows){
+    if(!rows.length)return;
+    var grid=document.querySelector('.prj-g');
+    grid.innerHTML='';
+    rows.forEach(function(row,index){
       renderProjectCard({
         id:row.id,title:row.title,type:row.type,desc:row.description,tags:row.tags||[],metrics:row.metrics||[],
         url:row.live_url,github_url:row.github_url,demo_url:row.demo_url,image_1_url:row.image_1_url
-      });
+      },{label:String(index+1).padStart(2,'0')});
     });
-    setStats('projects',result.data);
+    // Same layout as the placeholders: the newest project is featured across two columns
+    if(rows.length>=3){
+      var first=grid.querySelector('.pc');
+      var num=first&&first.querySelector('.pnum');
+      if(first)first.classList.add('feat');
+      if(num)num.textContent='01 — Featured';
+    }
+    applyProjectFilter();
+    observeReveals(grid);
+    setStats('projects',rows);
   });
-  client.from('blog_posts').select('*').eq('status','published').eq('type','blog').order('created_at',{ascending:false}).then(function(result){
-    if(result.error||!result.data)return;
-    if(result.data.length)clearDynamicSection('.blog-g');
-    result.data.forEach(renderBlogCard);
+  load(client.from('blog_posts').select('*').eq('status','published').eq('type','blog').order('created_at',{ascending:false}).limit(3), function(rows){
+    var grid=document.querySelector('.blog-g');
+    if(!rows.length||!grid){setBlogVisible(false);return;}
+    grid.innerHTML='';
+    rows.forEach(renderBlogCard);
+    setBlogVisible(true);
   });
-  client.from('certifications').select('*').order('year_earned',{ascending:false}).order('month_earned',{ascending:false}).order('created_at',{ascending:false}).then(function(result){
-    if(result.error||!result.data)return;
-    if(result.data.length)clearDynamicSection('.certs-g');
-    renderCertificationGrid(result.data);
-    setStats('certifications',result.data);
+  load(client.from('certifications').select('*').order('year_earned',{ascending:false}).order('month_earned',{ascending:false}).order('created_at',{ascending:false}), function(rows){
+    if(!rows.length)return;
+    renderCertificationGrid(rows);
+    var active=document.querySelector('.cf-btn.active');
+    if(active)active.click();
+    setStats('certifications',rows);
   });
-  client.from('publications').select('*').order('created_at',{ascending:false}).then(function(result){
-    if(result.error||!result.data)return;
-    if(result.data.length)clearDynamicSection('.pub-list');
-    renderPublicationList(result.data);
-    setStats('publications',result.data);
+  load(client.from('experience').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}), function(rows){
+    if(!rows.length)return;
+    renderTimeline('experience',rows,'experience');
+    setStats('experience',rows);
   });
-  client.from('experience').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}).then(function(result){
-    if(result.error||!result.data)return;
-    if(result.data.length)clearDynamicSection('#experience .timeline');
-    renderTimeline('experience',result.data,'experience');
-    setStats('experience',result.data);
+  load(client.from('education').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}), function(rows){
+    if(!rows.length)return;
+    renderTimeline('education',rows,'education');
   });
-  client.from('education').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}).then(function(result){
-    if(result.error||!result.data)return;
-    if(result.data.length)clearDynamicSection('#education .timeline');
-    renderTimeline('education',result.data,'education');
+  load(client.from('achievements').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}), function(rows){
+    if(!rows.length)return;
+    renderAchievementGrid(rows);
   });
-  client.from('achievements').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}).then(function(result){
-    if(result.error||!result.data)return;
-    if(result.data.length)clearDynamicSection('.ach-g');
-    renderAchievementGrid(result.data);
-  });
-  client.from('site_media').select('*').then(function(result){
-    if(result.error||!result.data)return;
-    applySiteMedia(result.data);
-  });
+  load(client.from('site_media').select('*'), applySiteMedia);
 })();

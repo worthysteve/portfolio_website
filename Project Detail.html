@@ -196,6 +196,7 @@ h1,h2,h3{font-family:var(--fh);font-weight:600;line-height:1.15;color:var(--t1)}
 
 <script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="site-common.js"></script>
 <script>
 // ── THEME ──────────────────────────────────────────────
 (function(){
@@ -507,7 +508,8 @@ function goNext(){
 
 const id=parseInt(new URLSearchParams(location.search).get('id'))||1;
 const fallbackProject=ALL_PROJECTS.find(p=>p.id===id);
-render(fallbackProject||{id:id,num:String(id).padStart(2,'0'),title:'Project unavailable',type:'Project',date:'',org:'',desc:'This project could not be found locally. If it was added in Supabase, confirm your public project is published and your Supabase settings are saved in the admin dashboard.',features:[],metrics:[],tags:[],gradients:DEFAULT_GRADIENTS,url:'#'});
+const UNAVAILABLE={id:id,num:String(id).padStart(2,'0'),title:'Project unavailable',type:'Project',date:'',org:'',desc:'This project may have been unpublished or removed.',overview:'Head back to the portfolio to browse other projects.',challenge:' ',solution:' ',features:[],metrics:[],tags:[],gradients:DEFAULT_GRADIENTS,url:'#'};
+render(fallbackProject||(getSupabaseClient()?Object.assign({},UNAVAILABLE,{title:'Loading project…',desc:'',overview:' '}):UNAVAILABLE));
 
 (async function loadSupabaseProject(){
   var client=getSupabaseClient();
@@ -517,7 +519,7 @@ render(fallbackProject||{id:id,num:String(id).padStart(2,'0'),title:'Project una
     ALL_PROJECTS=listResult.data.map(mapSupabaseProject).filter(Boolean);
   }
   var result=await client.from('projects').select('*').eq('id',id).maybeSingle();
-  if(result.error||!result.data)return;
+  if(result.error||!result.data){if(!fallbackProject)render(UNAVAILABLE);return;}
   var mapped=mapSupabaseProject(result.data);
   var existingIndex=ALL_PROJECTS.findIndex(function(p){return p.id===mapped.id;});
   if(existingIndex>=0)ALL_PROJECTS[existingIndex]=Object.assign({},ALL_PROJECTS[existingIndex],mapped);

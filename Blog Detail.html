@@ -107,6 +107,10 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
 .cfield input:focus,.cfield textarea:focus{border-color:var(--a)}
 [data-theme="light"] .cfield input,[data-theme="light"] .cfield textarea{background:rgba(241,245,249,.8)}
 .cfield textarea{resize:vertical;min-height:110px}
+.comment-status{font-size:13px;margin-top:12px;min-height:1.2em}
+.comment-status.ok{color:#10B981}
+.comment-status.err{color:#EF4444}
+.btn-submit:disabled,.btn-like:disabled{opacity:.7;cursor:progress}
 .btn-submit{padding:11px 24px;border-radius:var(--r);background:var(--a);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:filter .2s,transform .15s}
 .btn-submit:hover{filter:brightness(1.1);transform:translateY(-1px)}
 
@@ -179,7 +183,7 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
     <div class="nav-bread">
       <a href="index.html">Home</a>
       <span class="sep">/</span>
-      <a href="index.html#blog">Blog</a>
+      <a href="Blog.html">Blog</a>
       <span class="sep">/</span>
       <span style="color:var(--t1);font-weight:500" id="bread-title">Article</span>
     </div>
@@ -271,7 +275,8 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
         <div class="cfield"><label>Name *</label><input type="text" id="cf-name" placeholder="Enter your name"></div>
         <div class="cfield"><label>Email (optional)</label><input type="email" id="cf-email" placeholder="Enter your email"></div>
         <div class="cfield"><label>Comment *</label><textarea id="cf-msg" placeholder="Enter your comment..."></textarea></div>
-        <button class="btn-submit" onclick="submitComment()">Submit Comment</button>
+        <button class="btn-submit" id="comment-submit" onclick="submitComment()">Submit Comment</button>
+        <p class="comment-status" id="comment-status" role="status" aria-live="polite"></p>
       </div>
 
       <!-- PREV / NEXT -->
@@ -306,6 +311,7 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
 
 <script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="site-common.js"></script>
 <script>
 // ── THEME ────────────────────────────────────────────────────────────
 (function(){
@@ -321,79 +327,9 @@ h1,h2,h3,h4{font-family:var(--fh);font-weight:600;line-height:1.2;color:var(--t1
 window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('scrolled',scrollY>40));
 
 // ── DATA ─────────────────────────────────────────────────────────────
-const BLOGS=[
-  {id:1,type:'blog',title:'Building RAG Systems from Scratch: A Production Guide',category:'AI',tags:['AI','LLMs','Python'],date:'Jun 2025',readTime:'8 min read',
-   gradient:'linear-gradient(135deg,#061428 0%,rgba(37,99,235,.35) 60%,rgba(6,182,212,.2) 100%)',
-   content:`<p>Retrieval-Augmented Generation (RAG) has become the go-to architecture for enterprise LLM applications. Unlike naive prompting, RAG grounds model outputs in your actual data, dramatically reducing hallucinations and keeping answers current without expensive retraining.</p>
-<h2>Why RAG?</h2>
-<p>Enterprise knowledge is dynamic — it changes daily. Fine-tuning a model on this knowledge is expensive, slow, and quickly stale. RAG solves this by retrieving relevant documents at inference time and conditioning the model's response on them. The result: accurate, cited, up-to-date answers at a fraction of the cost.</p>
-<h2>Architecture Overview</h2>
-<p>A production RAG system has three core components: an <strong>ingestion pipeline</strong> (chunking + embedding documents into a vector store), a <strong>retrieval engine</strong> (finding relevant chunks at query time), and a <strong>generation layer</strong> (the LLM that synthesises retrieved context into an answer).</p>
-<h3>1. Document Ingestion</h3>
-<p>Chunking strategy dramatically impacts retrieval quality. Naive fixed-size chunking loses semantic context at boundaries. Semantic chunking — splitting on sentence boundaries and topic shifts — consistently outperforms in my benchmarks. I use LangChain's <code>SemanticChunker</code> with <code>percentile</code> breakpoint threshold.</p>
-<h3>2. Hybrid Retrieval</h3>
-<p>Dense-only retrieval (embedding similarity) struggles with exact keyword matches and rare terms. Hybrid retrieval combines dense embeddings (OpenAI <code>text-embedding-3-small</code>) with sparse BM25 via the SPLADE model. A weighted Reciprocal Rank Fusion (RRF) merge consistently outperforms either approach alone.</p>
-<h3>3. Re-ranking</h3>
-<p>After retrieving the top-K candidates, a cross-encoder re-ranker (Cohere's <code>rerank-english-v2.0</code>) scores each candidate against the query holistically. This two-stage approach keeps latency low while maximising precision on the final context window.</p>
-<h2>Key Lessons</h2>
-<ul>
-<li><strong>Chunk size matters more than you think.</strong> 512 tokens with 50-token overlap is a strong default for technical documents.</li>
-<li><strong>Eval early and often.</strong> Set up RAGAS metrics (faithfulness, answer relevancy, context precision) from day one.</li>
-<li><strong>Citations build trust.</strong> Always return source document IDs and page references alongside the answer.</li>
-<li><strong>Cache aggressively.</strong> Semantic caching of frequent queries reduces costs by 40–60% in production.</li>
-</ul>
-<p>RAG is not a silver bullet — it requires careful tuning, good evaluation, and ongoing monitoring. But for enterprise knowledge applications, it remains the most practical path to reliable, grounded LLM behaviour.</p>`},
-  {id:2,type:'blog',title:'Time Series Forecasting with LSTMs for Financial Data',category:'Financial Engineering',tags:['Finance','LSTM','Python'],date:'May 2025',readTime:'6 min read',
-   gradient:'linear-gradient(135deg,#061428 0%,rgba(6,182,212,.3) 60%,rgba(37,99,235,.15) 100%)',
-   content:`<p>Financial time series present unique challenges: non-stationarity, fat tails, and regime changes that confound traditional statistical models. LSTMs, with their ability to capture long-range dependencies through gated memory cells, offer a powerful alternative — but only if you respect the specific quirks of financial data.</p>
-<h2>The Problem with Standard Approaches</h2>
-<p>ARIMA and its variants assume stationarity and linear relationships. Real financial data is neither. Volatility clusters, mean-reversion in some regimes but trending in others, and macro events create structural breaks that a fixed-parameter model cannot handle. LSTMs, being non-parametric sequence models, can theoretically adapt — but naïve application leads to overfit models that look great in-sample and fail completely out-of-sample.</p>
-<h2>Data Preprocessing is Everything</h2>
-<p>Before even thinking about the architecture, the preprocessing pipeline determines everything. I use <strong>log returns</strong> rather than prices (which are non-stationary), <strong>rolling z-score normalisation</strong> (window size 252 trading days) to handle regime changes, and <strong>feature engineering</strong> that includes: RSI(14), MACD signal line, rolling volatility, order book imbalance, and macro indicators like VIX.</p>
-<h3>Avoiding Lookahead Bias</h3>
-<p>The most common mistake in financial ML is lookahead bias — accidentally including future information in your features. All preprocessing transformations must use only data available at prediction time. I use a strict <code>TimeSeriesSplit</code> with a purge gap of 5 days between train and validation folds.</p>
-<h2>Architecture and Training</h2>
-<p>A two-layer LSTM (128 → 64 units) with dropout (p=0.3) and a linear output head performs well across multiple asset classes in my experiments. Key training details: sequence length of 60 bars, batch size of 32, AdamW optimiser with weight decay 1e-4, and cosine annealing with warm restarts.</p>
-<h2>Backtesting Properly</h2>
-<p>Walk-forward optimisation is non-negotiable. I retrain the model monthly on an expanding window, evaluate on the next month out-of-sample, and aggregate performance across all folds. Sharpe ratio > 1.2 with max drawdown < 15% is my acceptance threshold before any live consideration.</p>
-<p>LSTMs are not the final word in financial forecasting — Transformers and state-space models show promise — but they remain practical, well-understood, and effective when applied rigorously.</p>`},
-  {id:3,type:'blog',title:'Computer Vision for Social Good: Detecting Floods via Satellite Imagery',category:'Data Science',tags:['Computer Vision','Social Good','Python'],date:'Apr 2025',readTime:'7 min read',
-   gradient:'linear-gradient(135deg,#061428 0%,rgba(16,185,129,.28) 60%,rgba(37,99,235,.15) 100%)',
-   content:`<p>When I started working on flood detection for West African communities, I quickly realised that the challenge wasn't purely technical — it was about building something that could actually be deployed and trusted by communities with limited connectivity, digital literacy barriers, and deep scepticism of technology that has repeatedly overpromised.</p>
-<h2>The Problem</h2>
-<p>West Africa experiences severe seasonal flooding that displaces millions annually. Existing early warning systems are either too coarse (global satellite products at 500m resolution are useless for village-level decisions) or require connectivity and expertise that vulnerable communities don't have. We needed a local, offline-capable, community-trusted solution.</p>
-<h2>Data Sources</h2>
-<p>I combined three data sources: <strong>Sentinel-1 SAR imagery</strong> (cloud-penetrating, critical during rainy seasons when optical satellites are blind), <strong>Sentinel-2 multispectral imagery</strong> (12-band optical, useful in clear conditions), and <strong>historical flood polygon datasets</strong> from the Copernicus Emergency Management Service as ground truth labels.</p>
-<h3>Preprocessing SAR Data</h3>
-<p>SAR data requires careful preprocessing: orbit file application, thermal noise removal, radiometric calibration, terrain correction, and speckle filtering (Lee filter, 5×5 window). I use the ESA SNAP Toolbox via <code>snappy</code> Python bindings for this pipeline.</p>
-<h2>The Model</h2>
-<p>A modified U-Net with a ResNet34 encoder (pretrained on ImageNet) achieves 89% pixel-level IoU on the test set. Key modifications: attention gates to suppress false positives from urban water bodies, and a temporal consistency loss term that penalises predictions that contradict the previous timestep by more than a physically plausible amount.</p>
-<h2>Deployment Constraints</h2>
-<p>The hardest part was deployment. I quantised the model to INT8 using TensorFlow Lite, reducing model size from 84MB to 21MB. This runs inference in under 3 seconds on a Raspberry Pi 4 with 4GB RAM — enabling a solar-powered offline edge device that community leaders can operate without internet access.</p>
-<p>Technology for social good is not just about building the best model. It's about understanding the human system the technology sits within, and designing for that system first.</p>`}
-];
-
-const PUBS=[
-  {id:1,type:'pub',pubType:'journal',title:'AI-Driven Flood Risk Assessment for Sub-Saharan African Communities',tags:['AI','Climate','GIS'],date:'2025',readTime:'15 min read',
-   gradient:'linear-gradient(135deg,#061428 0%,rgba(37,99,235,.3) 60%,rgba(16,185,129,.15) 100%)',
-   content:`<p>This paper presents a novel framework for flood risk assessment in Sub-Saharan Africa using ensemble machine learning models trained on multi-source remote sensing data and historical flood records. We demonstrate 89% prediction accuracy with 48-hour advance warning capability across 12 pilot communities in Sierra Leone.</p>
-<h2>Abstract</h2>
-<p>Flooding represents one of the most destructive natural hazards facing Sub-Saharan Africa, displacing millions annually. Existing global early warning systems lack the spatial resolution and local calibration required for community-level decision-making. This work addresses that gap through a locally-calibrated, multi-model ensemble approach combining LSTM temporal networks with geospatial Random Forest classifiers.</p>
-<h2>Methodology</h2>
-<p>We collected Sentinel-1 SAR imagery, weather station data from 23 monitoring stations, and historical flood polygon data spanning 2010–2024. The ensemble combines LSTM networks (sequence length 72 hours) for temporal pattern detection with a Random Forest spatial risk model trained on DEM-derived features, soil moisture indices, and land cover classification.</p>
-<h2>Results</h2>
-<p>The proposed system achieves 89.2% prediction accuracy (F1=0.87) with a 48-hour prediction horizon. False positive rate is 8.3%, acceptable for humanitarian early warning where the cost of missed warnings vastly exceeds the cost of unnecessary evacuations. Community trials in 12 villages showed 94% message delivery via SMS integration.</p>
-<h2>Conclusion</h2>
-<p>This work demonstrates that locally-calibrated ML ensembles can achieve operational flood prediction accuracy in data-sparse African contexts. Future work will extend to 72-hour prediction horizons and integrate real-time social media signals as auxiliary flood indicators.</p>`},
-  {id:2,type:'pub',pubType:'conference',title:'RAG Architectures for Domain-Specific Knowledge Management in Low-Resource Settings',tags:['LLMs','RAG','NLP'],date:'ICML 2025',readTime:'12 min read',
-   gradient:'linear-gradient(135deg,#061428 0%,rgba(6,182,212,.3) 60%,rgba(37,99,235,.15) 100%)',
-   content:`<p>This paper investigates the performance of retrieval-augmented generation (RAG) architectures under low-resource constraints typical of developing-world deployments, where compute budgets, connectivity, and data availability are significantly restricted compared to standard benchmarks.</p>
-<h2>Abstract</h2>
-<p>RAG has emerged as the dominant paradigm for grounding LLM outputs in organisational knowledge. However, most published work assumes high-resource settings: powerful embedding models, large vector stores, and reliable high-bandwidth connectivity. We study RAG performance degradation under realistic low-resource constraints and propose architectural adaptations that recover 85% of high-resource performance at 20% of the compute cost.</p>
-<h2>Key Contributions</h2>
-<p>We introduce Sparse-Dense Hybrid RAG (SDH-RAG), combining TF-IDF sparse retrieval with a compact 384-dimensional dense embedding model (BAAI/bge-small-en-v1.5, 134M parameters). This combination achieves comparable recall to full-scale dense retrieval while reducing memory requirements by 74% and retrieval latency by 68%.</p>
-<p>We also propose a caching strategy — Semantic Query Caching — that stores LLM responses to semantically similar queries, reducing repeated LLM calls by 43% in enterprise settings with predictable query distributions.</p>`}
-];
+// Posts come from Supabase only (no placeholder articles).
+const BLOGS=[];
+const PUBS=[];
 
 const ALL=[...BLOGS,...PUBS];
 let BLOG_NAV=BLOGS.slice(),PUB_NAV=PUBS.slice();
@@ -538,9 +474,18 @@ function render(item){
   loadEngagement();
 }
 
+function renderNotFound(message){
+  render({
+    id:id,type:'blog',placeholder:true,title:'Post not found',category:'Blog',tags:[],date:'',readTime:'',
+    gradient:'linear-gradient(135deg,#061428 0%,rgba(37,99,235,.35) 60%,rgba(6,182,212,.2) 100%)',
+    content:'<p>'+escapeHtml(message||'This post may have been unpublished or removed.')+'</p><p><a href="Blog.html">Browse all posts →</a></p>'
+  });
+  document.querySelectorAll('.interact-row,.comments-section,#comment-form,.meta-bar,.author-block').forEach(function(el){el.style.display='none';});
+}
+
 function renderSidebar(active){
   // Latest posts
-  const latest=(active&&active.type==='blog'&&!BLOG_NAV.some(p=>Number(p.id)===Number(active.id)))?[active,...BLOG_NAV].slice(0,3):BLOG_NAV.slice(0,3);
+  const latest=(active&&active.type==='blog'&&!active.placeholder&&!BLOG_NAV.some(p=>Number(p.id)===Number(active.id)))?[active,...BLOG_NAV].slice(0,3):BLOG_NAV.slice(0,3);
   document.getElementById('sb-latest').innerHTML=latest.map(p=>`
     <div class="sb-post" onclick="location.href='Blog Detail.html?id=${p.id}'">
       <div class="sb-post-img" style="background:${p.imageUrl?'url('+p.imageUrl+') center/cover':p.gradient}"></div>
@@ -550,21 +495,32 @@ function renderSidebar(active){
   // Categories
   const cats=[...new Set([...BLOG_NAV,...PUB_NAV].map(p=>p.category||p.pubType))].filter(Boolean);
   document.getElementById('sb-cats').innerHTML=cats.map(c=>`
-    <div class="sb-cat"><span class="sb-cat-name">${c}</span><span class="sb-cat-count">${[...BLOG_NAV,...PUB_NAV].filter(p=>(p.category||p.pubType)===c).length}</span></div>`).join('');
+    <div class="sb-cat" role="link" tabindex="0" onclick="location.href='Blog.html?category='+encodeURIComponent(this.dataset.value)" data-value="${escapeHtml(c)}"><span class="sb-cat-name">${escapeHtml(c)}</span><span class="sb-cat-count">${[...BLOG_NAV,...PUB_NAV].filter(p=>(p.category||p.pubType)===c).length}</span></div>`).join('');
 
   // Tags
   const tags=[...new Set([...BLOG_NAV,...PUB_NAV].flatMap(p=>p.tags||[]))];
-  document.getElementById('sb-tags').innerHTML=tags.map(t=>`<span class="sb-tag">${t}</span>`).join('');
+  document.getElementById('sb-tags').innerHTML=tags.map(t=>`<a class="sb-tag" href="Blog.html?tag=${encodeURIComponent(t)}">${escapeHtml(t)}</a>`).join('');
 }
 
 // ── LIKE ────────────────────────────────────────────────────────────
+let likeBusy=false;
 async function toggleLike(){
+  if(likeBusy)return;
   const client=supabaseClient();
   if(client&&curItem&&!isPub){
-    const vid=visitorId();
-    if(liked) await client.from('blog_likes').delete().eq('post_id',curItem.id).eq('visitor_id',vid);
-    else await client.from('blog_likes').insert({post_id:curItem.id,visitor_id:vid});
-    await loadLikes();
+    const btn=document.getElementById('like-btn');
+    likeBusy=true;btn.disabled=true;
+    try{
+      const vid=visitorId();
+      const result=liked
+        ? await client.from('blog_likes').delete().eq('post_id',curItem.id).eq('visitor_id',vid)
+        : await client.from('blog_likes').insert({post_id:curItem.id,visitor_id:vid});
+      if(result.error)throw result.error;
+      await loadLikes();
+    }catch(error){
+      document.getElementById('like-text').textContent='Try again';
+      setTimeout(updateLikeUi,2000);
+    }finally{likeBusy=false;btn.disabled=false;}
     return;
   }
   liked=!liked;
@@ -590,17 +546,33 @@ async function loadLikes(){
 }
 
 // ── COMMENTS ────────────────────────────────────────────────────────
+// One click = one comment: the button locks while posting and the result is shown under it.
+let commentSubmitting=false;
+function setCommentStatus(text,kind){
+  const el=document.getElementById('comment-status');
+  el.textContent=text||'';
+  el.className='comment-status'+(kind?' '+kind:'');
+}
 async function submitComment(){
+  if(commentSubmitting)return;
   const name=document.getElementById('cf-name').value.trim();
   const email=document.getElementById('cf-email').value.trim();
   const msg=document.getElementById('cf-msg').value.trim();
-  if(!name||!msg){alert('Please fill in your name and comment.');return;}
+  if(!name||!msg){setCommentStatus('Please add your name and a comment.','err');return;}
   const client=supabaseClient();
   if(client&&curItem&&!isPub){
-    const {error}=await client.from('blog_comments').insert({
-      post_id:curItem.id,parent_id:replyParentId,name:name,email:email,comment:msg,is_admin:false,status:'published'
-    });
-    if(error){alert('Comment could not be saved.');return;}
+    const btn=document.getElementById('comment-submit');
+    commentSubmitting=true;btn.disabled=true;btn.textContent='Posting…';setCommentStatus('');
+    try{
+      const {error}=await client.from('blog_comments').insert({
+        post_id:curItem.id,parent_id:replyParentId,name:name,email:email,comment:msg,is_admin:false,status:'published'
+      });
+      if(error)throw error;
+    }catch(error){
+      setCommentStatus('✕ Your comment was not posted — please try again.','err');
+      return;
+    }finally{commentSubmitting=false;btn.disabled=false;btn.textContent='Submit Comment';}
+    setCommentStatus('✓ Comment posted — thank you!','ok');
     await loadComments();
   }else{
     const now=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
@@ -670,10 +642,9 @@ function shareByEmail(){location.href='mailto:?subject='+encodeURIComponent(curI
 
 // ── SEARCH ──────────────────────────────────────────────────────────
 function doSearch(){
-  const q=document.getElementById('sb-search-inp').value.trim().toLowerCase();
-  if(!q) return;
-  const found=BLOG_NAV.find(p=>p.title.toLowerCase().includes(q));
-  if(found) location.href='Blog Detail.html?id='+found.id;
+  const q=document.getElementById('sb-search-inp').value.trim();
+  if(!q){document.getElementById('sb-search-inp').focus();return;}
+  location.href='Blog.html?q='+encodeURIComponent(q);
 }
 
 // ── INIT ─────────────────────────────────────────────────────────────
@@ -684,6 +655,7 @@ if(hasRemoteSource){BLOG_NAV=[];PUB_NAV=[];}
 const fallbackItem=hasRemoteSource?null:(isPub?PUBS.find(p=>p.id===id):BLOGS.find(p=>p.id===id));
 const loadingItem=fallbackItem||{
   id:id,
+  placeholder:true,
   type:isPub?'pub':'blog',
   title:'Loading content…',
   category:'Article',
@@ -693,8 +665,8 @@ const loadingItem=fallbackItem||{
   gradient:'linear-gradient(135deg,#061428 0%,rgba(37,99,235,.35) 60%,rgba(6,182,212,.2) 100%)',
   content:'<p>Loading the admin-managed content for this page.</p>'
 };
-render(loadingItem);
-renderComments();
+if(hasRemoteSource){render(loadingItem);renderComments();}
+else renderNotFound('Posts are not available right now. Please try again later.');
 
 (async function loadAdminPost(){
   const client=supabaseClient();
@@ -710,6 +682,7 @@ renderComments();
   if(result.error||!result.data) {
     const fromList=(isPub?PUB_NAV:BLOG_NAV).find(function(item){return Number(item.id)===Number(id);});
     if(fromList)render(fromList);
+    else renderNotFound();
     return;
   }
   const mapped=isPub?mapSupabasePublication(result.data):mapSupabaseBlog(result.data);
