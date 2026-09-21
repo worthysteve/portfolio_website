@@ -17,7 +17,9 @@ This application includes:
 ## Main Pages
 
 - `index.html` — public portfolio homepage.
-- `Projects.html` — full projects listing page.
+- `Projects.html` — full projects listing page (the homepage previews the first 5).
+- `Certifications.html` — all certifications with category filters (the homepage previews the first 8).
+- `Experience.html` — all fellowships, bootcamps, and work experience (the homepage previews the first 5).
 - `Project Detail.html` — individual project detail page with image carousel and conditional CTA buttons.
 - `Blog.html` — full blog listing page.
 - `Blog Detail.html` — individual blog/publication detail page with comments, replies, and likes.

@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Projects — Steven Daniel</title>
+<title>All Certifications — Steven Daniel</title>
+<meta name="description" content="Certifications earned by Steven Daniel across AI, machine learning, data science, and engineering.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -39,10 +40,29 @@
   <a href="index.html#blog" data-blog-link hidden>Blog</a>
   <a href="index.html#contact">Contact</a>
 </div>
-<section style="padding-top:140px">
+<section id="certifications" style="padding-top:140px">
   <div class="container">
-    <div class="reveal"><p class="slabel">Work</p><h1 class="stitle">All Projects</h1><p class="ssub">Published projects from the admin dashboard.</p></div>
-    <div class="prj-g rstagger" id="listing-grid" style="margin-top:34px"></div>
+    <div class="reveal">
+      <p class="slabel">Credentials</p>
+      <h1 class="stitle">All Certifications</h1>
+      <p class="ssub">Certifications spanning AI, machine learning, data science, and engineering disciplines.</p>
+    </div>
+    <div class="cert-filter">
+      <button class="cf-btn active" data-cat="all">All</button>
+      <button class="cf-btn" data-cat="ai">AI</button>
+      <button class="cf-btn" data-cat="ml">Machine Learning</button>
+      <button class="cf-btn" data-cat="dl">Deep Learning / CV</button>
+      <button class="cf-btn" data-cat="cv">Computer Vision</button>
+      <button class="cf-btn" data-cat="ds">Data Science</button>
+      <button class="cf-btn" data-cat="nlp">Natural Language Processing</button>
+      <button class="cf-btn" data-cat="llm">Large Language Models</button>
+      <button class="cf-btn" data-cat="pr">Programming</button>
+      <button class="cf-btn" data-cat="ux">UX Design</button>
+      <button class="cf-btn" data-cat="pm">Project Management</button>
+      <button class="cf-btn" data-cat="fe">Financial Engineering</button>
+    </div>
+    <div class="certs-g rstagger"></div>
+    <p class="ssub" id="page-status" style="margin-top:24px">Loading certifications…</p>
   </div>
 </section>
 
@@ -77,7 +97,6 @@
 <script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="site-common.js"></script>
-<script src="listing.js"></script>
-<script>loadListing('projects');</script>
+<script src="portfolio.js"></script>
 </body>
 </html>

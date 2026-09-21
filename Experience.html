@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>All Projects — Steven Daniel</title>
+<title>Experience & Fellowships — Steven Daniel</title>
+<meta name="description" content="Fellowships, bootcamps, and work experience of Steven Daniel.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -39,10 +40,20 @@
   <a href="index.html#blog" data-blog-link hidden>Blog</a>
   <a href="index.html#contact">Contact</a>
 </div>
-<section style="padding-top:140px">
+<section id="experience" style="padding-top:140px">
   <div class="container">
-    <div class="reveal"><p class="slabel">Work</p><h1 class="stitle">All Projects</h1><p class="ssub">Published projects from the admin dashboard.</p></div>
-    <div class="prj-g rstagger" id="listing-grid" style="margin-top:34px"></div>
+    <div class="reveal"><p class="slabel">Career</p><h1 class="stitle">Experience &amp; Fellowships</h1></div>
+
+    <div class="tl-group" data-exp-group="work" hidden>
+      <h3 class="tl-group-title reveal">Work Experience</h3>
+      <div class="tl"></div>
+    </div>
+
+    <div class="tl-group" data-exp-group="fellowship" hidden>
+      <h3 class="tl-group-title reveal">Fellowships &amp; Bootcamps</h3>
+      <div class="tl"></div>
+    </div>
+    <p class="ssub" id="page-status" style="margin-top:24px">Loading experience…</p>
   </div>
 </section>
 
@@ -77,7 +88,6 @@
 <script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="site-common.js"></script>
-<script src="listing.js"></script>
-<script>loadListing('projects');</script>
+<script src="portfolio.js"></script>
 </body>
 </html>

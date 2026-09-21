@@ -9,6 +9,7 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', scrollY
   const btn = document.getElementById('theme-btn');
   const html = document.documentElement;
   html.dataset.theme = localStorage.getItem('pf-theme') || 'dark';
+  if (!btn) return;
   updateIcon();
   btn.addEventListener('click', () => {
     const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
@@ -172,8 +173,7 @@ observeReveals(document);
       }
     });
   }, { threshold: .3 });
-  const sg = document.querySelector('.stats-g');
-  if (sg) obs.observe(sg);
+  document.querySelectorAll('.stats-g,.about-kpis').forEach(el => obs.observe(el));
 })();
 
 // COMMAND PALETTE
@@ -188,10 +188,10 @@ observeReveals(document);
     {label:'Home',                 cat:'Navigate', icon:'⌂', href:'#hero'},
     {label:'About',                cat:'Navigate', icon:'◉', href:'#about'},
     {label:'Education',            cat:'Navigate', icon:'◆', href:'#education'},
-    {label:'Certifications',       cat:'Navigate', icon:'✦', href:'#certifications'},
     {label:'Experience & Fellowships', cat:'Navigate', icon:'◈', href:'#experience'},
-    {label:'Achievements',         cat:'Navigate', icon:'★', href:'#achievements'},
+    {label:'Certifications',       cat:'Navigate', icon:'✦', href:'#certifications'},
     {label:'Projects',             cat:'Navigate', icon:'▷', href:'#projects'},
+    {label:'Achievements',         cat:'Navigate', icon:'★', href:'#achievements'},
     {label:'Research Interests',   cat:'Navigate', icon:'⊕', href:'#research'},
     {label:'Blog',                 cat:'Navigate', icon:'◧', href:'#blog', when: blogVisible},
     {label:'Contact',              cat:'Navigate', icon:'◎', href:'#contact'},
@@ -239,19 +239,47 @@ observeReveals(document);
   input.addEventListener('input', e => { sel=0; render(e.target.value); });
 })();
 
-// CERT FILTER
-(function(){
-  document.querySelectorAll('.cf-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.cf-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const cat = btn.dataset.cat;
-      document.querySelectorAll('.cert').forEach(c => {
-        c.classList.toggle('hidden', cat !== 'all' && c.dataset.cat !== cat);
-      });
-    });
+// SECTION PREVIEWS — on the homepage a container with data-limit shows only its first N matching
+// items; the "See all" button under it opens the full page. Full-list pages have no limit.
+function applyLimit(container, itemSelector, matches, seeAllKey, noun) {
+  if (!container) return;
+  const limit = Number(container.dataset.limit) || Infinity;
+  const items = Array.from(container.querySelectorAll(itemSelector));
+  let shown = 0;
+  items.forEach(item => {
+    const visible = matches(item) && shown < limit;
+    if (visible) shown++;
+    item.classList.toggle('hidden', !visible);
   });
-})();
+  const link = seeAllKey && document.querySelector('[data-see-all="' + seeAllKey + '"]');
+  if (link && noun) link.textContent = 'See all ' + (items.length > 1 ? items.length + ' ' : '') + noun + ' →';
+}
+
+// CERT FILTER
+function applyCertFilter() {
+  const active = document.querySelector('.cf-btn.active');
+  const cat = active ? active.dataset.cat : 'all';
+  applyLimit(document.querySelector('.certs-g'), '.cert', c => cat === 'all' || c.dataset.cat === cat, 'certifications', 'Certifications');
+}
+document.querySelectorAll('.cf-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.cf-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyCertFilter();
+  });
+});
+applyCertFilter();
+
+// EXPERIENCE PREVIEW — first N entries in each group (Work Experience, Fellowships & Bootcamps)
+function applyExperienceLimit() {
+  const section = document.getElementById('experience');
+  if (!section) return;
+  section.querySelectorAll('[data-exp-group]').forEach(group => {
+    if (section.dataset.limit) group.dataset.limit = section.dataset.limit;
+    applyLimit(group, '.tl-it', () => true);
+  });
+}
+applyExperienceLimit();
 
 // CONTACT FORM
 async function handleContact(e) {
@@ -290,12 +318,9 @@ async function handleContact(e) {
 function applyProjectFilter() {
   const active = document.querySelector('.prj-tab.active');
   const cat = active ? active.dataset.cat : 'all';
-  document.querySelectorAll('.prj-g .pc').forEach(c => {
-    const show = cat === 'all' || c.dataset.cat === cat;
-    c.classList.toggle('hidden', !show);
-    if (c.classList.contains('feat')) {
-      c.style.gridColumn = (cat === 'all' && show) ? 'span 2' : (show ? 'span 1' : '');
-    }
+  applyLimit(document.querySelector('.prj-g'), '.pc', c => cat === 'all' || c.dataset.cat === cat, 'projects', 'Projects');
+  document.querySelectorAll('.prj-g .pc.feat').forEach(c => {
+    c.style.gridColumn = c.classList.contains('hidden') ? '' : (cat === 'all' ? 'span 2' : 'span 1');
   });
 }
 document.querySelectorAll('.prj-tab').forEach(btn => {
@@ -305,6 +330,7 @@ document.querySelectorAll('.prj-tab').forEach(btn => {
     applyProjectFilter();
   });
 });
+applyProjectFilter();
 
 function escapeHtml(value) {
   return String(value || '').replace(/[&<>"']/g, function(char){
@@ -401,14 +427,16 @@ function updatePortfolioStats(data) {
     'data-science-projects':projects.filter(isDataScienceProject).length,
     'nlp-llm-projects':projects.filter(isNlpLlmProject).length,
     'certifications':certifications.length,
+    'fellowships':experience.filter(function(item){return /fellow/i.test(String(item.category||''));}).length,
+    'achievements':(Array.isArray(data.achievements)?data.achievements:[]).length,
     'experience-years':countExperienceYears(experience)
   };
   Object.keys(values).forEach(function(key){
-    var el=document.querySelector('[data-stat="'+key+'"]');
-    if(!el)return;
-    el.dataset.count=String(values[key]);
-    if (window.animateStatNumber && el.closest('.stats-g')) window.animateStatNumber(el);
-    else el.textContent=String(values[key])+(el.dataset.suffix||'');
+    document.querySelectorAll('[data-stat="'+key+'"]').forEach(function(el){
+      el.dataset.count=String(values[key]);
+      if (window.animateStatNumber && el.closest('.stats-g,.about-kpis')) window.animateStatNumber(el);
+      else el.textContent=String(values[key])+(el.dataset.suffix||'');
+    });
   });
 }
 // Stats read from the placeholder content while Supabase has no rows for a section
@@ -423,13 +451,18 @@ function placeholderProjects() {
     };
   });
 }
+function placeholderAchievements() {
+  return Array.from(document.querySelectorAll('.ach-g .ach'));
+}
 function placeholderCertifications() {
   return Array.from(document.querySelectorAll('.certs-g .cert'));
 }
 function placeholderExperience() {
   return Array.from(document.querySelectorAll('#experience .tl-it[data-start]')).map(function(el){
     var end=el.dataset.end;
+    var group=el.closest('[data-exp-group]');
     return {
+      category:group?group.dataset.expGroup:'work',
       start_date:el.dataset.start+'-01',
       end_date:(!end||end==='present')?null:end+'-28',
       date_period:end==='present'?'Present':''
@@ -697,6 +730,14 @@ function applySiteMedia(media) {
   });
 }
 
+// Status line on the full-list pages (Certifications.html, Experience.html)
+function setPageStatus(text) {
+  var el=document.getElementById('page-status');
+  if(!el)return;
+  el.textContent=text||'';
+  el.hidden=!text;
+}
+
 // BLOG VISIBILITY — the section and its menu links only appear once a post is published
 function setBlogVisible(visible) {
   var section=document.getElementById('blog');
@@ -708,7 +749,7 @@ function setBlogVisible(visible) {
 // ADMIN-MANAGED PUBLIC CONTENT
 // Each section keeps its placeholder content until Supabase returns at least one row for it.
 (function(){
-  var statsData={projects:placeholderProjects(),certifications:placeholderCertifications(),experience:placeholderExperience()};
+  var statsData={projects:placeholderProjects(),certifications:placeholderCertifications(),experience:placeholderExperience(),achievements:placeholderAchievements()};
   function setStats(key,value){
     statsData[key]=Array.isArray(value)?value:[];
     updatePortfolioStats(statsData);
@@ -719,13 +760,13 @@ function setBlogVisible(visible) {
   if(!client)return;
   function load(query, onRows){
     query.then(function(result){
-      if(result.error){console.warn('Supabase read failed',result.error);return;}
+      if(result.error){console.warn('Supabase read failed',result.error);setPageStatus('This list could not be loaded right now. Please try again later.');return;}
       onRows(result.data||[]);
-    }, function(error){console.warn('Supabase read failed',error);});
+    }, function(error){console.warn('Supabase read failed',error);setPageStatus('This list could not be loaded right now. Please try again later.');});
   }
   load(client.from('projects').select('*').eq('status','published').order('created_at',{ascending:false}), function(rows){
-    if(!rows.length)return;
     var grid=document.querySelector('.prj-g');
+    if(!rows.length||!grid){if(rows.length)setStats('projects',rows);return;}
     grid.innerHTML='';
     rows.forEach(function(row,index){
       renderProjectCard({
@@ -746,21 +787,23 @@ function setBlogVisible(visible) {
   });
   load(client.from('blog_posts').select('*').eq('status','published').eq('type','blog').order('created_at',{ascending:false}).limit(3), function(rows){
     var grid=document.querySelector('.blog-g');
-    if(!rows.length||!grid){setBlogVisible(false);return;}
+    if(!rows.length||!grid){setBlogVisible(rows.length>0);return;}
     grid.innerHTML='';
     rows.forEach(renderBlogCard);
     setBlogVisible(true);
   });
   load(client.from('certifications').select('*').order('year_earned',{ascending:false}).order('month_earned',{ascending:false}).order('created_at',{ascending:false}), function(rows){
+    setPageStatus(rows.length?'':'No certifications have been added yet.');
     if(!rows.length)return;
     renderCertificationGrid(rows);
-    var active=document.querySelector('.cf-btn.active');
-    if(active)active.click();
+    applyCertFilter();
     setStats('certifications',rows);
   });
   load(client.from('experience').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}), function(rows){
+    setPageStatus(rows.length?'':'No experience has been added yet.');
     if(!rows.length)return;
     renderTimeline('experience',rows,'experience');
+    applyExperienceLimit();
     setStats('experience',rows);
   });
   load(client.from('education').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}), function(rows){
@@ -770,6 +813,7 @@ function setBlogVisible(visible) {
   load(client.from('achievements').select('*').order('display_order',{ascending:true}).order('created_at',{ascending:false}), function(rows){
     if(!rows.length)return;
     renderAchievementGrid(rows);
+    setStats('achievements',rows);
   });
   load(client.from('site_media').select('*'), applySiteMedia);
 })();
