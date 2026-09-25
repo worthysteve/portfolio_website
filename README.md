@@ -90,6 +90,21 @@ Then redeploy the reply-email function so only the admin can send replies:
 supabase functions deploy send-reply-email
 ```
 
+## Contact Form Email Notifications
+
+Every contact-form submission is saved to the `messages` table (Admin → Messages) and a copy is emailed to you through Resend. The email's Reply-To is the visitor's address, so replying from Gmail goes straight to them.
+
+1. Run `supabase/migrations/20260925000000_message_email_notifications.sql` in the SQL Editor (prevents duplicate emails).
+2. Deploy the function:
+
+```bash
+supabase functions deploy notify-new-message --use-api --no-verify-jwt
+```
+
+3. In Supabase, open **Database → Webhooks → Create a new hook**: table `messages`, event **Insert**, type **Supabase Edge Functions**, function `notify-new-message`, method `POST`.
+
+The function uses the existing `RESEND_API_KEY` and `RESEND_FROM_EMAIL` secrets and sends to `NOTIFY_EMAIL` (falls back to `REPLY_TO_EMAIL`). It only ever emails that address, never one taken from the request.
+
 ## Authentication Setup
 
 In Supabase:

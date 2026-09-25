@@ -635,7 +635,7 @@ async function loadEngagement(){await loadLikes();await loadComments();}
 
 // ── SHARE ────────────────────────────────────────────────────────────
 function shareToFacebook(){window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),'_blank');}
-function shareToTwitter(){window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(curItem?.title||'')+' by @realstevend&url='+encodeURIComponent(location.href),'_blank');}
+function shareToTwitter(){window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(curItem?.title||'')+' by @WorthyStevenD&url='+encodeURIComponent(location.href),'_blank');}
 function shareToLinkedIn(){window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(location.href),'_blank');}
 function shareToWhatsApp(){window.open('https://wa.me/?text='+encodeURIComponent((curItem?.title||'')+' '+location.href),'_blank');}
 function shareByEmail(){location.href='mailto:?subject='+encodeURIComponent(curItem?.title||'')+'&body='+encodeURIComponent('Check this out: '+location.href);}
