@@ -48,37 +48,182 @@
     };
   }
 
-  // SIGN-IN PERSISTENCE — by default the admin session lives only until the tab/browser is closed,
-  // so every new visit asks for your credentials. "Keep me signed in on this device" opts in to a
-  // persistent session (stored like Supabase's default).
-  const KEEP_SIGNED_IN_KEY = 'pf-admin-keep-signed-in';
-  function keepSignedIn() {
-    try { return localStorage.getItem(KEEP_SIGNED_IN_KEY) === '1'; } catch (e) { return false; }
-  }
-  function sessionStore() {
-    return keepSignedIn() ? window.localStorage : window.sessionStorage;
-  }
+  // ADMIN SESSION RULES
+  // - The session lives only in this tab: it is never saved permanently on the device, and a
+  //   new tab or window always asks for your email and password.
+  // - Leaving the page for more than LEAVE_GRACE_MS ends it; a quick refresh does not.
+  // - IDLE_LIMIT_MS without any activity ends it (with a warning IDLE_WARNING_MS before).
+  // - MAX_SESSION_MS after signing in ends it, however active you are.
+  const LEAVE_GRACE_MS = 60 * 1000;
+  const IDLE_LIMIT_MS = 10 * 60 * 1000;
+  const IDLE_WARNING_MS = 60 * 1000;
+  const MAX_SESSION_MS = 8 * 60 * 60 * 1000;
+  const SIGNED_IN_AT_KEY = 'pf-admin-signed-in-at';
+  const LAST_ACTIVE_KEY = 'pf-admin-last-active';
+  const RESET_PENDING_KEY = 'pf-admin-password-reset-pending';
+  const AUTH_TOKEN_KEY = /^sb-.+-auth-token$/;
+
   const adminAuthStorage = {
-    getItem: function(key){ return sessionStore().getItem(key); },
-    setItem: function(key, value){ sessionStore().setItem(key, value); },
+    getItem: function(key){ return window.sessionStorage.getItem(key); },
+    setItem: function(key, value){ window.sessionStorage.setItem(key, value); },
     removeItem: function(key){ window.localStorage.removeItem(key); window.sessionStorage.removeItem(key); }
   };
-  function setKeepSignedIn(keep) {
-    try {
-      if (keep) localStorage.setItem(KEEP_SIGNED_IN_KEY, '1');
-      else localStorage.removeItem(KEEP_SIGNED_IN_KEY);
-    } catch (e) {}
-    if (!keep) forgetPersistentSessions();
-  }
-  // Removes sessions saved permanently on this device (including ones from before this change).
+  // Removes sessions that older versions of the admin saved permanently on this device.
   function forgetPersistentSessions() {
     try {
+      localStorage.removeItem('pf-admin-keep-signed-in');
       Object.keys(localStorage).forEach(function(key){
-        if (/^sb-.+-auth-token$/.test(key)) localStorage.removeItem(key);
+        if (AUTH_TOKEN_KEY.test(key)) localStorage.removeItem(key);
       });
     } catch (e) {}
   }
-  if (!keepSignedIn()) forgetPersistentSessions();
+  forgetPersistentSessions();
+
+  // Read before Supabase starts, which takes the sign-in details out of the address bar.
+  // A Google sign-in or an emailed link only counts as a new sign-in when this tab had no
+  // session yet, so adding "?code=" to the address cannot revive a session that has ended.
+  const HAD_STORED_SESSION = (function(){
+    try { return Object.keys(sessionStorage).some(function(key){ return AUTH_TOKEN_KEY.test(key); }); }
+    catch (e) { return false; }
+  })();
+  const URL_HAS_SIGN_IN = /access_token=|[?&]code=/.test(window.location.hash + window.location.search);
+  const URL_IS_PASSWORD_RESET = /type=recovery/.test(window.location.hash + window.location.search);
+
+  function readTime(key) {
+    try { return Number(sessionStorage.getItem(key)) || 0; } catch (e) { return 0; }
+  }
+  function writeTime(key, value) {
+    try { sessionStorage.setItem(key, String(value)); } catch (e) {}
+  }
+  function markSignedIn() {
+    const now = Date.now();
+    writeTime(SIGNED_IN_AT_KEY, now);
+    writeTime(LAST_ACTIVE_KEY, now);
+  }
+  let lastActivityWrite = 0;
+  function markActive(force) {
+    const now = Date.now();
+    if (!force && now - lastActivityWrite < 5000) return;
+    lastActivityWrite = now;
+    if (readTime(SIGNED_IN_AT_KEY)) writeTime(LAST_ACTIVE_KEY, now);
+  }
+  // Why the current session may not be used any more, or '' if it is still valid.
+  // onPageLoad also applies the "left the page" rule.
+  function sessionEndReason(onPageLoad) {
+    const now = Date.now();
+    const signedInAt = readTime(SIGNED_IN_AT_KEY);
+    const lastActive = readTime(LAST_ACTIVE_KEY);
+    if (!signedInAt || !lastActive) return 'expired';
+    if (now - signedInAt > MAX_SESSION_MS) return 'max';
+    if (now - lastActive > IDLE_LIMIT_MS) return 'idle';
+    if (onPageLoad && now - lastActive > LEAVE_GRACE_MS) return 'left';
+    return '';
+  }
+  const SESSION_END_MESSAGES = {
+    idle: 'You were signed out after 10 minutes of inactivity. Please sign in again.',
+    max: 'Your session has ended. Please sign in again.',
+    left: 'Your session ended when you left the admin. Please sign in again.',
+    expired: 'Please sign in to continue.'
+  };
+  function sessionEndMessage(reason) {
+    return SESSION_END_MESSAGES[reason] || SESSION_END_MESSAGES.expired;
+  }
+  // Milliseconds left before the idle sign-out.
+  function idleTimeLeft() {
+    return Math.max(0, IDLE_LIMIT_MS - (Date.now() - readTime(LAST_ACTIVE_KEY)));
+  }
+
+  // Called on page load. Returns { user } when the session may continue, otherwise ends it
+  // and returns { user: null, reason } so the page can say why you need to sign in again.
+  async function resumeSession() {
+    if (!init()) return { user: null, reason: '' };
+    const { data } = await client.auth.getSession();
+    if (!data || !data.session) return { user: null, reason: '' };
+    if (URL_HAS_SIGN_IN && !HAD_STORED_SESSION) {
+      markSignedIn();
+      if (URL_IS_PASSWORD_RESET) {
+        try { sessionStorage.setItem(RESET_PENDING_KEY, '1'); } catch (e) {}
+      }
+    }
+    const reason = sessionEndReason(true);
+    if (reason) {
+      await endSession();
+      return { user: null, reason: reason };
+    }
+    const user = await getCurrentUser();
+    if (!user) {
+      await endSession();
+      return { user: null, reason: 'expired' };
+    }
+    markActive(true);
+    let passwordReset = false;
+    try { passwordReset = sessionStorage.getItem(RESET_PENDING_KEY) === '1'; } catch (e) {}
+    return { user: user, reason: '', passwordReset: passwordReset };
+  }
+
+  let sessionTimer = null;
+  let watchHandlers = null;
+  let warnedAboutIdle = false;
+  let watchListenersAdded = false;
+  function onActivity() {
+    if (!sessionTimer) return;
+    markActive(false);
+    if (warnedAboutIdle) {
+      warnedAboutIdle = false;
+      markActive(true);
+      if (watchHandlers.onActive) watchHandlers.onActive();
+    }
+  }
+  async function checkSession(onPageShow) {
+    if (!sessionTimer || !readTime(SIGNED_IN_AT_KEY)) return;
+    const reason = sessionEndReason(onPageShow === true);
+    if (reason) {
+      const handlers = watchHandlers;
+      stopSessionWatch();
+      await endSession();
+      handlers.onEnd(reason);
+      return;
+    }
+    if (!warnedAboutIdle && idleTimeLeft() <= IDLE_WARNING_MS) {
+      warnedAboutIdle = true;
+      if (watchHandlers.onWarn) watchHandlers.onWarn();
+    }
+  }
+  // While signed in: records activity, warns before the idle limit, and ends the session when a
+  // limit is reached. handlers: { onEnd(reason), onWarn(), onActive() }.
+  function startSessionWatch(handlers) {
+    stopSessionWatch();
+    watchHandlers = handlers;
+    warnedAboutIdle = false;
+    markActive(true);
+    sessionTimer = setInterval(checkSession, 5000);
+    if (watchListenersAdded) return;
+    watchListenersAdded = true;
+    ['pointerdown', 'keydown', 'wheel', 'touchstart', 'mousemove', 'scroll'].forEach(function(type){
+      window.addEventListener(type, onActivity, { passive: true, capture: true });
+    });
+    // Leaving or refreshing the page stamps the time, so a quick refresh stays signed in
+    // and a later return does not.
+    window.addEventListener('pagehide', function(){ if (sessionTimer) markActive(true); });
+    // Coming back with the browser's Back button can restore the page without reloading it.
+    window.addEventListener('pageshow', function(event){ if (event.persisted) checkSession(true); });
+    document.addEventListener('visibilitychange', function(){ checkSession(false); });
+  }
+  function stopSessionWatch() {
+    if (sessionTimer) clearInterval(sessionTimer);
+    sessionTimer = null;
+  }
+  // Signs out this browser only (other devices stay signed in) and clears the session stamps.
+  async function endSession() {
+    stopSessionWatch();
+    try { if (init()) await client.auth.signOut({ scope: 'local' }); } catch (e) {}
+    try {
+      [SIGNED_IN_AT_KEY, LAST_ACTIVE_KEY, RESET_PENDING_KEY].forEach(function(key){ sessionStorage.removeItem(key); });
+      Object.keys(sessionStorage).forEach(function(key){
+        if (/^sb-.+-auth-token/.test(key)) sessionStorage.removeItem(key);
+      });
+    } catch (e) {}
+  }
 
   // One client per URL/key. Creating a new client on every call starts several auth
   // instances that compete for the same session lock and make saves hang.
@@ -1071,6 +1216,7 @@
     if (!init()) return { connected: false };
     const { error } = await client.auth.signInWithPassword({ email: email, password: password });
     if (error) throw error;
+    markSignedIn();
     await loadDashboard();
     return { connected: true };
   }
@@ -1088,7 +1234,7 @@
     const { error } = await client.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href,
+        redirectTo: window.location.origin + window.location.pathname,
         queryParams: { prompt: 'select_account' }
       }
     });
@@ -1097,8 +1243,16 @@
   }
 
   async function signOut() {
-    if (init()) await client.auth.signOut();
-    adminAuthStorage.removeItem('sb-' + new URL(getConfig().url).hostname.split('.')[0] + '-auth-token');
+    await endSession();
+  }
+
+  // Used after opening a password reset link from your email.
+  async function updatePassword(password) {
+    if (!init()) throw new Error('Supabase is not configured');
+    const { error } = await client.auth.updateUser({ password: password });
+    if (error) throw error;
+    try { sessionStorage.removeItem(RESET_PENDING_KEY); } catch (e) {}
+    markSignedIn();
   }
 
   async function getCurrentUser() {
@@ -1212,8 +1366,11 @@
   window.PortfolioAdminDB = {
     init,
     busy,
-    keepSignedIn,
-    setKeepSignedIn,
+    resumeSession,
+    startSessionWatch,
+    sessionEndMessage,
+    idleTimeLeft,
+    updatePassword,
     isConfigured,
     loadDashboard,
     getProjectById,

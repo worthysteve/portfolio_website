@@ -59,6 +59,14 @@ button{cursor:pointer;font-family:var(--fb)}
 .remember-label input{accent-color:var(--a)}
 .forgot-btn{background:none;border:0;color:var(--a2);font-size:12px;font-family:var(--fb);padding:0;cursor:pointer}
 .forgot-btn:hover{text-decoration:underline}
+.login-notice{margin:-12px 0 24px;padding:10px 12px;border-radius:var(--r);border:1px solid rgba(245,158,11,.35);background:rgba(245,158,11,.1);color:var(--t1);font-size:13px;line-height:1.5}
+.login-notice.ok{border-color:rgba(16,185,129,.35);background:rgba(16,185,129,.1)}
+.login-checking{font-size:13px;color:var(--t2);text-align:center;padding:24px 0}
+#idle-warning{position:fixed;left:50%;bottom:28px;transform:translate(-50%,120px);opacity:0;transition:transform .3s,opacity .3s;z-index:1000;width:min(440px,calc(100vw - 32px));background:var(--s1);border:1px solid rgba(245,158,11,.45);border-radius:var(--rl);box-shadow:0 16px 40px rgba(0,0,0,.45);padding:16px 18px;display:flex;gap:14px;align-items:center}
+#idle-warning.show{transform:translate(-50%,0);opacity:1}
+#idle-warning p{flex:1;font-size:13px;line-height:1.5;color:var(--t2)}
+#idle-warning strong{color:var(--t1)}
+#idle-warning button{flex-shrink:0;padding:8px 14px;border-radius:var(--r);border:0;background:var(--a);color:#fff;font-size:13px;font-weight:600}
 
 /* SHELL */
 #app{display:none;height:100%;flex-direction:column}
@@ -418,6 +426,9 @@ button[data-busy]{cursor:progress;opacity:.8}
       <div class="login-logo-mark"><span>SD</span></div>
       <div><h2>Steven Daniel</h2><p>Portfolio Admin</p></div>
     </div>
+    <p class="login-notice" id="login-notice" role="status" hidden></p>
+    <p class="login-checking" id="login-checking" hidden>Checking your session…</p>
+    <div id="login-form">
     <h1 class="login-title">Sign in</h1>
     <p class="login-sub">Access your portfolio dashboard to manage content, messages, and analytics.</p>
     <button class="btn-google" onclick="doGoogleLogin(this)">
@@ -428,12 +439,21 @@ button[data-busy]{cursor:progress;opacity:.8}
     <div class="lfield"><label>Email address</label><input type="email" id="login-email" placeholder="admin@example.com" autocomplete="username"></div>
     <div class="lfield"><label>Password</label><div class="password-wrap"><input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"><button type="button" class="password-toggle" onclick="togglePasswordVisibility()" aria-label="Show password" id="password-toggle"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>
     <div class="login-row">
-      <label class="remember-label" title="Only tick this on your own device. Otherwise you are signed out when you close the tab or browser."><input type="checkbox" id="remember-me"> Keep me signed in on this device</label>
+      <label class="remember-label" title="Fills in your email next time. You still need your password every time."><input type="checkbox" id="remember-me"> Remember my email</label>
       <button type="button" class="forgot-btn" onclick="doForgotPassword(this)">Forgot password?</button>
     </div>
     <button class="btn-login" id="login-btn" onclick="doLogin()">Sign In →</button>
-    <p class="login-hint">Admin access only. Sign in with your Supabase Auth email/password or Google.</p>
+    <p class="login-hint">Admin access only. For your security you are signed out after 10 minutes of inactivity or when you leave this page.</p>
     <p class="login-hint"><a href="index.html" style="color:var(--a2)">← Back to portfolio</a></p>
+    </div>
+    <div id="new-password-form" hidden>
+      <h1 class="login-title">Set a new password</h1>
+      <p class="login-sub">You opened a password reset link. Choose a new password for <strong id="reset-email"></strong>.</p>
+      <div class="lfield"><label for="new-pass">New password</label><input type="password" id="new-pass" placeholder="At least 8 characters" autocomplete="new-password"></div>
+      <div class="lfield"><label for="new-pass-confirm">Confirm new password</label><input type="password" id="new-pass-confirm" placeholder="Type it again" autocomplete="new-password"></div>
+      <button class="btn-login" id="new-pass-btn" onclick="saveNewPassword()">Save new password →</button>
+      <p class="login-hint"><button type="button" class="forgot-btn" onclick="cancelPasswordReset()">Cancel and sign out</button></p>
+    </div>
   </div>
 </div>
 
@@ -799,31 +819,85 @@ button[data-busy]{cursor:progress;opacity:.8}
 
 <!-- TOAST -->
 <div id="toast"><div class="toast-dot"></div><span id="toast-msg">Saved successfully</span></div>
+<div id="idle-warning" role="alertdialog" aria-live="assertive" aria-hidden="true">
+  <p><strong>Still there?</strong> You will be signed out in <strong id="idle-countdown">60</strong> seconds because of inactivity.</p>
+  <button type="button" onclick="hideIdleWarning()">Stay signed in</button>
+</div>
 
 <script src="portfolio-config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="admin-supabase.js"></script>
 <script>
 // LOGIN
+// Session rules (see admin-supabase.js): signed out after 10 minutes of inactivity, when you
+// leave the page for more than a minute, and 8 hours after signing in. "Remember my email"
+// only fills in the email address; the password is always required.
 const LOGIN_MEMORY_KEY = 'pf-admin-remembered-email';
-// Unless "Keep me signed in on this device" is ticked, the session ends when the tab or browser
-// closes, so each new visit asks for your email and password again.
+const LOGIN_NOTICE_KEY = 'pf-admin-login-notice';
 function hydrateRememberedLogin(){
-  const keep = Boolean(window.PortfolioAdminDB?.keepSignedIn());
-  const remembered = keep ? (localStorage.getItem(LOGIN_MEMORY_KEY) || '') : '';
+  let remembered = '';
+  try { remembered = localStorage.getItem(LOGIN_MEMORY_KEY) || ''; } catch (e) {}
   const emailInput = document.getElementById('login-email');
   const rememberInput = document.getElementById('remember-me');
-  if (rememberInput) rememberInput.checked = keep;
+  if (rememberInput) rememberInput.checked = Boolean(remembered);
   if (remembered && emailInput) emailInput.value = remembered;
-  if (!keep) localStorage.removeItem(LOGIN_MEMORY_KEY);
-}
-function applyKeepSignedInChoice(){
-  PortfolioAdminDB.setKeepSignedIn(Boolean(document.getElementById('remember-me')?.checked));
 }
 function persistRememberedLogin(email){
   const remember = document.getElementById('remember-me')?.checked;
-  if(remember) localStorage.setItem(LOGIN_MEMORY_KEY, email);
-  else localStorage.removeItem(LOGIN_MEMORY_KEY);
+  try {
+    if(remember) localStorage.setItem(LOGIN_MEMORY_KEY, email);
+    else localStorage.removeItem(LOGIN_MEMORY_KEY);
+  } catch (e) {}
+}
+function showLoginNotice(message, ok){
+  const notice = document.getElementById('login-notice');
+  if (!notice) return;
+  notice.textContent = message || '';
+  notice.classList.toggle('ok', Boolean(ok));
+  notice.hidden = !message;
+}
+// A notice saved just before the page reloads (after signing out or a session ending).
+function showSavedLoginNotice(){
+  let saved = null;
+  try { saved = JSON.parse(sessionStorage.getItem(LOGIN_NOTICE_KEY) || 'null'); sessionStorage.removeItem(LOGIN_NOTICE_KEY); } catch (e) {}
+  if (saved && saved.message) showLoginNotice(saved.message, saved.ok);
+}
+// Ends the admin session: the page reloads so nothing that was loaded stays in the page behind
+// the sign-in screen.
+function returnToLogin(message, ok){
+  try { sessionStorage.setItem(LOGIN_NOTICE_KEY, JSON.stringify({ message: message, ok: Boolean(ok) })); } catch (e) {}
+  window.location.replace(window.location.pathname);
+}
+let idleCountdownTimer = null;
+function showIdleWarning(){
+  const box = document.getElementById('idle-warning');
+  const count = document.getElementById('idle-countdown');
+  if (!box) return;
+  const tick = function(){ if (count) count.textContent = Math.ceil(PortfolioAdminDB.idleTimeLeft() / 1000); };
+  tick();
+  clearInterval(idleCountdownTimer);
+  idleCountdownTimer = setInterval(tick, 1000);
+  box.classList.add('show');
+  box.setAttribute('aria-hidden', 'false');
+}
+function hideIdleWarning(){
+  clearInterval(idleCountdownTimer);
+  const box = document.getElementById('idle-warning');
+  if (!box) return;
+  box.classList.remove('show');
+  box.setAttribute('aria-hidden', 'true');
+}
+function startAdminSessionWatch(){
+  PortfolioAdminDB.startSessionWatch({
+    onEnd: function(reason){ hideIdleWarning(); returnToLogin(PortfolioAdminDB.sessionEndMessage(reason)); },
+    onWarn: showIdleWarning,
+    onActive: hideIdleWarning
+  });
+}
+async function enterAdmin(email){
+  await updateAdminProfile(email);
+  showApp();
+  startAdminSessionWatch();
 }
 function togglePasswordVisibility(){
   const input=document.getElementById('login-pass');
@@ -852,14 +926,14 @@ async function doLogin() {
     return;
   }
   signingIn = true;
-  applyKeepSignedInChoice();
   const restore = PortfolioAdminDB.busy(document.getElementById('login-btn'), 'Signing in…');
   try { await PortfolioAdminDB.signInWithPassword(email, pass); }
   catch (error) { showToast('✕ Sign-in failed — ' + (error.message || 'invalid email or password'), 'error'); return; }
   finally { signingIn = false; restore(); }
   persistRememberedLogin(email);
-  await updateAdminProfile(email);
-  showApp();
+  document.getElementById('login-pass').value = '';
+  showLoginNotice('');
+  await enterAdmin(email);
   showToast('✓ Signed in', 'success');
 }
 async function doForgotPassword(btn){
@@ -876,11 +950,37 @@ async function doForgotPassword(btn){
 }
 async function doLogout() {
   if (window.PortfolioAdminDB?.isConfigured()) await PortfolioAdminDB.signOut();
-  document.getElementById('login-pass').value = '';
-  document.getElementById('app').classList.remove('visible');
-  const overlay = document.getElementById('login-overlay');
-  overlay.style.opacity = '1'; overlay.style.display = 'flex';
-  showToast('✓ Signed out', 'success');
+  returnToLogin('✓ You have signed out.', true);
+}
+// Shown after opening a password reset link from your email.
+function showNewPasswordForm(email){
+  document.getElementById('login-form').hidden = true;
+  document.getElementById('new-password-form').hidden = false;
+  document.getElementById('reset-email').textContent = email || 'your account';
+  document.getElementById('new-pass').focus();
+}
+let savingPassword = false;
+async function saveNewPassword(){
+  if (savingPassword) return;
+  const pass = document.getElementById('new-pass').value;
+  const confirmPass = document.getElementById('new-pass-confirm').value;
+  if (pass.length < 8) { showToast('Use at least 8 characters for your new password', 'error'); return; }
+  if (pass !== confirmPass) { showToast('The two passwords do not match', 'error'); return; }
+  savingPassword = true;
+  const restore = PortfolioAdminDB.busy(document.getElementById('new-pass-btn'), 'Saving…');
+  try { await PortfolioAdminDB.updatePassword(pass); }
+  catch (error) { showToast('✕ Password not changed — ' + (error.message || 'unknown error'), 'error'); return; }
+  finally { savingPassword = false; restore(); }
+  document.getElementById('new-pass').value = '';
+  document.getElementById('new-pass-confirm').value = '';
+  const email = document.getElementById('reset-email').textContent;
+  await enterAdmin(email);
+  PortfolioAdminDB.loadDashboard();
+  showToast('✓ Password updated — you are signed in', 'success');
+}
+async function cancelPasswordReset(){
+  await PortfolioAdminDB.signOut();
+  returnToLogin('Password not changed. You have been signed out.');
 }
 function confirmLogout(){
   closeProfileMenu();
@@ -964,17 +1064,27 @@ async function sendAccountPasswordReset(btn){
 }
 document.getElementById('login-pass').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
 document.getElementById('login-email').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
+document.getElementById('new-pass-confirm').addEventListener('keydown', e => { if (e.key==='Enter') saveNewPassword(); });
 window.addEventListener('load', async function(){
   hydrateRememberedLogin();
-  if(window.PortfolioAdminDB?.isConfigured()&&PortfolioAdminDB.getCurrentUser){
-    var user=await PortfolioAdminDB.getCurrentUser();
-    if(user){
-      await updateAdminProfile(user.email);
-      document.getElementById('login-overlay').style.display='none';
-      document.getElementById('app').classList.add('visible');
-      PortfolioAdminDB.loadDashboard();
-    }
-  }
+  showSavedLoginNotice();
+  if(!window.PortfolioAdminDB?.isConfigured()) return;
+  var form=document.getElementById('login-form');
+  var checking=document.getElementById('login-checking');
+  form.hidden=true; checking.hidden=false;
+  var result={user:null,reason:''};
+  try{ result=await PortfolioAdminDB.resumeSession(); }
+  catch(error){ console.warn('Session check failed', error); }
+  checking.hidden=true;
+  if(result.passwordReset&&result.user){ showNewPasswordForm(result.user.email); return; }
+  form.hidden=false;
+  if(result.reason){ showLoginNotice(PortfolioAdminDB.sessionEndMessage(result.reason)); return; }
+  if(!result.user) return;
+  document.getElementById('login-overlay').style.display='none';
+  document.getElementById('app').classList.add('visible');
+  await updateAdminProfile(result.user.email);
+  startAdminSessionWatch();
+  PortfolioAdminDB.loadDashboard();
 });
 
 // VIEW SWITCHING
@@ -1645,7 +1755,6 @@ function doGoogleLogin(btn) {
     showToast('Supabase must be configured before admin login', 'error');
     return;
   }
-  applyKeepSignedInChoice();
   var restore=PortfolioAdminDB.busy(btn,'Redirecting to Google…');
   PortfolioAdminDB.signInWithGoogle().catch(function(error){restore();showToast('✕ Google sign-in failed — '+(error.message||'unknown error'), 'error');});
 }
