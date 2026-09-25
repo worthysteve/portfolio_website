@@ -208,6 +208,10 @@ ul.tl-desc li::marker{color:var(--a2)}
 .tl-group-title{display:flex;align-items:center;gap:14px;font-family:var(--fm);font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
 .tl-group-title::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,var(--b2),transparent)}
 .tl-group .tl{margin-top:30px}
+/* Work Experience and Fellowships & Bootcamps side by side; they stack on narrow screens, and a
+   group on its own (the other empty) takes the full width. */
+.tl-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:20px 56px;align-items:start;margin-top:44px}
+.tl-groups .tl-group,.tl-groups .tl-group+.tl-group{margin-top:0;min-width:0}
 .tl-it.hidden,.tl-group.hidden{display:none}
 .see-more{display:flex;justify-content:center;margin-top:36px}
 
