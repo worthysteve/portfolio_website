@@ -23,7 +23,7 @@ This application includes:
 - `Project Detail.html` — individual project detail page with image carousel and conditional CTA buttons.
 - `Blog.html` — full blog listing page.
 - `Blog Detail.html` — individual blog/publication detail page with comments, replies, and likes.
-- `Admin Dashboard.html` — admin panel for managing portfolio content.
+- `admin.html` — admin panel for managing portfolio content (live at `/admin`; the old `Admin%20Dashboard.html` address redirects there via `_redirects`).
 
 ## Core Files
 
@@ -57,7 +57,7 @@ The admin dashboard is designed to manage the main front-facing content:
 2. Open the Supabase SQL Editor.
 3. Run the full contents of `supabase-schema.sql`.
 4. Copy your Supabase Project URL and publishable/anon key.
-5. Open `Admin Dashboard.html`.
+5. Open `admin.html`.
 6. Add the Supabase URL, public key, and storage bucket name in the dashboard settings.
 
 The schema creates these main tables:
@@ -119,10 +119,8 @@ https://your-domain.com
 3. Add redirect URLs for production and local development:
 
 ```text
-https://your-domain.com/Admin%20Dashboard.html
 https://your-domain.com/*
 http://localhost:3000/*
-http://localhost:3000/Admin%20Dashboard.html
 ```
 
 4. Enable email/password authentication if you want manual admin login, and turn off "Allow new users to sign up" once your admin account exists. Only the emails listed in `public.is_portfolio_admin()` can change content either way.
@@ -158,7 +156,7 @@ http://localhost:3000/index.html
 Open the admin dashboard:
 
 ```text
-http://localhost:3000/Admin%20Dashboard.html
+http://localhost:3000/admin.html
 ```
 
 ## Deployment
@@ -168,7 +166,7 @@ The project can be deployed as a static site on Netlify.
 Recommended production URLs:
 
 - Public site: `https://your-domain.com/`
-- Admin dashboard: `https://your-domain.com/Admin%20Dashboard.html`
+- Admin dashboard: `https://your-domain.com/admin`
 
 If using Netlify DNS, point the domain nameservers to the Netlify-provided nameservers and wait for DNS propagation. Once DNS is verified, Netlify provisions the SSL/TLS certificate automatically.
 

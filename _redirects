@@ -1,0 +1,6 @@
+# The admin moved from "Admin Dashboard.html" to admin.html (served at /admin).
+# Old bookmarks, emails and password-reset links keep working.
+/Admin%20Dashboard.html   /admin   301
+/Admin%20Dashboard        /admin   301
+/admin%20dashboard.html   /admin   301
+/admin%20dashboard        /admin   301

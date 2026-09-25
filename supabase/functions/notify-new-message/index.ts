@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
   const visitorEmail = String(message.email || "").trim();
   const subject = String(message.subject || "").trim() || "No subject";
   const body = String(message.message || "").trim();
-  const adminUrl = Deno.env.get("ADMIN_URL") || "https://stevendaniel.dev/Admin%20Dashboard.html";
+  const adminUrl = Deno.env.get("ADMIN_URL") || "https://stevendaniel.dev/admin";
 
   const html = `
     <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827">
